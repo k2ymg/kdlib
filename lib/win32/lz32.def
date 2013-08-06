@@ -1,0 +1,18 @@
+LIBRARY "lz32.lib"
+EXETYPE NT
+SUBSYSTEM WINDOWS
+EXPORTS
+	_CopyLZFile@8 = CopyLZFile
+	_GetExpandedNameA@8 = GetExpandedNameA
+	_GetExpandedNameW@8 = GetExpandedNameW
+	_LZClose@4 = LZClose
+	_LZCloseFile@4 = LZCloseFile
+	_LZCopy@8 = LZCopy
+	_LZCreateFileW@20 = LZCreateFileW
+	_LZDone@0 = LZDone
+	_LZInit@4 = LZInit
+	_LZOpenFileA@12 = LZOpenFileA
+	_LZOpenFileW@12 = LZOpenFileW
+	_LZRead@12 = LZRead
+	_LZSeek@12 = LZSeek
+	_LZStart@0 = LZStart

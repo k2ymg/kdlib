@@ -1,0 +1,6 @@
+;v7.0
+LIBRARY dwrite
+EXETYPE NT
+SUBSYSTEM WINDOWS
+EXPORTS
+	_DWriteCreateFactory@12 = DWriteCreateFactory

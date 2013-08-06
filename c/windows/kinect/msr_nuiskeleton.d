@@ -1,0 +1,161 @@
+/** msr_nuiskeleton.d
+
+Converted from 'MSR_NuiSkeleton.h'.
+
+Version: Beta
+Authors: Koji Kishita
+*/
+module c.windows.kinect.msr_nuiskeleton;
+
+
+import c.windows.windef;
+import c.windows.kinect.msr_nuiapi;
+
+
+enum FLT_EPSILON = 1.192092896e-07F;
+
+enum {
+	NUI_SKELETON_POSITION_HIP_CENTER = 0,
+	NUI_SKELETON_POSITION_SPINE,
+	NUI_SKELETON_POSITION_SHOULDER_CENTER,
+	NUI_SKELETON_POSITION_HEAD,
+	NUI_SKELETON_POSITION_SHOULDER_LEFT,
+	NUI_SKELETON_POSITION_ELBOW_LEFT,
+	NUI_SKELETON_POSITION_WRIST_LEFT,
+	NUI_SKELETON_POSITION_HAND_LEFT,
+	NUI_SKELETON_POSITION_SHOULDER_RIGHT,
+	NUI_SKELETON_POSITION_ELBOW_RIGHT,
+	NUI_SKELETON_POSITION_WRIST_RIGHT,
+	NUI_SKELETON_POSITION_HAND_RIGHT,
+	NUI_SKELETON_POSITION_HIP_LEFT,
+	NUI_SKELETON_POSITION_KNEE_LEFT,
+	NUI_SKELETON_POSITION_ANKLE_LEFT,
+	NUI_SKELETON_POSITION_FOOT_LEFT,
+	NUI_SKELETON_POSITION_HIP_RIGHT,
+	NUI_SKELETON_POSITION_KNEE_RIGHT,
+	NUI_SKELETON_POSITION_ANKLE_RIGHT,
+	NUI_SKELETON_POSITION_FOOT_RIGHT,
+	NUI_SKELETON_POSITION_COUNT
+}
+alias int NUI_SKELETON_POSITION_INDEX;
+
+align(8)
+struct NUI_TRANSFORM_SMOOTH_PARAMETERS {
+	FLOAT fSmoothing;
+	FLOAT fCorrection;
+	FLOAT fPrediction;
+	FLOAT fJitterRadius;
+	FLOAT fMaxDeviationRadius;
+}
+
+enum NUI_SKELETON_COUNT = 6;
+enum NUI_SKELETON_MAX_TRACKED_COUNT = 2;
+enum NUI_SKELETON_INVALID_TRACKING_ID = 0;
+
+enum {
+	NUI_SKELETON_POSITION_NOT_TRACKED = 0,
+	NUI_SKELETON_POSITION_INFERRED,
+	NUI_SKELETON_POSITION_TRACKED
+}
+alias int NUI_SKELETON_POSITION_TRACKING_STATE;
+
+enum {
+	NUI_SKELETON_NOT_TRACKED = 0,
+	NUI_SKELETON_POSITION_ONLY,
+	NUI_SKELETON_TRACKED
+}
+alias int NUI_SKELETON_TRACKING_STATE;
+
+align(8)
+struct NUI_SKELETON_DATA {
+	NUI_SKELETON_TRACKING_STATE eTrackingState;
+	DWORD dwTrackingID;
+	DWORD dwEnrollmentIndex_NotUsed;
+	DWORD dwUserIndex;
+	Vector4 Position;
+	Vector4 SkeletonPositions[NUI_SKELETON_POSITION_COUNT];
+	NUI_SKELETON_POSITION_TRACKING_STATE eSkeletonPositionTrackingState[NUI_SKELETON_POSITION_COUNT];
+	DWORD dwQualityFlags;
+}
+
+enum NuiSkeletonDataSize = NUI_SKELETON_DATA.sizeof;
+
+enum {
+	NUI_SKELETON_QUALITY_CLIPPED_RIGHT  = 0x00000001,
+	NUI_SKELETON_QUALITY_CLIPPED_LEFT   = 0x00000002,
+	NUI_SKELETON_QUALITY_CLIPPED_TOP    = 0x00000004,
+	NUI_SKELETON_QUALITY_CLIPPED_BOTTOM = 0x00000008,
+}
+
+align(16)
+struct NUI_SKELETON_FRAME {
+	LARGE_INTEGER liTimeStamp;
+	DWORD dwFrameNumber;
+	DWORD dwFlags;
+	Vector4 vFloorClipPlane;
+	Vector4 vNormalToGravity;
+	NUI_SKELETON_DATA[NUI_SKELETON_COUNT] SkeletonData;
+}
+
+enum {
+	NUI_SKELETON_FRAME_FLAG_CAMERA_MOTION       = 0x00000001,
+	NUI_SKELETON_FRAME_FLAG_EXTRAPOLATED_FLOOR  = 0x00000002,
+	NUI_SKELETON_FRAME_FLAG_UPPER_BODY_SKELETON = 0x00000004,
+}
+enum NUI_SKELETON_TRACKING_FLAG_SUPPRESS_NO_FRAME_DATA = 0x00000001;
+
+extern(Windows)
+{
+HRESULT NuiSkeletonTrackingEnable(HANDLE hNextFrameEvent, DWORD dwFlags);
+HRESULT NuiSkeletonTrackingDisable();
+HRESULT NuiSkeletonGetNextFrame(DWORD dwMillisecondsToWait, NUI_SKELETON_FRAME* pSkeletonFrame);
+HRESULT NuiTransformSmooth(NUI_SKELETON_FRAME* pSkeletonFrame, const(NUI_TRANSFORM_SMOOTH_PARAMETERS)* pSmoothingParams);
+}
+
+enum NUI_CAMERA_DEPTH_IMAGE_TO_SKELETON_MULTIPLIER_320x240 = NUI_CAMERA_DEPTH_NOMINAL_INVERSE_FOCAL_LENGTH_IN_PIXELS;
+enum NUI_CAMERA_SKELETON_TO_DEPTH_IMAGE_MULTIPLIER_320x240 = NUI_CAMERA_DEPTH_NOMINAL_FOCAL_LENGTH_IN_PIXELS;
+
+void NuiTransformSkeletonToDepthImageF(Vector4 vPoint, float* pfDepthX, float* pfDepthY, USHORT* pusDepthValue)
+{
+	if((pfDepthX == null) || (pfDepthY == null) || (pusDepthValue == null))
+		return;
+
+	if(vPoint.z > FLT_EPSILON){
+		*pfDepthX = cast(float)(0.5f + vPoint.x * NUI_CAMERA_SKELETON_TO_DEPTH_IMAGE_MULTIPLIER_320x240 / (vPoint.z * 320.0f));
+		*pfDepthY = cast(float)(0.5f - vPoint.y * NUI_CAMERA_SKELETON_TO_DEPTH_IMAGE_MULTIPLIER_320x240 / (vPoint.z * 240.0f));
+		*pusDepthValue = cast(USHORT)(cast(USHORT)(vPoint.z * 1000) << 3);
+	}else{
+		*pfDepthX = 0;
+		*pfDepthY = 0;
+		*pusDepthValue = 0;
+	}
+}
+
+void NuiTransformSkeletonToDepthImageF(Vector4 vPoint, FLOAT* pfDepthX, FLOAT* pfDepthY)
+{
+	if((pfDepthX == null) || (pfDepthY == null))
+		return;
+
+	if(vPoint.z > FLT_EPSILON){
+		*pfDepthX = 0.5f + vPoint.x * (NUI_CAMERA_SKELETON_TO_DEPTH_IMAGE_MULTIPLIER_320x240 / vPoint.z) / 320.0f;
+		*pfDepthY = 0.5f - vPoint.y * (NUI_CAMERA_SKELETON_TO_DEPTH_IMAGE_MULTIPLIER_320x240 / vPoint.z) / 240.0f;
+	}else{
+		*pfDepthX = 0.0f;
+		*pfDepthY = 0.0f;
+	}
+}
+
+Vector4 NuiTransformDepthImageToSkeletonF(float fDepthX, float fDepthY, USHORT usDepthValue)
+{
+	FLOAT fSkeletonZ = cast(FLOAT)(usDepthValue >> 3) / 1000.0f;
+
+	FLOAT fSkeletonX = cast(FLOAT)(fDepthX - 0.5f) * (NUI_CAMERA_DEPTH_IMAGE_TO_SKELETON_MULTIPLIER_320x240 * fSkeletonZ) * 320.0f;
+	FLOAT fSkeletonY = cast(FLOAT)(0.5f - fDepthY) * (NUI_CAMERA_DEPTH_IMAGE_TO_SKELETON_MULTIPLIER_320x240 * fSkeletonZ) * 240.0f;
+
+	Vector4 v4;
+	v4.x = fSkeletonX;
+	v4.y = fSkeletonY;
+	v4.z = fSkeletonZ;
+	v4.w = 1.0f;
+	return v4;
+}

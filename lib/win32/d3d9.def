@@ -1,0 +1,4 @@
+LIBRARY d3d9
+DESCRIPTION 'd3d9.dll'
+EXPORTS
+	_Direct3DCreate9@4=Direct3DCreate9

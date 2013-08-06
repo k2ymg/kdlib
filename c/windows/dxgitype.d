@@ -1,0 +1,133 @@
+/** dxgitype.d
+
+Converted from 'dxgitype.h'.
+
+Version: V7.0
+Authors: Koji Kishita
+*/
+module c.windows.dxgitype;
+
+
+import c.windows.windef;
+import c.windows.winerror;
+import c.windows.dxgiformat;
+
+
+private enum _FACDXGI = 0x87a;
+
+pure nothrow
+HRESULT MAKE_DXGI_HRESULT(WORD code)
+{
+	return MAKE_HRESULT(1, _FACDXGI, code);
+}
+
+pure nothrow
+HRESULT MAKE_DXGI_STATUS(WORD code)
+{
+	return MAKE_HRESULT(0, _FACDXGI, code);
+}
+
+enum {
+	DXGI_STATUS_OCCLUDED                     = MAKE_DXGI_STATUS(1),
+	DXGI_STATUS_CLIPPED                      = MAKE_DXGI_STATUS(2),
+	DXGI_STATUS_NO_REDIRECTION               = MAKE_DXGI_STATUS(4),
+	DXGI_STATUS_NO_DESKTOP_ACCESS            = MAKE_DXGI_STATUS(5),
+	DXGI_STATUS_GRAPHICS_VIDPN_SOURCE_IN_USE = MAKE_DXGI_STATUS(6),
+	DXGI_STATUS_MODE_CHANGED                 = MAKE_DXGI_STATUS(7),
+	DXGI_STATUS_MODE_CHANGE_IN_PROGRESS      = MAKE_DXGI_STATUS(8),
+	DXGI_ERROR_INVALID_CALL                  = MAKE_DXGI_HRESULT(1),
+	DXGI_ERROR_NOT_FOUND                     = MAKE_DXGI_HRESULT(2),
+	DXGI_ERROR_MORE_DATA                     = MAKE_DXGI_HRESULT(3),
+	DXGI_ERROR_UNSUPPORTED                   = MAKE_DXGI_HRESULT(4),
+	DXGI_ERROR_DEVICE_REMOVED                = MAKE_DXGI_HRESULT(5),
+	DXGI_ERROR_DEVICE_HUNG                   = MAKE_DXGI_HRESULT(6),
+	DXGI_ERROR_DEVICE_RESET                  = MAKE_DXGI_HRESULT(7),
+	DXGI_ERROR_WAS_STILL_DRAWING             = MAKE_DXGI_HRESULT(10),
+	DXGI_ERROR_FRAME_STATISTICS_DISJOINT     = MAKE_DXGI_HRESULT(11),
+	DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE  = MAKE_DXGI_HRESULT(12),
+	DXGI_ERROR_DRIVER_INTERNAL_ERROR         = MAKE_DXGI_HRESULT(32),
+	DXGI_ERROR_NONEXCLUSIVE                  = MAKE_DXGI_HRESULT(33),
+	DXGI_ERROR_NOT_CURRENTLY_AVAILABLE       = MAKE_DXGI_HRESULT(34),
+	DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED    = MAKE_DXGI_HRESULT(35),
+	DXGI_ERROR_REMOTE_OUTOFMEMORY            = MAKE_DXGI_HRESULT(36),
+}
+
+/*enum {
+	DXGI_CPU_ACCESS_NONE       =  0,
+	DXGI_CPU_ACCESS_DYNAMIC    =  1,
+	DXGI_CPU_ACCESS_READ_WRITE =  2,
+	DXGI_CPU_ACCESS_SCRATCH    =  3,
+	DXGI_CPU_ACCESS_FIELD      = 15,
+}
+enum {
+	DXGI_USAGE_SHADER_INPUT         = 1 << (0 + 4),
+	DXGI_USAGE_RENDER_TARGET_OUTPUT = 1 << (1 + 4),
+	DXGI_USAGE_BACK_BUFFER          = 1 << (2 + 4),
+	DXGI_USAGE_SHARED               = 1 << (3 + 4),
+	DXGI_USAGE_READ_ONLY            = 1 << (4 + 4),
+	DXGI_USAGE_DISCARD_ON_PRESENT   = 1 << (5 + 4),
+	DXGI_USAGE_UNORDERED_ACCESS     = 1 << (6 + 4),
+}*/
+
+struct DXGI_RGB {
+	float Red;
+	float Green;
+	float Blue;
+}
+
+struct DXGI_GAMMA_CONTROL {
+	DXGI_RGB Scale;
+	DXGI_RGB Offset;
+	DXGI_RGB[1025] GammaCurve;
+}
+
+struct DXGI_GAMMA_CONTROL_CAPABILITIES {
+	BOOL ScaleAndOffsetSupported;
+	float MaxConvertedValue;
+	float MinConvertedValue;
+	UINT NumGammaControlPoints;
+	float[1025] ControlPointPositions;
+}
+
+struct DXGI_RATIONAL {
+	UINT Numerator;
+	UINT Denominator;
+}
+
+enum {
+	DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED       = 0,
+	DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE       = 1,
+	DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST = 2,
+	DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST = 3
+}
+alias int DXGI_MODE_SCANLINE_ORDER;
+
+enum {
+	DXGI_MODE_SCALING_UNSPECIFIED = 0,
+	DXGI_MODE_SCALING_CENTERED    = 1,
+	DXGI_MODE_SCALING_STRETCHED   = 2
+}
+alias int DXGI_MODE_SCALING;
+
+enum {
+	DXGI_MODE_ROTATION_UNSPECIFIED = 0,
+	DXGI_MODE_ROTATION_IDENTITY    = 1,
+	DXGI_MODE_ROTATION_ROTATE90    = 2,
+	DXGI_MODE_ROTATION_ROTATE180   = 3,
+	DXGI_MODE_ROTATION_ROTATE270   = 4
+}
+alias int DXGI_MODE_ROTATION;
+
+struct DXGI_MODE_DESC {
+	UINT Width;
+	UINT Height;
+	DXGI_RATIONAL RefreshRate;
+	DXGI_FORMAT Format;
+	DXGI_MODE_SCANLINE_ORDER ScanlineOrdering;
+	DXGI_MODE_SCALING Scaling;
+}
+
+struct DXGI_SAMPLE_DESC {
+	UINT Count;
+	UINT Quality;
+}

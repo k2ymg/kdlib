@@ -1,0 +1,38 @@
+/** d3dcommon.d
+
+Converted from 'd3dcommon.h'.
+
+Version: V7.0
+Authors: Koji Kishita
+*/
+module c.windows.d3dcommon;
+
+
+import c.windows.guiddef;
+
+
+extern(C){
+
+enum {
+	D3D_DRIVER_TYPE_UNKNOWN   = 0,
+	D3D_DRIVER_TYPE_HARDWARE  = D3D_DRIVER_TYPE_UNKNOWN + 1,
+	D3D_DRIVER_TYPE_REFERENCE = D3D_DRIVER_TYPE_HARDWARE + 1,
+	D3D_DRIVER_TYPE_NULL      = D3D_DRIVER_TYPE_REFERENCE + 1 ,
+	D3D_DRIVER_TYPE_SOFTWARE  = D3D_DRIVER_TYPE_NULL + 1,
+	D3D_DRIVER_TYPE_WARP      = D3D_DRIVER_TYPE_SOFTWARE + 1
+}
+alias int D3D_DRIVER_TYPE;
+
+enum {
+	D3D_FEATURE_LEVEL_9_1  = 0x9100,
+	D3D_FEATURE_LEVEL_9_2  = 0x9200,
+	D3D_FEATURE_LEVEL_9_3  = 0x9300,
+	D3D_FEATURE_LEVEL_10_0 = 0xa000,
+	D3D_FEATURE_LEVEL_10_1 = 0xa100,
+	D3D_FEATURE_LEVEL_11_0 = 0xb000
+}
+alias int D3D_FEATURE_LEVEL;
+
+mixin DEFINE_GUID!("WKPDID_D3DDebugObjectName", 0x429b8c22, 0x9188, 0x4b0c, 0x87, 0x42, 0xac, 0xb0, 0xbf, 0x85, 0xc2, 0x00);
+
+} // extern(C)

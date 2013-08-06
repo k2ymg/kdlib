@@ -1,0 +1,23 @@
+LIBRARY msrkinectnui
+EXETYPE NT
+SUBSYSTEM WINDOWS
+EXPORTS
+	_MSR_NUIGetDeviceCount = MSR_NUIGetDeviceCount
+	_MSR_NuiCreateInstanceByIndex = MSR_NuiCreateInstanceByIndex
+	_MSR_NuiDestroyInstance = MSR_NuiDestroyInstance
+	_MSR_NuiGetPropsBlob@12 = MSR_NuiGetPropsBlob
+	_MSR_NuiGetPropsType@4 = MSR_NuiGetPropsType
+	_MSR_NuiSetDeviceStatusCallback@4 = MSR_NuiSetDeviceStatusCallback
+	_NuiCameraElevationGetAngle@4 = NuiCameraElevationGetAngle
+	_NuiCameraElevationSetAngle@4 = NuiCameraElevationSetAngle
+	_NuiImageGetColorPixelCoordinatesFromDepthPixel@28 = NuiImageGetColorPixelCoordinatesFromDepthPixel
+	_NuiImageStreamGetNextFrame@12 = NuiImageStreamGetNextFrame
+	_NuiImageStreamOpen@24 = NuiImageStreamOpen
+	_NuiImageStreamReleaseFrame@8 = NuiImageStreamReleaseFrame
+	_NuiInitialize@4 = NuiInitialize
+	_NuiInternalSetHooks = NuiInternalSetHooks
+	_NuiShutdown@0 = NuiShutdown
+	_NuiSkeletonGetNextFrame@8 = NuiSkeletonGetNextFrame
+	_NuiSkeletonTrackingDisable@0 = NuiSkeletonTrackingDisable
+	_NuiSkeletonTrackingEnable@8 = NuiSkeletonTrackingEnable
+	_NuiTransformSmooth@8 = NuiTransformSmooth

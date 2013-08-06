@@ -1,0 +1,8 @@
+;v7.0
+LIBRARY "d2d1.dll"
+EXPORTS
+	_D2D1CreateFactory@16=D2D1CreateFactory
+	_D2D1InvertMatrix@4=D2D1InvertMatrix
+	_D2D1IsMatrixInvertible@4=D2D1IsMatrixInvertible
+	_D2D1MakeRotateMatrix@16=D2D1MakeRotateMatrix
+	_D2D1MakeSkewMatrix@20=D2D1MakeSkewMatrix

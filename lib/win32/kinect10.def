@@ -1,0 +1,27 @@
+LIBRARY kinect10
+EXETYPE NT
+SUBSYSTEM WINDOWS
+EXPORTS
+	_NuiCameraElevationGetAngle@4 @7 NONAME
+	_NuiCameraElevationSetAngle@4 @8 NONAME
+	_NuiCreateSensorById@8 @21 NONAME
+	_NuiCreateSensorByIndex@8 @6 NONAME
+	_NuiGetAudioSource@4 @25 NONAME
+	_NuiGetSensorCount@4 @5 NONAME
+	_NuiImageGetColorPixelCoordinatesFromDepthPixel@28 @9 NONAME
+	_NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution@32 @10 NONAME
+	_NuiImageStreamGetImageFrameFlags@8 @24 NONAME
+	_NuiImageStreamGetNextFrame@12 @11 NONAME
+	_NuiImageStreamOpen@24 @12 NONAME
+	_NuiImageStreamReleaseFrame@8 @13 NONAME
+	_NuiImageStreamSetImageFrameFlags@8 @23 NONAME
+	_NuiInitialize@4 @14 NONAME
+	_NuiSetDeviceStatusCallback@8 @22 NONAME
+	_NuiSetFrameEndEvent@8 @15 NONAME
+	_NuiShutdown@0 @16 NONAME
+	_NuiSkeletonCalculateBoneOrientations@8 @27 NONAME
+	_NuiSkeletonGetNextFrame@8 @17 NONAME
+	_NuiSkeletonSetTrackedSkeletons@4 @26 NONAME
+	_NuiSkeletonTrackingDisable@0 @18 NONAME
+	_NuiSkeletonTrackingEnable@8 @19 NONAME
+	_NuiTransformSmooth@8 @20 NONAME

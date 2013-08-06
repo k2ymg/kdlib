@@ -1,0 +1,6 @@
+LIBRARY d3d11
+EXETYPE NT
+SUBSYSTEM WINDOWS
+EXPORTS
+	_D3D11CoreCreateDevice@40 = D3D11CoreCreateDevice
+	_D3D11CreateDeviceAndSwapChain@48 = D3D11CreateDeviceAndSwapChain

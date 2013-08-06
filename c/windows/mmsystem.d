@@ -1,0 +1,2832 @@
+/** mmsystem.d
+
+Converted from 'mmsystem.h'.
+
+Version: V7.0
+Authors: Koji Kishita
+*/
+module c.windows.mmsystem;
+
+
+import c.windows.sdkddkver;
+import c.windows.windef;
+import c.windows.guiddef;
+
+
+align(1){
+extern(C){
+
+enum {
+	MAXPNAMELEN            = 32,
+	MAXERRORLENGTH         = 256,
+	MAX_JOYSTICKOEMVXDNAME = 260,
+}
+
+/*(WINVER <= _WIN32_WINNT_NT4){
+	enum {
+		MM_MICROSOFT       = 1,
+		MM_MIDI_MAPPER     = 1,
+		MM_WAVE_MAPPER     = 2,
+		MM_SNDBLST_MIDIOUT = 3,
+		MM_SNDBLST_MIDIIN  = 4,
+		MM_SNDBLST_SYNTH   = 5,
+		MM_SNDBLST_WAVEOUT = 6,
+		MM_SNDBLST_WAVEIN  = 7,
+		MM_ADLIB           = 9,
+		MM_MPU401_MIDIOUT  = 10,
+		MM_MPU401_MIDIIN   = 11,
+		MM_PC_JOYSTICK     = 12,
+	}
+}*/
+
+alias UINT MMVERSION;
+alias UINT MMRESULT;
+//alias UINT* LPUINT; move to windef
+
+struct MMTIME {
+	UINT wType;
+	union {
+		DWORD ms;
+		DWORD sample;
+		DWORD cb;
+		DWORD ticks;
+
+		struct {
+			BYTE hour;
+			BYTE min;
+			BYTE sec;
+			BYTE frame;
+			BYTE fps;
+			BYTE dummy;
+			BYTE[2] pad;
+		}
+
+		struct {
+			DWORD songptrpos;
+		}
+	}
+}
+alias MMTIME* PMMTIME;
+alias MMTIME* NPMMTIME;
+alias MMTIME* LPMMTIME;
+
+enum {
+	TIME_MS      = 0x0001,
+	TIME_SAMPLES = 0x0002,
+	TIME_BYTES   = 0x0004,
+	TIME_SMPTE   = 0x0008,
+	TIME_MIDI    = 0x0010,
+	TIME_TICKS   = 0x0020,
+}
+
+pure nothrow
+DWORD MAKEFOURCC(BYTE ch0, BYTE ch1, BYTE ch2, BYTE ch3)
+{
+	return (cast(DWORD)ch0 | (cast(DWORD)ch1 << 8) |  (cast(DWORD)ch2 << 16) | (cast(DWORD)ch3 << 24 ));
+}
+
+enum {
+	MM_JOY1MOVE            = 0x3A0,
+	MM_JOY2MOVE            = 0x3A1,
+	MM_JOY1ZMOVE           = 0x3A2,
+	MM_JOY2ZMOVE           = 0x3A3,
+	MM_JOY1BUTTONDOWN      = 0x3B5,
+	MM_JOY2BUTTONDOWN      = 0x3B6,
+	MM_JOY1BUTTONUP        = 0x3B7,
+	MM_JOY2BUTTONUP        = 0x3B8,
+	MM_MCINOTIFY           = 0x3B9,
+	MM_WOM_OPEN            = 0x3BB,
+	MM_WOM_CLOSE           = 0x3BC,
+	MM_WOM_DONE            = 0x3BD,
+	MM_WIM_OPEN            = 0x3BE,
+	MM_WIM_CLOSE           = 0x3BF,
+	MM_WIM_DATA            = 0x3C0,
+	MM_MIM_OPEN            = 0x3C1,
+	MM_MIM_CLOSE           = 0x3C2,
+	MM_MIM_DATA            = 0x3C3,
+	MM_MIM_LONGDATA        = 0x3C4,
+	MM_MIM_ERROR           = 0x3C5,
+	MM_MIM_LONGERROR       = 0x3C6,
+	MM_MOM_OPEN            = 0x3C7,
+	MM_MOM_CLOSE           = 0x3C8,
+	MM_MOM_DONE            = 0x3C9,
+	MM_DRVM_OPEN           = 0x3D0,
+	MM_DRVM_CLOSE          = 0x3D1,
+	MM_DRVM_DATA           = 0x3D2,
+	MM_DRVM_ERROR          = 0x3D3,
+	MM_STREAM_OPEN         = 0x3D4,
+	MM_STREAM_CLOSE        = 0x3D5,
+	MM_STREAM_DONE         = 0x3D6,
+	MM_STREAM_ERROR        = 0x3D7,
+	MM_MOM_POSITIONCB      = 0x3CA,
+	MM_MCISIGNAL           = 0x3CB,
+	MM_MIM_MOREDATA        = 0x3CC,
+	MM_MIXM_LINE_CHANGE    = 0x3D0,
+	MM_MIXM_CONTROL_CHANGE = 0x3D1,
+}
+
+enum {
+	MMSYSERR_BASE = 0,
+	WAVERR_BASE   = 32,
+	MIDIERR_BASE  = 64,
+	TIMERR_BASE   = 96,
+	JOYERR_BASE   = 160,
+	MCIERR_BASE   = 256,
+	MIXERR_BASE   = 1024,
+}
+
+enum {
+	MCI_STRING_OFFSET = 512,
+	MCI_VD_OFFSET     = 1024,
+	MCI_CD_OFFSET     = 1088,
+	MCI_WAVE_OFFSET   = 1152,
+	MCI_SEQ_OFFSET    = 1216,
+}
+enum {
+	MMSYSERR_NOERROR      = 0,
+	MMSYSERR_ERROR        = MMSYSERR_BASE + 1,
+	MMSYSERR_BADDEVICEID  = MMSYSERR_BASE + 2,
+	MMSYSERR_NOTENABLED   = MMSYSERR_BASE + 3,
+	MMSYSERR_ALLOCATED    = MMSYSERR_BASE + 4,
+	MMSYSERR_INVALHANDLE  = MMSYSERR_BASE + 5,
+	MMSYSERR_NODRIVER     = MMSYSERR_BASE + 6,
+	MMSYSERR_NOMEM        = MMSYSERR_BASE + 7,
+	MMSYSERR_NOTSUPPORTED = MMSYSERR_BASE + 8,
+	MMSYSERR_BADERRNUM    = MMSYSERR_BASE + 9,
+	MMSYSERR_INVALFLAG    = MMSYSERR_BASE + 10,
+	MMSYSERR_INVALPARAM   = MMSYSERR_BASE + 11,
+	MMSYSERR_HANDLEBUSY   = MMSYSERR_BASE + 12,
+	MMSYSERR_INVALIDALIAS = MMSYSERR_BASE + 13,
+	MMSYSERR_BADDB        = MMSYSERR_BASE + 14,
+	MMSYSERR_KEYNOTFOUND  = MMSYSERR_BASE + 15,
+	MMSYSERR_READERROR    = MMSYSERR_BASE + 16,
+	MMSYSERR_WRITEERROR   = MMSYSERR_BASE + 17,
+	MMSYSERR_DELETEERROR  = MMSYSERR_BASE + 18,
+	MMSYSERR_VALNOTFOUND  = MMSYSERR_BASE + 19,
+	MMSYSERR_NODRIVERCB   = MMSYSERR_BASE + 20,
+	MMSYSERR_MOREDATA     = MMSYSERR_BASE + 21,
+	MMSYSERR_LASTERROR    = MMSYSERR_BASE + 21,
+}
+
+enum HDRVR : HANDLE {init = (HANDLE).init}
+
+struct DRVCONFIGINFOEX {
+	DWORD dwDCISize;
+	LPCWSTR lpszDCISectionName;
+	LPCWSTR lpszDCIAliasName;
+	DWORD dnDevNode;
+}
+alias DRVCONFIGINFOEX* PDRVCONFIGINFOEX;
+alias DRVCONFIGINFOEX* NPDRVCONFIGINFOEX;
+alias DRVCONFIGINFOEX* LPDRVCONFIGINFOEX;
+
+enum {
+	DRV_LOAD           = 0x0001,
+	DRV_ENABLE         = 0x0002,
+	DRV_OPEN           = 0x0003,
+	DRV_CLOSE          = 0x0004,
+	DRV_DISABLE        = 0x0005,
+	DRV_FREE           = 0x0006,
+	DRV_CONFIGURE      = 0x0007,
+	DRV_QUERYCONFIGURE = 0x0008,
+	DRV_INSTALL        = 0x0009,
+	DRV_REMOVE         = 0x000A,
+	DRV_EXITSESSION    = 0x000B,
+	DRV_POWER          = 0x000F,
+	DRV_RESERVED       = 0x0800,
+	DRV_USER           = 0x4000,
+}
+
+struct DRVCONFIGINFO {
+	DWORD dwDCISize;
+	LPCWSTR lpszDCISectionName;
+	LPCWSTR lpszDCIAliasName;
+}
+alias DRVCONFIGINFO* PDRVCONFIGINFO;
+alias DRVCONFIGINFO* NPDRVCONFIGINFO;
+alias DRVCONFIGINFO* LPDRVCONFIGINFO;
+
+enum {
+	DRVCNF_CANCEL  = 0x0000,
+	DRVCNF_OK      = 0x0001,
+	DRVCNF_RESTART = 0x0002,
+}
+
+
+alias extern(Windows) LRESULT function(DWORD_PTR, HDRVR, UINT, LPARAM, LPARAM) DRIVERPROC;
+
+export extern(Windows) LRESULT CloseDriver(HDRVR hDriver, LPARAM lParam1, LPARAM lParam2);
+export extern(Windows) HDRVR OpenDriver(LPCWSTR szDriverName, LPCWSTR szSectionName, LPARAM lParam2);
+export extern(Windows) LRESULT SendDriverMessage(HDRVR hDriver, UINT message, LPARAM lParam1, LPARAM lParam2);
+export extern(Windows) HMODULE DrvGetModuleHandle(HDRVR hDriver);
+export extern(Windows) HMODULE GetDriverModuleHandle(HDRVR hDriver);
+export extern(Windows) LRESULT DefDriverProc(DWORD_PTR dwDriverIdentifier, HDRVR hdrvr, UINT uMsg, LPARAM lParam1, LPARAM lParam2);
+
+enum {
+	DRV_CANCEL    = DRVCNF_CANCEL,
+	DRV_OK        = DRVCNF_OK,
+	DRV_RESTART   = DRVCNF_RESTART,
+	DRV_MCI_FIRST = DRV_RESERVED,
+	DRV_MCI_LAST  = DRV_RESERVED + 0xFFF,
+}
+
+enum {
+	CALLBACK_TYPEMASK = 0x00070000,
+	CALLBACK_NULL     = 0x00000000,
+	CALLBACK_WINDOW   = 0x00010000,
+	CALLBACK_TASK     = 0x00020000,
+	CALLBACK_FUNCTION = 0x00030000,
+	CALLBACK_THREAD   = CALLBACK_TASK,
+	CALLBACK_EVENT    = 0x00050000,
+}
+alias extern(Windows) void function(HDRVR hdrvr, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) DRVCALLBACK;
+
+alias DRVCALLBACK LPDRVCALLBACK;
+alias DRVCALLBACK PDRVCALLBACK;
+
+export extern(Windows) BOOL sndPlaySoundA(LPCSTR pszSound, UINT fuSound);
+export extern(Windows) BOOL sndPlaySoundW(LPCWSTR pszSound, UINT fuSound);
+version(UNICODE)
+	alias sndPlaySoundW sndPlaySound;
+else
+	alias sndPlaySoundA sndPlaySound;
+
+enum {
+	SND_SYNC        = 0x0000,
+	SND_ASYNC       = 0x0001,
+	SND_NODEFAULT   = 0x0002,
+	SND_MEMORY      = 0x0004,
+	SND_LOOP        = 0x0008,
+	SND_NOSTOP      = 0x0010,
+	SND_NOWAIT      = 0x00002000,
+	SND_ALIAS       = 0x00010000,
+	SND_ALIAS_ID    = 0x00110000,
+	SND_FILENAME    = 0x00020000,
+	SND_RESOURCE    = 0x00040004,
+	SND_PURGE       = 0x0040,
+	SND_APPLICATION = 0x0080,
+	SND_SENTRY      = 0x00080000,
+	SND_RING        = 0x00100000,
+	SND_SYSTEM      = 0x00200000,
+	SND_ALIAS_START = 0,
+}
+
+pure nothrow
+DWORD sndAlias(BYTE ch0, BYTE ch1)
+{
+	return SND_ALIAS_START + cast(DWORD)ch0 | (cast(DWORD)ch1 << 8);
+}
+enum {
+	SND_ALIAS_SYSTEMASTERISK    = sndAlias('S', '*'),
+	SND_ALIAS_SYSTEMQUESTION    = sndAlias('S', '?'),
+	SND_ALIAS_SYSTEMHAND        = sndAlias('S', 'H'),
+	SND_ALIAS_SYSTEMEXIT        = sndAlias('S', 'E'),
+	SND_ALIAS_SYSTEMSTART       = sndAlias('S', 'S'),
+	SND_ALIAS_SYSTEMWELCOME     = sndAlias('S', 'W'),
+	SND_ALIAS_SYSTEMEXCLAMATION = sndAlias('S', '!'),
+	SND_ALIAS_SYSTEMDEFAULT     = sndAlias('S', 'D'),
+}
+export extern(Windows) BOOL PlaySoundA(LPCSTR pszSound, HMODULE hmod, DWORD fdwSound);
+export extern(Windows) BOOL PlaySoundW(LPCWSTR pszSound, HMODULE hmod, DWORD fdwSound);
+version(UNICODE)
+	alias PlaySoundW PlaySound;
+else
+	alias PlaySoundA PlaySound;
+
+enum {
+	WAVERR_BADFORMAT    = WAVERR_BASE + 0,
+	WAVERR_STILLPLAYING = WAVERR_BASE + 1,
+	WAVERR_UNPREPARED   = WAVERR_BASE + 2,
+	WAVERR_SYNC         = WAVERR_BASE + 3,
+	WAVERR_LASTERROR    = WAVERR_BASE + 3,
+}
+
+enum HWAVE : HANDLE {init = (HANDLE).init}
+enum HWAVEIN : HANDLE {init = (HANDLE).init}
+enum HWAVEOUT : HANDLE {init = (HANDLE).init}
+alias HWAVEIN* LPHWAVEIN;
+alias HWAVEOUT* LPHWAVEOUT;
+alias DRVCALLBACK WAVECALLBACK;
+alias WAVECALLBACK LPWAVECALLBACK;
+
+enum {
+	WOM_OPEN  = MM_WOM_OPEN,
+	WOM_CLOSE = MM_WOM_CLOSE,
+	WOM_DONE  = MM_WOM_DONE,
+	WIM_OPEN  = MM_WIM_OPEN,
+	WIM_CLOSE = MM_WIM_CLOSE,
+	WIM_DATA  = MM_WIM_DATA,
+}
+
+enum WAVE_MAPPER = cast(UINT)-1;
+
+enum {
+	WAVE_FORMAT_QUERY                        = 0x0001,
+	WAVE_ALLOWSYNC                           = 0x0002,
+	WAVE_MAPPED                              = 0x0004,
+	WAVE_FORMAT_DIRECT                       = 0x0008,
+	WAVE_FORMAT_DIRECT_QUERY                 = WAVE_FORMAT_QUERY | WAVE_FORMAT_DIRECT,
+	WAVE_MAPPED_DEFAULT_COMMUNICATION_DEVICE = 0x0010,
+}
+
+struct WAVEHDR {
+	LPSTR lpData;
+	DWORD dwBufferLength;
+	DWORD dwBytesRecorded;
+	DWORD_PTR dwUser;
+	DWORD dwFlags;
+	DWORD dwLoops;
+	WAVEHDR* lpNext;
+	DWORD_PTR reserved;
+}
+alias WAVEHDR* PWAVEHDR;
+alias WAVEHDR* NPWAVEHDR;
+alias WAVEHDR* LPWAVEHDR;
+
+enum {
+	WHDR_DONE      = 0x00000001,
+	WHDR_PREPARED  = 0x00000002,
+	WHDR_BEGINLOOP = 0x00000004,
+	WHDR_ENDLOOP   = 0x00000008,
+	WHDR_INQUEUE   = 0x00000010,
+}
+
+private struct WAVEOUTCAPS_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	DWORD dwFormats;
+	WORD wChannels;
+	WORD wReserved1;
+	DWORD dwSupport;
+}
+alias WAVEOUTCAPS_T!(CHAR) WAVEOUTCAPSA;
+alias WAVEOUTCAPSA* PWAVEOUTCAPSA;
+alias WAVEOUTCAPSA* NPWAVEOUTCAPSA;
+alias WAVEOUTCAPSA* LPWAVEOUTCAPSA;
+alias WAVEOUTCAPS_T!(WCHAR) WAVEOUTCAPSW;
+alias WAVEOUTCAPSW* PWAVEOUTCAPSW;
+alias WAVEOUTCAPSW* NPWAVEOUTCAPSW;
+alias WAVEOUTCAPSW* LPWAVEOUTCAPSW;
+
+version(UNICODE){
+	alias WAVEOUTCAPSW WAVEOUTCAPS;
+	alias PWAVEOUTCAPSW PWAVEOUTCAPS;
+	alias NPWAVEOUTCAPSW NPWAVEOUTCAPS;
+	alias LPWAVEOUTCAPSW LPWAVEOUTCAPS;
+}else{
+	alias WAVEOUTCAPSA WAVEOUTCAPS;
+	alias PWAVEOUTCAPSA PWAVEOUTCAPS;
+	alias NPWAVEOUTCAPSA NPWAVEOUTCAPS;
+	alias LPWAVEOUTCAPSA LPWAVEOUTCAPS;
+}
+
+private struct WAVEOUTCAPS2_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	DWORD dwFormats;
+	WORD wChannels;
+	WORD wReserved1;
+	DWORD dwSupport;
+	GUID ManufacturerGuid;
+	GUID ProductGuid;
+	GUID NameGuid;
+}
+alias WAVEOUTCAPS2_T!(CHAR) WAVEOUTCAPS2A;
+alias WAVEOUTCAPS2A* PWAVEOUTCAPS2A;
+alias WAVEOUTCAPS2A* NPWAVEOUTCAPS2A;
+alias WAVEOUTCAPS2A* LPWAVEOUTCAPS2A;
+alias WAVEOUTCAPS2_T!(WCHAR) WAVEOUTCAPS2W;
+alias WAVEOUTCAPS2W* PWAVEOUTCAPS2W;
+alias WAVEOUTCAPS2W* NPWAVEOUTCAPS2W;
+alias WAVEOUTCAPS2W* LPWAVEOUTCAPS2W;
+version(UNICODE){
+	alias WAVEOUTCAPS2W WAVEOUTCAPS2;
+	alias PWAVEOUTCAPS2W PWAVEOUTCAPS2;
+	alias NPWAVEOUTCAPS2W NPWAVEOUTCAPS2;
+	alias LPWAVEOUTCAPS2W LPWAVEOUTCAPS2;
+}else{
+	alias WAVEOUTCAPS2A WAVEOUTCAPS2;
+	alias PWAVEOUTCAPS2A PWAVEOUTCAPS2;
+	alias NPWAVEOUTCAPS2A NPWAVEOUTCAPS2;
+	alias LPWAVEOUTCAPS2A LPWAVEOUTCAPS2;
+}
+enum {
+	WAVECAPS_PITCH          = 0x0001,
+	WAVECAPS_PLAYBACKRATE   = 0x0002,
+	WAVECAPS_VOLUME         = 0x0004,
+	WAVECAPS_LRVOLUME       = 0x0008,
+	WAVECAPS_SYNC           = 0x0010,
+	WAVECAPS_SAMPLEACCURATE = 0x0020,
+}
+
+private struct WAVEINCAPS_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	DWORD dwFormats;
+	WORD wChannels;
+	WORD wReserved1;
+}
+alias WAVEINCAPS_T!(CHAR) WAVEINCAPSA;
+alias WAVEINCAPSA* PWAVEINCAPSA;
+alias WAVEINCAPSA* NPWAVEINCAPSA;
+alias WAVEINCAPSA* LPWAVEINCAPSA;
+alias WAVEINCAPS_T!(WCHAR) WAVEINCAPSW;
+alias WAVEINCAPSW* PWAVEINCAPSW;
+alias WAVEINCAPSW* NPWAVEINCAPSW;
+alias WAVEINCAPSW* LPWAVEINCAPSW;
+version(UNICODE){
+	alias WAVEINCAPSW WAVEINCAPS;
+	alias PWAVEINCAPSW PWAVEINCAPS;
+	alias NPWAVEINCAPSW NPWAVEINCAPS;
+	alias LPWAVEINCAPSW LPWAVEINCAPS;
+}else{
+	alias WAVEINCAPSA WAVEINCAPS;
+	alias PWAVEINCAPSA PWAVEINCAPS;
+	alias NPWAVEINCAPSA NPWAVEINCAPS;
+	alias LPWAVEINCAPSA LPWAVEINCAPS;
+}
+
+private struct WAVEINCAPS2_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	CHAR[MAXPNAMELEN] szPname;
+	DWORD dwFormats;
+	WORD wChannels;
+	WORD wReserved1;
+	GUID ManufacturerGuid;
+	GUID ProductGuid;
+	GUID NameGuid;
+}
+alias WAVEINCAPS2_T!(CHAR) WAVEINCAPS2A;
+alias WAVEINCAPS2A* PWAVEINCAPS2A;
+alias WAVEINCAPS2A* NPWAVEINCAPS2A;
+alias WAVEINCAPS2A* LPWAVEINCAPS2A;
+alias WAVEINCAPS2_T!(WCHAR) WAVEINCAPS2W;
+alias WAVEINCAPS2W* PWAVEINCAPS2W;
+alias WAVEINCAPS2W* NPWAVEINCAPS2W;
+alias WAVEINCAPS2W* LPWAVEINCAPS2W;
+version(UNICODE){
+	alias WAVEINCAPS2W WAVEINCAPS2;
+	alias PWAVEINCAPS2W PWAVEINCAPS2;
+	alias NPWAVEINCAPS2W NPWAVEINCAPS2;
+	alias LPWAVEINCAPS2W LPWAVEINCAPS2;
+}else{
+	alias WAVEINCAPS2A WAVEINCAPS2;
+	alias PWAVEINCAPS2A PWAVEINCAPS2;
+	alias NPWAVEINCAPS2A NPWAVEINCAPS2;
+	alias LPWAVEINCAPS2A LPWAVEINCAPS2;
+}
+
+enum {
+	WAVE_INVALIDFORMAT = 0x00000000,
+	WAVE_FORMAT_1M08   = 0x00000001,
+	WAVE_FORMAT_1S08   = 0x00000002,
+	WAVE_FORMAT_1M16   = 0x00000004,
+	WAVE_FORMAT_1S16   = 0x00000008,
+	WAVE_FORMAT_2M08   = 0x00000010,
+	WAVE_FORMAT_2S08   = 0x00000020,
+	WAVE_FORMAT_2M16   = 0x00000040,
+	WAVE_FORMAT_2S16   = 0x00000080,
+	WAVE_FORMAT_4M08   = 0x00000100,
+	WAVE_FORMAT_4S08   = 0x00000200,
+	WAVE_FORMAT_4M16   = 0x00000400,
+	WAVE_FORMAT_4S16   = 0x00000800,
+	WAVE_FORMAT_44M08  = 0x00000100,
+	WAVE_FORMAT_44S08  = 0x00000200,
+	WAVE_FORMAT_44M16  = 0x00000400,
+	WAVE_FORMAT_44S16  = 0x00000800,
+	WAVE_FORMAT_48M08  = 0x00001000,
+	WAVE_FORMAT_48S08  = 0x00002000,
+	WAVE_FORMAT_48M16  = 0x00004000,
+	WAVE_FORMAT_48S16  = 0x00008000,
+	WAVE_FORMAT_96M08  = 0x00010000,
+	WAVE_FORMAT_96S08  = 0x00020000,
+	WAVE_FORMAT_96M16  = 0x00040000,
+	WAVE_FORMAT_96S16  = 0x00080000,
+}
+
+struct WAVEFORMAT {
+	WORD wFormatTag;
+	WORD nChannels;
+	DWORD nSamplesPerSec;
+	DWORD nAvgBytesPerSec;
+	WORD nBlockAlign;
+}
+alias WAVEFORMAT* PWAVEFORMAT;
+alias WAVEFORMAT* NPWAVEFORMAT;
+alias WAVEFORMAT* LPWAVEFORMAT;
+
+enum WAVE_FORMAT_PCM = 1;
+
+struct PCMWAVEFORMAT {
+	WAVEFORMAT wf;
+	WORD wBitsPerSample;
+}
+alias PCMWAVEFORMAT* PPCMWAVEFORMAT;
+alias PCMWAVEFORMAT* NPPCMWAVEFORMAT;
+alias PCMWAVEFORMAT* LPPCMWAVEFORMAT;
+
+struct WAVEFORMATEX {
+	WORD wFormatTag;
+	WORD nChannels;
+	DWORD nSamplesPerSec;
+	DWORD nAvgBytesPerSec;
+	WORD nBlockAlign;
+	WORD wBitsPerSample;
+	WORD cbSize;
+}
+alias WAVEFORMATEX* PWAVEFORMATEX;
+alias WAVEFORMATEX* NPWAVEFORMATEX;
+alias WAVEFORMATEX* LPWAVEFORMATEX;
+alias const(WAVEFORMATEX)* LPCWAVEFORMATEX;
+
+export extern(Windows) UINT waveOutGetNumDevs();
+
+export extern(Windows) MMRESULT waveOutGetDevCapsA(UINT_PTR uDeviceID, LPWAVEOUTCAPSA pwoc, UINT cbwoc);
+export extern(Windows) MMRESULT waveOutGetDevCapsW(UINT_PTR uDeviceID, LPWAVEOUTCAPSW pwoc, UINT cbwoc);
+version(UNICODE)
+	alias waveOutGetDevCapsW waveOutGetDevCaps;
+else
+	alias waveOutGetDevCapsA waveOutGetDevCaps;
+
+export extern(Windows) MMRESULT waveOutGetVolume(HWAVEOUT hwo, LPDWORD pdwVolume);
+export extern(Windows) MMRESULT waveOutSetVolume(HWAVEOUT hwo, DWORD dwVolume);
+
+export extern(Windows) MMRESULT waveOutGetErrorTextA(MMRESULT mmrError, LPSTR pszText, UINT cchText);
+export extern(Windows) MMRESULT waveOutGetErrorTextW(MMRESULT mmrError, LPWSTR pszText, UINT cchText);
+version(UNICODE)
+	alias waveOutGetErrorTextW waveOutGetErrorText;
+else
+	alias waveOutGetErrorTextA waveOutGetErrorText;
+export extern(Windows) MMRESULT waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, LPCWAVEFORMATEX pwfx, DWORD_PTR dwCallback, DWORD_PTR dwInstance, DWORD fdwOpen);
+export extern(Windows) MMRESULT waveOutClose(HWAVEOUT hwo);
+export extern(Windows) MMRESULT waveOutPrepareHeader(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh);
+export extern(Windows) MMRESULT waveOutUnprepareHeader(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh);
+export extern(Windows) MMRESULT waveOutWrite(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh);
+export extern(Windows) MMRESULT waveOutPause(HWAVEOUT hwo);
+export extern(Windows) MMRESULT waveOutRestart(HWAVEOUT hwo);
+export extern(Windows) MMRESULT waveOutReset(HWAVEOUT hwo);
+export extern(Windows) MMRESULT waveOutBreakLoop(HWAVEOUT hwo);
+export extern(Windows) MMRESULT waveOutGetPosition(HWAVEOUT hwo, LPMMTIME pmmt, UINT cbmmt);
+export extern(Windows) MMRESULT waveOutGetPitch(HWAVEOUT hwo, LPDWORD pdwPitch);
+export extern(Windows) MMRESULT waveOutSetPitch(HWAVEOUT hwo, DWORD dwPitch);
+export extern(Windows) MMRESULT waveOutGetPlaybackRate(HWAVEOUT hwo, LPDWORD pdwRate);
+export extern(Windows) MMRESULT waveOutSetPlaybackRate(HWAVEOUT hwo, DWORD dwRate);
+export extern(Windows) MMRESULT waveOutGetID(HWAVEOUT hwo, LPUINT puDeviceID);
+export extern(Windows) MMRESULT waveOutMessage(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dw1, DWORD_PTR dw2);
+
+export extern(Windows) UINT waveInGetNumDevs();
+export extern(Windows) MMRESULT waveInGetDevCapsA(UINT_PTR uDeviceID, LPWAVEINCAPSA pwic, UINT cbwic);
+export extern(Windows) MMRESULT waveInGetDevCapsW(UINT_PTR uDeviceID, LPWAVEINCAPSW pwic, UINT cbwic);
+version(UNICODE)
+	alias waveInGetDevCapsW waveInGetDevCaps;
+else
+	alias waveInGetDevCapsA waveInGetDevCaps;
+export extern(Windows) MMRESULT waveInGetErrorTextA(MMRESULT mmrError, LPSTR pszText, UINT cchText);
+export extern(Windows) MMRESULT waveInGetErrorTextW(MMRESULT mmrError, LPWSTR pszText, UINT cchText);
+version(UNICODE)
+	alias waveInGetErrorTextW waveInGetErrorText;
+else
+	alias waveInGetErrorTextA waveInGetErrorText;
+
+export extern(Windows) MMRESULT waveInOpen(LPHWAVEIN phwi, UINT uDeviceID, LPCWAVEFORMATEX pwfx, DWORD_PTR dwCallback, DWORD_PTR dwInstance, DWORD fdwOpen);
+export extern(Windows) MMRESULT waveInClose(HWAVEIN hwi);
+export extern(Windows) MMRESULT waveInPrepareHeader(HWAVEIN hwi, LPWAVEHDR pwh, UINT cbwh);
+export extern(Windows) MMRESULT waveInUnprepareHeader(HWAVEIN hwi, LPWAVEHDR pwh, UINT cbwh);
+export extern(Windows) MMRESULT waveInAddBuffer(HWAVEIN hwi, LPWAVEHDR pwh, UINT cbwh);
+export extern(Windows) MMRESULT waveInStart(HWAVEIN hwi);
+export extern(Windows) MMRESULT waveInStop(HWAVEIN hwi);
+export extern(Windows) MMRESULT waveInReset(HWAVEIN hwi);
+export extern(Windows) MMRESULT waveInGetPosition(HWAVEIN hwi, LPMMTIME pmmt, UINT cbmmt);
+export extern(Windows) MMRESULT waveInGetID(HWAVEIN hwi, LPUINT puDeviceID);
+export extern(Windows) MMRESULT waveInMessage(HWAVEIN hwi, UINT uMsg, DWORD_PTR dw1, DWORD_PTR dw2);
+
+enum {
+	MIDIERR_UNPREPARED    = MIDIERR_BASE + 0,
+	MIDIERR_STILLPLAYING  = MIDIERR_BASE + 1,
+	MIDIERR_NOMAP         = MIDIERR_BASE + 2,
+	MIDIERR_NOTREADY      = MIDIERR_BASE + 3,
+	MIDIERR_NODEVICE      = MIDIERR_BASE + 4,
+	MIDIERR_INVALIDSETUP  = MIDIERR_BASE + 5,
+	MIDIERR_BADOPENMODE   = MIDIERR_BASE + 6,
+	MIDIERR_DONT_CONTINUE = MIDIERR_BASE + 7,
+	MIDIERR_LASTERROR     = MIDIERR_BASE + 7,
+}
+
+enum HMIDI : HANDLE {init = (HANDLE).init}
+enum HMIDIIN : HANDLE {init = (HANDLE).init}
+enum HMIDIOUT : HANDLE {init = (HANDLE).init}
+enum HMIDISTRM : HANDLE {init = (HANDLE).init}
+alias HMIDI* LPHMIDI;
+alias HMIDIIN* LPHMIDIIN;
+alias HMIDIOUT* LPHMIDIOUT;
+alias HMIDISTRM* LPHMIDISTRM;
+alias DRVCALLBACK MIDICALLBACK;
+alias MIDICALLBACK* LPMIDICALLBACK;
+enum MIDIPATCHSIZE = 128;
+alias WORD[MIDIPATCHSIZE] PATCHARRAY;
+alias WORD* LPPATCHARRAY;
+alias WORD[MIDIPATCHSIZE] KEYARRAY;
+alias WORD* LPKEYARRAY;
+
+enum {
+	MIM_OPEN       = MM_MIM_OPEN,
+	MIM_CLOSE      = MM_MIM_CLOSE,
+	MIM_DATA       = MM_MIM_DATA,
+	MIM_LONGDATA   = MM_MIM_LONGDATA,
+	MIM_ERROR      = MM_MIM_ERROR,
+	MIM_LONGERROR  = MM_MIM_LONGERROR,
+	MOM_OPEN       = MM_MOM_OPEN,
+	MOM_CLOSE      = MM_MOM_CLOSE,
+	MOM_DONE       = MM_MOM_DONE,
+	MIM_MOREDATA   = MM_MIM_MOREDATA,
+	MOM_POSITIONCB = MM_MOM_POSITIONCB,
+}
+enum {
+	MIDIMAPPER         = (UINT)-1,
+	MIDI_MAPPER        = (UINT)-1,
+	MIDI_IO_STATUS     = 0x00000020,
+	MIDI_CACHE_ALL     = 1,
+	MIDI_CACHE_BESTFIT = 2,
+	MIDI_CACHE_QUERY   = 3,
+	MIDI_UNCACHE       = 4,
+}
+
+private struct MIDIOUTCAPS_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	WORD wTechnology;
+	WORD wVoices;
+	WORD wNotes;
+	WORD wChannelMask;
+	DWORD dwSupport;
+}
+alias MIDIOUTCAPS_T!(CHAR) MIDIOUTCAPSA;
+alias MIDIOUTCAPSA* PMIDIOUTCAPSA;
+alias MIDIOUTCAPSA* NPMIDIOUTCAPSA;
+alias MIDIOUTCAPSA* LPMIDIOUTCAPSA;
+alias MIDIOUTCAPS_T!(WCHAR) MIDIOUTCAPSW;
+alias MIDIOUTCAPSW* PMIDIOUTCAPSW;
+alias MIDIOUTCAPSW* NPMIDIOUTCAPSW;
+alias MIDIOUTCAPSW* LPMIDIOUTCAPSW;
+version(UNICODE){
+	alias MIDIOUTCAPSW MIDIOUTCAPS;
+	alias PMIDIOUTCAPSW PMIDIOUTCAPS;
+	alias NPMIDIOUTCAPSW NPMIDIOUTCAPS;
+	alias LPMIDIOUTCAPSW LPMIDIOUTCAPS;
+}else{
+	alias MIDIOUTCAPSA MIDIOUTCAPS;
+	alias PMIDIOUTCAPSA PMIDIOUTCAPS;
+	alias NPMIDIOUTCAPSA NPMIDIOUTCAPS;
+	alias LPMIDIOUTCAPSA LPMIDIOUTCAPS;
+}
+
+private struct MIDIOUTCAPS2_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	WORD wTechnology;
+	WORD wVoices;
+	WORD wNotes;
+	WORD wChannelMask;
+	DWORD dwSupport;
+	GUID ManufacturerGuid;
+	GUID ProductGuid;
+	GUID NameGuid;
+}
+alias MIDIOUTCAPS2_T!(CHAR) MIDIOUTCAPS2A;
+alias MIDIOUTCAPS2A* PMIDIOUTCAPS2A;
+alias MIDIOUTCAPS2A* NPMIDIOUTCAPS2A;
+alias MIDIOUTCAPS2A* LPMIDIOUTCAPS2A;
+alias MIDIOUTCAPS2_T!(WCHAR) MIDIOUTCAPS2W;
+alias MIDIOUTCAPS2W* PMIDIOUTCAPS2W;
+alias MIDIOUTCAPS2W* NPMIDIOUTCAPS2W;
+alias MIDIOUTCAPS2W* LPMIDIOUTCAPS2W;
+version(UNICODE){
+	alias MIDIOUTCAPS2W MIDIOUTCAPS2;
+	alias PMIDIOUTCAPS2W PMIDIOUTCAPS2;
+	alias NPMIDIOUTCAPS2W NPMIDIOUTCAPS2;
+	alias LPMIDIOUTCAPS2W LPMIDIOUTCAPS2;
+}else{
+	alias MIDIOUTCAPS2A MIDIOUTCAPS2;
+	alias PMIDIOUTCAPS2A PMIDIOUTCAPS2;
+	alias NPMIDIOUTCAPS2A NPMIDIOUTCAPS2;
+	alias LPMIDIOUTCAPS2A LPMIDIOUTCAPS2;
+}
+
+enum {
+	MOD_MIDIPORT  = 1,
+	MOD_SYNTH     = 2,
+	MOD_SQSYNTH   = 3,
+	MOD_FMSYNTH   = 4,
+	MOD_MAPPER    = 5,
+	MOD_WAVETABLE = 6,
+	MOD_SWSYNTH   = 7,
+}
+enum {
+	MIDICAPS_VOLUME   = 0x0001,
+	MIDICAPS_LRVOLUME = 0x0002,
+	MIDICAPS_CACHE    = 0x0004,
+	MIDICAPS_STREAM   = 0x0008,
+}
+
+private struct MIDIINCAPS_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	DWORD dwSupport;
+}
+alias MIDIINCAPS_T!(CHAR) MIDIINCAPSA;
+alias MIDIINCAPSA* PMIDIINCAPSA;
+alias MIDIINCAPSA* NPMIDIINCAPSA;
+alias MIDIINCAPSA* LPMIDIINCAPSA;
+alias MIDIINCAPS_T!(WCHAR) MIDIINCAPSW;
+alias MIDIINCAPSW* PMIDIINCAPSW;
+alias MIDIINCAPSW* NPMIDIINCAPSW;
+alias MIDIINCAPSW* LPMIDIINCAPSW;
+version(UNICODE){
+	alias MIDIINCAPSW MIDIINCAPS;
+	alias PMIDIINCAPSW PMIDIINCAPS;
+	alias NPMIDIINCAPSW NPMIDIINCAPS;
+	alias LPMIDIINCAPSW LPMIDIINCAPS;
+}else{
+	alias MIDIINCAPSA MIDIINCAPS;
+	alias PMIDIINCAPSA PMIDIINCAPS;
+	alias NPMIDIINCAPSA NPMIDIINCAPS;
+	alias LPMIDIINCAPSA LPMIDIINCAPS;
+}
+
+private struct MIDIINCAPS2_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	DWORD dwSupport;
+	GUID ManufacturerGuid;
+	GUID ProductGuid;
+	GUID NameGuid;
+}
+alias MIDIINCAPS2_T!(CHAR) MIDIINCAPS2A;
+alias MIDIINCAPS2A* PMIDIINCAPS2A;
+alias MIDIINCAPS2A* NPMIDIINCAPS2A;
+alias MIDIINCAPS2A* LPMIDIINCAPS2A;
+alias MIDIINCAPS2_T!(WCHAR) MIDIINCAPS2W;
+alias MIDIINCAPS2W* PMIDIINCAPS2W;
+alias MIDIINCAPS2W* NPMIDIINCAPS2W;
+alias MIDIINCAPS2W* LPMIDIINCAPS2W;
+version(UNICODE){
+	alias MIDIINCAPS2W MIDIINCAPS2;
+	alias PMIDIINCAPS2W PMIDIINCAPS2;
+	alias NPMIDIINCAPS2W NPMIDIINCAPS2;
+	alias LPMIDIINCAPS2W LPMIDIINCAPS2;
+}else{
+	alias MIDIINCAPS2A MIDIINCAPS2;
+	alias PMIDIINCAPS2A PMIDIINCAPS2;
+	alias NPMIDIINCAPS2A NPMIDIINCAPS2;
+	alias LPMIDIINCAPS2A LPMIDIINCAPS2;
+}
+
+struct MIDIHDR {
+	LPSTR lpData;
+	DWORD dwBufferLength;
+	DWORD dwBytesRecorded;
+	DWORD_PTR dwUser;
+	DWORD dwFlags;
+	MIDIHDR* lpNext;
+	DWORD_PTR reserved;
+	DWORD dwOffset;
+	DWORD_PTR[8] dwReserved;
+}
+alias MIDIHDR* PMIDIHDR;
+alias MIDIHDR* NPMIDIHDR;
+alias MIDIHDR* LPMIDIHDR;
+
+struct MIDIEVENT {
+	DWORD dwDeltaTime;
+	DWORD dwStreamID;
+	DWORD dwEvent;
+	DWORD[1] dwParms;
+}
+
+struct MIDISTRMBUFFVER {
+	DWORD dwVersion;
+	DWORD dwMid;
+	DWORD dwOEMVersion;
+}
+
+enum {
+	MHDR_DONE     = 0x00000001,
+	MHDR_PREPARED = 0x00000002,
+	MHDR_INQUEUE  = 0x00000004,
+	MHDR_ISSTRM   = 0x00000008,
+}
+
+enum {
+	MEVT_F_SHORT    = 0x00000000,
+	MEVT_F_LONG     = 0x80000000,
+	MEVT_F_CALLBACK = 0x40000000,
+}
+
+pure nothrow
+BYTE MEVT_EVENTTYPE(DWORD x)
+{
+	return cast(BYTE)((x >> 24 ) & 0xFF);
+}
+
+pure nothrow
+DWORD MEVT_EVENTPARM(DWORD x)
+{
+	return x & 0x00FFFFFF;
+}
+
+enum {
+	MEVT_SHORTMSG = 0x00,
+	MEVT_TEMPO    = 0x01,
+	MEVT_NOP      = 0x02,
+	MEVT_LONGMSG  = 0x80,
+	MEVT_COMMENT  = 0x82,
+	MEVT_VERSION  = 0x84,
+}
+
+enum {
+	MIDISTRM_ERROR   = -2,
+	MIDIPROP_SET     = 0x80000000,
+	MIDIPROP_GET     = 0x40000000,
+	MIDIPROP_TIMEDIV = 0x00000001,
+	MIDIPROP_TEMPO   = 0x00000002,
+}
+struct MIDIPROPTIMEDIV {
+	DWORD cbStruct;
+	DWORD dwTimeDiv;
+}
+alias MIDIPROPTIMEDIV* LPMIDIPROPTIMEDIV;
+
+struct MIDIPROPTEMPO {
+	DWORD cbStruct;
+	DWORD dwTempo;
+}
+alias MIDIPROPTEMPO* LPMIDIPROPTEMPO;
+
+export extern(Windows) UINT midiOutGetNumDevs();
+export extern(Windows) MMRESULT midiStreamOpen(LPHMIDISTRM phms, LPUINT puDeviceID, DWORD cMidi, DWORD_PTR dwCallback, DWORD_PTR dwInstance, DWORD fdwOpen);
+export extern(Windows) MMRESULT midiStreamClose(HMIDISTRM hms);
+export extern(Windows) MMRESULT midiStreamProperty(HMIDISTRM hms, LPBYTE lppropdata, DWORD dwProperty);
+export extern(Windows) MMRESULT midiStreamPosition(HMIDISTRM hms, LPMMTIME lpmmt, UINT cbmmt);
+export extern(Windows) MMRESULT midiStreamOut(HMIDISTRM hms, LPMIDIHDR pmh, UINT cbmh);
+export extern(Windows) MMRESULT midiStreamPause(HMIDISTRM hms);
+export extern(Windows) MMRESULT midiStreamRestart(HMIDISTRM hms);
+export extern(Windows) MMRESULT midiStreamStop(HMIDISTRM hms);
+export extern(Windows) MMRESULT midiConnect(HMIDI hmi, HMIDIOUT hmo, LPVOID pReserved);
+export extern(Windows) MMRESULT midiDisconnect(HMIDI hmi, HMIDIOUT hmo, LPVOID pReserved);
+export extern(Windows) MMRESULT midiOutGetDevCapsA(UINT_PTR uDeviceID, LPMIDIOUTCAPSA pmoc, UINT cbmoc);
+export extern(Windows) MMRESULT midiOutGetDevCapsW(UINT_PTR uDeviceID, LPMIDIOUTCAPSW pmoc, UINT cbmoc);
+version(UNICODE)
+	alias midiOutGetDevCapsW midiOutGetDevCaps;
+else
+	alias midiOutGetDevCapsA midiOutGetDevCaps;
+export extern(Windows) MMRESULT midiOutGetVolume(HMIDIOUT hmo, LPDWORD pdwVolume);
+export extern(Windows) MMRESULT midiOutSetVolume(HMIDIOUT hmo, DWORD dwVolume);
+export extern(Windows) MMRESULT midiOutGetErrorTextA(MMRESULT mmrError, LPSTR pszText, UINT cchText);
+export extern(Windows) MMRESULT midiOutGetErrorTextW(MMRESULT mmrError, LPWSTR pszText, UINT cchText);
+version(UNICODE)
+	alias midiOutGetErrorTextW midiOutGetErrorText;
+else
+	alias midiOutGetErrorTextA midiOutGetErrorText;
+export extern(Windows) MMRESULT midiOutOpen(LPHMIDIOUT phmo, UINT uDeviceID, DWORD_PTR dwCallback, DWORD_PTR dwInstance, DWORD fdwOpen);
+export extern(Windows) MMRESULT midiOutClose(HMIDIOUT hmo);
+export extern(Windows) MMRESULT midiOutPrepareHeader(HMIDIOUT hmo, LPMIDIHDR pmh, UINT cbmh);
+export extern(Windows) MMRESULT midiOutUnprepareHeader(HMIDIOUT hmo, LPMIDIHDR pmh, UINT cbmh);
+export extern(Windows) MMRESULT midiOutShortMsg(HMIDIOUT hmo, DWORD dwMsg);
+export extern(Windows) MMRESULT midiOutLongMsg(HMIDIOUT hmo, LPMIDIHDR pmh, UINT cbmh);
+export extern(Windows) MMRESULT midiOutReset(HMIDIOUT hmo);
+export extern(Windows) MMRESULT midiOutCachePatches(HMIDIOUT hmo, UINT uBank, LPWORD pwpa, UINT fuCache);
+export extern(Windows) MMRESULT midiOutCacheDrumPatches(HMIDIOUT hmo, UINT uPatch, LPWORD pwkya, UINT fuCache);
+export extern(Windows) MMRESULT midiOutGetID(HMIDIOUT hmo, LPUINT puDeviceID);
+export extern(Windows) MMRESULT midiOutMessage(HMIDIOUT hmo,  UINT uMsg,DWORD_PTR dw1,DWORD_PTR dw2);
+
+export extern(Windows) UINT midiInGetNumDevs();
+export extern(Windows) MMRESULT midiInGetDevCapsA(UINT_PTR uDeviceID, LPMIDIINCAPSA pmic, UINT cbmic);
+export extern(Windows) MMRESULT midiInGetDevCapsW(UINT_PTR uDeviceID, LPMIDIINCAPSW pmic, UINT cbmic);
+version(UNICODE)
+	alias midiInGetDevCapsW midiInGetDevCaps;
+else
+	alias midiInGetDevCapsA midiInGetDevCaps;
+export extern(Windows) MMRESULT midiInGetErrorTextA(MMRESULT mmrError, LPSTR pszText, UINT cchText);
+export extern(Windows) MMRESULT midiInGetErrorTextW(MMRESULT mmrError, LPWSTR pszText, UINT cchText);
+version(UNICODE)
+	alias midiInGetErrorTextW midiInGetErrorText;
+else
+	alias midiInGetErrorTextA midiInGetErrorText;
+export extern(Windows) MMRESULT midiInOpen(LPHMIDIIN phmi, UINT uDeviceID, DWORD_PTR dwCallback, DWORD_PTR dwInstance, DWORD fdwOpen);
+export extern(Windows) MMRESULT midiInClose(HMIDIIN hmi);
+export extern(Windows) MMRESULT midiInPrepareHeader(HMIDIIN hmi, LPMIDIHDR pmh, UINT cbmh);
+export extern(Windows) MMRESULT midiInUnprepareHeader(HMIDIIN hmi, LPMIDIHDR pmh, UINT cbmh);
+export extern(Windows) MMRESULT midiInAddBuffer(HMIDIIN hmi, LPMIDIHDR pmh, UINT cbmh);
+export extern(Windows) MMRESULT midiInStart(HMIDIIN hmi);
+export extern(Windows) MMRESULT midiInStop(HMIDIIN hmi);
+export extern(Windows) MMRESULT midiInReset(HMIDIIN hmi);
+export extern(Windows) MMRESULT midiInGetID(HMIDIIN hmi, LPUINT puDeviceID);
+export extern(Windows) MMRESULT midiInMessage(HMIDIIN hmi,  UINT uMsg,DWORD_PTR dw1,DWORD_PTR dw2);
+
+enum AUX_MAPPER = cast(UINT)-1;
+
+private struct AUXCAPS_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	WORD wTechnology;
+	WORD wReserved1;
+	DWORD dwSupport;
+}
+alias AUXCAPS_T!(CHAR) AUXCAPSA;
+alias AUXCAPSA* PAUXCAPSA;
+alias AUXCAPSA* NPAUXCAPSA;
+alias AUXCAPSA* LPAUXCAPSA;
+alias AUXCAPS_T!(WCHAR) AUXCAPSW;
+alias AUXCAPSW* PAUXCAPSW;
+alias AUXCAPSW* NPAUXCAPSW;
+alias AUXCAPSW* LPAUXCAPSW;
+version(UNICODE){
+	alias AUXCAPSW AUXCAPS;
+	alias PAUXCAPSW PAUXCAPS;
+	alias NPAUXCAPSW NPAUXCAPS;
+	alias LPAUXCAPSW LPAUXCAPS;
+}else{
+	alias AUXCAPSA AUXCAPS;
+	alias PAUXCAPSA PAUXCAPS;
+	alias NPAUXCAPSA NPAUXCAPS;
+	alias LPAUXCAPSA LPAUXCAPS;
+}
+
+private struct AUXCAPS2_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	WORD wTechnology;
+	WORD wReserved1;
+	DWORD dwSupport;
+	GUID ManufacturerGuid;
+	GUID ProductGuid;
+	GUID NameGuid;
+}
+alias AUXCAPS2_T!(CHAR) AUXCAPS2A;
+alias AUXCAPS2A* PAUXCAPS2A;
+alias AUXCAPS2A* NPAUXCAPS2A;
+alias AUXCAPS2A* LPAUXCAPS2A;
+alias AUXCAPS2_T!(WCHAR) AUXCAPS2W;
+alias AUXCAPS2W* PAUXCAPS2W;
+alias AUXCAPS2W* NPAUXCAPS2W;
+alias AUXCAPS2W* LPAUXCAPS2W;
+version(UNICODE){
+	alias AUXCAPS2W AUXCAPS2;
+	alias PAUXCAPS2W PAUXCAPS2;
+	alias NPAUXCAPS2W NPAUXCAPS2;
+	alias LPAUXCAPS2W LPAUXCAPS2;
+}else{
+	alias AUXCAPS2A AUXCAPS2;
+	alias PAUXCAPS2A PAUXCAPS2;
+	alias NPAUXCAPS2A NPAUXCAPS2;
+	alias LPAUXCAPS2A LPAUXCAPS2;
+}
+
+enum {
+	AUXCAPS_CDAUDIO  = 1,
+	AUXCAPS_AUXIN    = 2,
+	AUXCAPS_VOLUME   = 0x0001,
+	AUXCAPS_LRVOLUME = 0x0002,
+}
+
+export extern(Windows) UINT auxGetNumDevs();
+export extern(Windows) MMRESULT auxGetDevCapsA(UINT_PTR uDeviceID, LPAUXCAPSA pac, UINT cbac);
+export extern(Windows) MMRESULT auxGetDevCapsW(UINT_PTR uDeviceID, LPAUXCAPSW pac, UINT cbac);
+version(UNICODE)
+	alias auxGetDevCapsW auxGetDevCaps;
+else
+	alias auxGetDevCapsA auxGetDevCaps;
+export extern(Windows) MMRESULT auxSetVolume(UINT uDeviceID, DWORD dwVolume);
+export extern(Windows) MMRESULT auxGetVolume(UINT uDeviceID, LPDWORD pdwVolume);
+export extern(Windows) MMRESULT auxOutMessage(UINT uDeviceID, UINT uMsg, DWORD_PTR dw1, DWORD_PTR dw2);
+
+enum HMIXEROBJ : HANDLE {init = (HANDLE).init}
+alias HMIXEROBJ* LPHMIXEROBJ;
+enum HMIXER : HANDLE {init = (HANDLE).init}
+alias HMIXER* LPHMIXER;
+
+enum {
+	MIXER_SHORT_NAME_CHARS = 16,
+	MIXER_LONG_NAME_CHARS  = 64,
+}
+enum {
+	MIXERR_INVALLINE    = MIXERR_BASE + 0,
+	MIXERR_INVALCONTROL = MIXERR_BASE + 1,
+	MIXERR_INVALVALUE   = MIXERR_BASE + 2,
+	MIXERR_LASTERROR    = MIXERR_BASE + 2,
+}
+enum {
+	MIXER_OBJECTF_HANDLE   = 0x80000000,
+	MIXER_OBJECTF_MIXER    = 0x00000000,
+	MIXER_OBJECTF_HMIXER   = MIXER_OBJECTF_HANDLE|MIXER_OBJECTF_MIXER,
+	MIXER_OBJECTF_WAVEOUT  = 0x10000000,
+	MIXER_OBJECTF_HWAVEOUT = MIXER_OBJECTF_HANDLE|MIXER_OBJECTF_WAVEOUT,
+	MIXER_OBJECTF_WAVEIN   = 0x20000000,
+	MIXER_OBJECTF_HWAVEIN  = MIXER_OBJECTF_HANDLE|MIXER_OBJECTF_WAVEIN,
+	MIXER_OBJECTF_MIDIOUT  = 0x30000000,
+	MIXER_OBJECTF_HMIDIOUT = MIXER_OBJECTF_HANDLE|MIXER_OBJECTF_MIDIOUT,
+	MIXER_OBJECTF_MIDIIN   = 0x40000000,
+	MIXER_OBJECTF_HMIDIIN  = MIXER_OBJECTF_HANDLE|MIXER_OBJECTF_MIDIIN,
+	MIXER_OBJECTF_AUX      = 0x50000000,
+}
+export extern(Windows) UINT mixerGetNumDevs();
+
+private struct MIXERCAPS_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	DWORD fdwSupport;
+	DWORD cDestinations;
+}
+alias MIXERCAPS_T!(CHAR) MIXERCAPSA;
+alias MIXERCAPSA* PMIXERCAPSA;
+alias MIXERCAPSA* LPMIXERCAPSA;
+alias MIXERCAPS_T!(WCHAR) MIXERCAPSW;
+alias MIXERCAPSW* PMIXERCAPSW;
+alias MIXERCAPSW* LPMIXERCAPSW;
+version(UNICODE){
+	alias MIXERCAPSW MIXERCAPS;
+	alias PMIXERCAPSW PMIXERCAPS;
+	alias LPMIXERCAPSW LPMIXERCAPS;
+}else{
+	alias MIXERCAPSA MIXERCAPS;
+	alias PMIXERCAPSA PMIXERCAPS;
+	alias LPMIXERCAPSA LPMIXERCAPS;
+}
+
+private struct MIXERCAPS2_T(T) {
+	WORD wMid;
+	WORD wPid;
+	MMVERSION vDriverVersion;
+	T[MAXPNAMELEN] szPname;
+	DWORD fdwSupport;
+	DWORD cDestinations;
+	GUID ManufacturerGuid;
+	GUID ProductGuid;
+	GUID NameGuid;
+}
+alias MIXERCAPS2_T!(CHAR) MIXERCAPS2A;
+alias MIXERCAPS2A* PMIXERCAPS2A;
+alias MIXERCAPS2A* LPMIXERCAPS2A;
+alias MIXERCAPS2_T!(WCHAR) MIXERCAPS2W;
+alias MIXERCAPS2W* PMIXERCAPS2W;
+alias MIXERCAPS2W* LPMIXERCAPS2W;
+version(UNICODE){
+	alias MIXERCAPS2W MIXERCAPS2;
+	alias PMIXERCAPS2W PMIXERCAPS2;
+	alias LPMIXERCAPS2W LPMIXERCAPS2;
+}else{
+	alias MIXERCAPS2A MIXERCAPS2;
+	alias PMIXERCAPS2A PMIXERCAPS2;
+	alias LPMIXERCAPS2A LPMIXERCAPS2;
+}
+
+export extern(Windows) MMRESULT mixerGetDevCapsA(UINT_PTR uMxId, LPMIXERCAPSA pmxcaps, UINT cbmxcaps);
+export extern(Windows) MMRESULT mixerGetDevCapsW(UINT_PTR uMxId, LPMIXERCAPSW pmxcaps, UINT cbmxcaps);
+version(UNICODE)
+	alias mixerGetDevCapsW mixerGetDevCaps;
+else
+	alias mixerGetDevCapsA mixerGetDevCaps;
+
+export extern(Windows) MMRESULT mixerOpen(LPHMIXER phmx, UINT uMxId, DWORD_PTR dwCallback, DWORD_PTR dwInstance, DWORD fdwOpen);
+export extern(Windows) MMRESULT mixerClose(HMIXER hmx);
+export extern(Windows) DWORD mixerMessage(HMIXER hmx, UINT uMsg, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
+
+private struct MIXERLINE_T(T) {
+	DWORD cbStruct;
+	DWORD dwDestination;
+	DWORD dwSource;
+	DWORD dwLineID;
+	DWORD fdwLine;
+	DWORD_PTR dwUser;
+	DWORD dwComponentType;
+	DWORD cChannels;
+	DWORD cConnections;
+	DWORD cControls;
+	T[MIXER_SHORT_NAME_CHARS] szShortName;
+	T[MIXER_LONG_NAME_CHARS] szName;
+	struct {
+		DWORD dwType;
+		DWORD dwDeviceID;
+		WORD wMid;
+		WORD wPid;
+		MMVERSION vDriverVersion;
+		T[MAXPNAMELEN] szPname;
+	}
+}
+alias MIXERLINE_T!(CHAR) MIXERLINEA;
+alias MIXERLINEA* PMIXERLINEA;
+alias MIXERLINEA* LPMIXERLINEA;
+alias MIXERLINE_T!(WCHAR) MIXERLINEW;
+alias MIXERLINEW* PMIXERLINEW;
+alias MIXERLINEW* LPMIXERLINEW;
+version(UNICODE){
+	alias MIXERLINEW MIXERLINE;
+	alias PMIXERLINEW PMIXERLINE;
+	alias LPMIXERLINEW LPMIXERLINE;
+}else{
+	alias MIXERLINEA MIXERLINE;
+	alias PMIXERLINEA PMIXERLINE;
+	alias LPMIXERLINEA LPMIXERLINE;
+}
+
+enum {
+	MIXERLINE_LINEF_ACTIVE       = 0x00000001,
+	MIXERLINE_LINEF_DISCONNECTED = 0x00008000,
+	MIXERLINE_LINEF_SOURCE       = 0x80000000,
+}
+enum {
+	MIXERLINE_COMPONENTTYPE_DST_FIRST      = 0x00000000,
+	MIXERLINE_COMPONENTTYPE_DST_UNDEFINED  = MIXERLINE_COMPONENTTYPE_DST_FIRST + 0,
+	MIXERLINE_COMPONENTTYPE_DST_DIGITAL    = MIXERLINE_COMPONENTTYPE_DST_FIRST + 1,
+	MIXERLINE_COMPONENTTYPE_DST_LINE       = MIXERLINE_COMPONENTTYPE_DST_FIRST + 2,
+	MIXERLINE_COMPONENTTYPE_DST_MONITOR    = MIXERLINE_COMPONENTTYPE_DST_FIRST + 3,
+	MIXERLINE_COMPONENTTYPE_DST_SPEAKERS   = MIXERLINE_COMPONENTTYPE_DST_FIRST + 4,
+	MIXERLINE_COMPONENTTYPE_DST_HEADPHONES = MIXERLINE_COMPONENTTYPE_DST_FIRST + 5,
+	MIXERLINE_COMPONENTTYPE_DST_TELEPHONE  = MIXERLINE_COMPONENTTYPE_DST_FIRST + 6,
+	MIXERLINE_COMPONENTTYPE_DST_WAVEIN     = MIXERLINE_COMPONENTTYPE_DST_FIRST + 7,
+	MIXERLINE_COMPONENTTYPE_DST_VOICEIN    = MIXERLINE_COMPONENTTYPE_DST_FIRST + 8,
+	MIXERLINE_COMPONENTTYPE_DST_LAST       = MIXERLINE_COMPONENTTYPE_DST_FIRST + 8,
+}
+enum {
+	MIXERLINE_COMPONENTTYPE_SRC_FIRST       = 0x00001000,
+	MIXERLINE_COMPONENTTYPE_SRC_UNDEFINED   = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 0,
+	MIXERLINE_COMPONENTTYPE_SRC_DIGITAL     = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 1,
+	MIXERLINE_COMPONENTTYPE_SRC_LINE        = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 2,
+	MIXERLINE_COMPONENTTYPE_SRC_MICROPHONE  = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 3,
+	MIXERLINE_COMPONENTTYPE_SRC_SYNTHESIZER = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 4,
+	MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 5,
+	MIXERLINE_COMPONENTTYPE_SRC_TELEPHONE   = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 6,
+	MIXERLINE_COMPONENTTYPE_SRC_PCSPEAKER   = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 7,
+	MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT     = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 8,
+	MIXERLINE_COMPONENTTYPE_SRC_AUXILIARY   = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 9,
+	MIXERLINE_COMPONENTTYPE_SRC_ANALOG      = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 10,
+	MIXERLINE_COMPONENTTYPE_SRC_LAST        = MIXERLINE_COMPONENTTYPE_SRC_FIRST + 10,
+}
+enum {
+	MIXERLINE_TARGETTYPE_UNDEFINED = 0,
+	MIXERLINE_TARGETTYPE_WAVEOUT   = 1,
+	MIXERLINE_TARGETTYPE_WAVEIN    = 2,
+	MIXERLINE_TARGETTYPE_MIDIOUT   = 3,
+	MIXERLINE_TARGETTYPE_MIDIIN    = 4,
+	MIXERLINE_TARGETTYPE_AUX       = 5,
+}
+
+export extern(Windows) MMRESULT mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA pmxl, DWORD fdwInfo);
+export extern(Windows) MMRESULT mixerGetLineInfoW(HMIXEROBJ hmxobj, LPMIXERLINEW pmxl, DWORD fdwInfo);
+version(UNICODE)
+	alias mixerGetLineInfoW mixerGetLineInfo;
+else
+	alias mixerGetLineInfoA mixerGetLineInfo;
+
+enum {
+	MIXER_GETLINEINFOF_DESTINATION   = 0x00000000,
+	MIXER_GETLINEINFOF_SOURCE        = 0x00000001,
+	MIXER_GETLINEINFOF_LINEID        = 0x00000002,
+	MIXER_GETLINEINFOF_COMPONENTTYPE = 0x00000003,
+	MIXER_GETLINEINFOF_TARGETTYPE    = 0x00000004,
+	MIXER_GETLINEINFOF_QUERYMASK     = 0x0000000F,
+}
+
+export extern(Windows) MMRESULT mixerGetID(HMIXEROBJ hmxobj, UINT* puMxId, DWORD fdwId);
+
+private struct MIXERCONTROL_T(T) {
+	DWORD cbStruct;
+	DWORD dwControlID;
+	DWORD dwControlType;
+	DWORD fdwControl;
+	DWORD cMultipleItems;
+	T[MIXER_SHORT_NAME_CHARS] szShortName;
+	T[MIXER_LONG_NAME_CHARS] szName;
+	union {
+		struct {
+			LONG lMinimum;
+			LONG lMaximum;
+		}
+		struct {
+			DWORD dwMinimum;
+			DWORD dwMaximum;
+		}
+		DWORD[6] dwReserved;
+	}
+	union {
+		DWORD cSteps;
+		DWORD cbCustomData;
+		DWORD[6] dwReserved2;
+	}
+}
+alias MIXERCONTROL_T!(CHAR) MIXERCONTROLA;
+alias MIXERCONTROLA* PMIXERCONTROLA;
+alias MIXERCONTROLA* LPMIXERCONTROLA;
+alias MIXERCONTROL_T!(WCHAR) MIXERCONTROLW;
+alias MIXERCONTROLW* PMIXERCONTROLW;
+alias MIXERCONTROLW* LPMIXERCONTROLW;
+version(UNICODE){
+	alias MIXERCONTROLW MIXERCONTROL;
+	alias PMIXERCONTROLW PMIXERCONTROL;
+	alias LPMIXERCONTROLW LPMIXERCONTROL;
+}else{
+	alias MIXERCONTROLA MIXERCONTROL;
+	alias PMIXERCONTROLA PMIXERCONTROL;
+	alias LPMIXERCONTROLA LPMIXERCONTROL;
+}
+
+enum {
+	MIXERCONTROL_CONTROLF_UNIFORM  = 0x00000001,
+	MIXERCONTROL_CONTROLF_MULTIPLE = 0x00000002,
+	MIXERCONTROL_CONTROLF_DISABLED = 0x80000000,
+}
+enum {
+	MIXERCONTROL_CT_CLASS_MASK        = 0xF0000000,
+	MIXERCONTROL_CT_CLASS_CUSTOM      = 0x00000000,
+	MIXERCONTROL_CT_CLASS_METER       = 0x10000000,
+	MIXERCONTROL_CT_CLASS_SWITCH      = 0x20000000,
+	MIXERCONTROL_CT_CLASS_NUMBER      = 0x30000000,
+	MIXERCONTROL_CT_CLASS_SLIDER      = 0x40000000,
+	MIXERCONTROL_CT_CLASS_FADER       = 0x50000000,
+	MIXERCONTROL_CT_CLASS_TIME        = 0x60000000,
+	MIXERCONTROL_CT_CLASS_LIST        = 0x70000000,
+	MIXERCONTROL_CT_SUBCLASS_MASK     = 0x0F000000,
+	MIXERCONTROL_CT_SC_SWITCH_BOOLEAN = 0x00000000,
+	MIXERCONTROL_CT_SC_SWITCH_BUTTON  = 0x01000000,
+	MIXERCONTROL_CT_SC_METER_POLLED   = 0x00000000,
+	MIXERCONTROL_CT_SC_TIME_MICROSECS = 0x00000000,
+	MIXERCONTROL_CT_SC_TIME_MILLISECS = 0x01000000,
+	MIXERCONTROL_CT_SC_LIST_SINGLE    = 0x00000000,
+	MIXERCONTROL_CT_SC_LIST_MULTIPLE  = 0x01000000,
+	MIXERCONTROL_CT_UNITS_MASK        = 0x00FF0000,
+	MIXERCONTROL_CT_UNITS_CUSTOM      = 0x00000000,
+	MIXERCONTROL_CT_UNITS_BOOLEAN     = 0x00010000,
+	MIXERCONTROL_CT_UNITS_SIGNED      = 0x00020000,
+	MIXERCONTROL_CT_UNITS_UNSIGNED    = 0x00030000,
+	MIXERCONTROL_CT_UNITS_DECIBELS    = 0x00040000,
+	MIXERCONTROL_CT_UNITS_PERCENT     = 0x00050000,
+}
+enum {
+	MIXERCONTROL_CONTROLTYPE_CUSTOM         = MIXERCONTROL_CT_CLASS_CUSTOM | MIXERCONTROL_CT_UNITS_CUSTOM,
+	MIXERCONTROL_CONTROLTYPE_BOOLEANMETER   = MIXERCONTROL_CT_CLASS_METER | MIXERCONTROL_CT_SC_METER_POLLED | MIXERCONTROL_CT_UNITS_BOOLEAN,
+	MIXERCONTROL_CONTROLTYPE_SIGNEDMETER    = MIXERCONTROL_CT_CLASS_METER | MIXERCONTROL_CT_SC_METER_POLLED | MIXERCONTROL_CT_UNITS_SIGNED,
+	MIXERCONTROL_CONTROLTYPE_PEAKMETER      = MIXERCONTROL_CONTROLTYPE_SIGNEDMETER + 1,
+	MIXERCONTROL_CONTROLTYPE_UNSIGNEDMETER  = MIXERCONTROL_CT_CLASS_METER | MIXERCONTROL_CT_SC_METER_POLLED | MIXERCONTROL_CT_UNITS_UNSIGNED,
+	MIXERCONTROL_CONTROLTYPE_BOOLEAN        = MIXERCONTROL_CT_CLASS_SWITCH | MIXERCONTROL_CT_SC_SWITCH_BOOLEAN | MIXERCONTROL_CT_UNITS_BOOLEAN,
+	MIXERCONTROL_CONTROLTYPE_ONOFF          = MIXERCONTROL_CONTROLTYPE_BOOLEAN + 1,
+	MIXERCONTROL_CONTROLTYPE_MUTE           = MIXERCONTROL_CONTROLTYPE_BOOLEAN + 2,
+	MIXERCONTROL_CONTROLTYPE_MONO           = MIXERCONTROL_CONTROLTYPE_BOOLEAN + 3,
+	MIXERCONTROL_CONTROLTYPE_LOUDNESS       = MIXERCONTROL_CONTROLTYPE_BOOLEAN + 4,
+	MIXERCONTROL_CONTROLTYPE_STEREOENH      = MIXERCONTROL_CONTROLTYPE_BOOLEAN + 5,
+	MIXERCONTROL_CONTROLTYPE_BASS_BOOST     = MIXERCONTROL_CONTROLTYPE_BOOLEAN + 0x00002277,
+	MIXERCONTROL_CONTROLTYPE_BUTTON         = MIXERCONTROL_CT_CLASS_SWITCH | MIXERCONTROL_CT_SC_SWITCH_BUTTON | MIXERCONTROL_CT_UNITS_BOOLEAN,
+	MIXERCONTROL_CONTROLTYPE_DECIBELS       = MIXERCONTROL_CT_CLASS_NUMBER | MIXERCONTROL_CT_UNITS_DECIBELS,
+	MIXERCONTROL_CONTROLTYPE_SIGNED         = MIXERCONTROL_CT_CLASS_NUMBER | MIXERCONTROL_CT_UNITS_SIGNED,
+	MIXERCONTROL_CONTROLTYPE_UNSIGNED       = MIXERCONTROL_CT_CLASS_NUMBER | MIXERCONTROL_CT_UNITS_UNSIGNED,
+	MIXERCONTROL_CONTROLTYPE_PERCENT        = MIXERCONTROL_CT_CLASS_NUMBER | MIXERCONTROL_CT_UNITS_PERCENT,
+	MIXERCONTROL_CONTROLTYPE_SLIDER         = MIXERCONTROL_CT_CLASS_SLIDER | MIXERCONTROL_CT_UNITS_SIGNED,
+	MIXERCONTROL_CONTROLTYPE_PAN            = MIXERCONTROL_CONTROLTYPE_SLIDER + 1,
+	MIXERCONTROL_CONTROLTYPE_QSOUNDPAN      = MIXERCONTROL_CONTROLTYPE_SLIDER + 2,
+	MIXERCONTROL_CONTROLTYPE_FADER          = MIXERCONTROL_CT_CLASS_FADER | MIXERCONTROL_CT_UNITS_UNSIGNED,
+	MIXERCONTROL_CONTROLTYPE_VOLUME         = MIXERCONTROL_CONTROLTYPE_FADER + 1,
+	MIXERCONTROL_CONTROLTYPE_BASS           = MIXERCONTROL_CONTROLTYPE_FADER + 2,
+	MIXERCONTROL_CONTROLTYPE_TREBLE         = MIXERCONTROL_CONTROLTYPE_FADER + 3,
+	MIXERCONTROL_CONTROLTYPE_EQUALIZER      = MIXERCONTROL_CONTROLTYPE_FADER + 4,
+	MIXERCONTROL_CONTROLTYPE_SINGLESELECT   = MIXERCONTROL_CT_CLASS_LIST | MIXERCONTROL_CT_SC_LIST_SINGLE | MIXERCONTROL_CT_UNITS_BOOLEAN,
+	MIXERCONTROL_CONTROLTYPE_MUX            = MIXERCONTROL_CONTROLTYPE_SINGLESELECT + 1,
+	MIXERCONTROL_CONTROLTYPE_MULTIPLESELECT = MIXERCONTROL_CT_CLASS_LIST | MIXERCONTROL_CT_SC_LIST_MULTIPLE | MIXERCONTROL_CT_UNITS_BOOLEAN,
+	MIXERCONTROL_CONTROLTYPE_MIXER          = MIXERCONTROL_CONTROLTYPE_MULTIPLESELECT + 1,
+	MIXERCONTROL_CONTROLTYPE_MICROTIME      = MIXERCONTROL_CT_CLASS_TIME | MIXERCONTROL_CT_SC_TIME_MICROSECS | MIXERCONTROL_CT_UNITS_UNSIGNED,
+	MIXERCONTROL_CONTROLTYPE_MILLITIME      = MIXERCONTROL_CT_CLASS_TIME | MIXERCONTROL_CT_SC_TIME_MILLISECS | MIXERCONTROL_CT_UNITS_UNSIGNED,
+}
+
+private struct MIXERLINECONTROLS_T(T) {
+	DWORD cbStruct;
+	DWORD dwLineID;
+	union {
+		DWORD dwControlID;
+		DWORD dwControlType;
+	}
+	DWORD cControls;
+	DWORD cbmxctrl;
+	T pamxctrl;
+}
+alias MIXERLINECONTROLS_T!(LPMIXERCONTROLA) MIXERLINECONTROLSA;
+alias MIXERLINECONTROLSA* PMIXERLINECONTROLSA;
+alias MIXERLINECONTROLSA* LPMIXERLINECONTROLSA;
+alias MIXERLINECONTROLS_T!(LPMIXERCONTROLW) MIXERLINECONTROLSW;
+alias MIXERLINECONTROLSW* PMIXERLINECONTROLSW;
+alias MIXERLINECONTROLSW* LPMIXERLINECONTROLSW;
+version(UNICODE){
+	alias MIXERLINECONTROLSW MIXERLINECONTROLS;
+	alias PMIXERLINECONTROLSW PMIXERLINECONTROLS;
+	alias LPMIXERLINECONTROLSW LPMIXERLINECONTROLS;
+}else{
+	alias MIXERLINECONTROLSA MIXERLINECONTROLS;
+	alias PMIXERLINECONTROLSA PMIXERLINECONTROLS;
+	alias LPMIXERLINECONTROLSA LPMIXERLINECONTROLS;
+}
+
+export extern(Windows) MMRESULT mixerGetLineControlsA(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSA pmxlc, DWORD fdwControls);
+export extern(Windows) MMRESULT mixerGetLineControlsW(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSW pmxlc, DWORD fdwControls);
+version(UNICODE)
+	alias mixerGetLineControlsW mixerGetLineControls;
+else
+	alias mixerGetLineControlsA mixerGetLineControls;
+
+enum {
+	MIXER_GETLINECONTROLSF_ALL       = 0x00000000,
+	MIXER_GETLINECONTROLSF_ONEBYID   = 0x00000001,
+	MIXER_GETLINECONTROLSF_ONEBYTYPE = 0x00000002,
+	MIXER_GETLINECONTROLSF_QUERYMASK = 0x0000000F,
+}
+struct MIXERCONTROLDETAILS {
+	DWORD cbStruct;
+	DWORD dwControlID;
+	DWORD cChannels;
+	union {
+		HWND hwndOwner;
+		DWORD cMultipleItems;
+	}
+	DWORD cbDetails;
+	LPVOID paDetails;
+}
+alias MIXERCONTROLDETAILS* PMIXERCONTROLDETAILS;
+alias MIXERCONTROLDETAILS* LPMIXERCONTROLDETAILS;
+
+struct MIXERCONTROLDETAILS_LISTTEXT_T(T) {
+	DWORD dwParam1;
+	DWORD dwParam2;
+	T[MIXER_LONG_NAME_CHARS] szName;
+}
+alias MIXERCONTROLDETAILS_LISTTEXT_T!(CHAR) MIXERCONTROLDETAILS_LISTTEXTA;
+alias MIXERCONTROLDETAILS_LISTTEXTA* PMIXERCONTROLDETAILS_LISTTEXTA;
+alias MIXERCONTROLDETAILS_LISTTEXTA* LPMIXERCONTROLDETAILS_LISTTEXTA;
+alias MIXERCONTROLDETAILS_LISTTEXT_T!(WCHAR) MIXERCONTROLDETAILS_LISTTEXTW;
+alias MIXERCONTROLDETAILS_LISTTEXTW* PMIXERCONTROLDETAILS_LISTTEXTW;
+alias MIXERCONTROLDETAILS_LISTTEXTW* LPMIXERCONTROLDETAILS_LISTTEXTW;
+version(UNICODE){
+	alias MIXERCONTROLDETAILS_LISTTEXTW MIXERCONTROLDETAILS_LISTTEXT;
+	alias PMIXERCONTROLDETAILS_LISTTEXTW PMIXERCONTROLDETAILS_LISTTEXT;
+	alias LPMIXERCONTROLDETAILS_LISTTEXTW LPMIXERCONTROLDETAILS_LISTTEXT;
+}else{
+	alias MIXERCONTROLDETAILS_LISTTEXTA MIXERCONTROLDETAILS_LISTTEXT;
+	alias PMIXERCONTROLDETAILS_LISTTEXTA PMIXERCONTROLDETAILS_LISTTEXT;
+	alias LPMIXERCONTROLDETAILS_LISTTEXTA LPMIXERCONTROLDETAILS_LISTTEXT;
+}
+
+struct MIXERCONTROLDETAILS_BOOLEAN {
+	LONG fValue;
+}
+alias MIXERCONTROLDETAILS_BOOLEAN* PMIXERCONTROLDETAILS_BOOLEAN;
+alias MIXERCONTROLDETAILS_BOOLEAN* LPMIXERCONTROLDETAILS_BOOLEAN;
+
+struct MIXERCONTROLDETAILS_SIGNED {
+	LONG lValue;
+}
+alias MIXERCONTROLDETAILS_SIGNED* PMIXERCONTROLDETAILS_SIGNED;
+alias MIXERCONTROLDETAILS_SIGNED* LPMIXERCONTROLDETAILS_SIGNED;
+
+struct MIXERCONTROLDETAILS_UNSIGNED {
+	DWORD dwValue;
+}
+alias MIXERCONTROLDETAILS_UNSIGNED* PMIXERCONTROLDETAILS_UNSIGNED;
+alias MIXERCONTROLDETAILS_UNSIGNED* LPMIXERCONTROLDETAILS_UNSIGNED;
+
+export extern(Windows) MMRESULT mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS pmxcd, DWORD fdwDetails);
+export extern(Windows) MMRESULT mixerGetControlDetailsW(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS pmxcd, DWORD fdwDetails);
+version(UNICODE)
+	alias mixerGetControlDetailsW mixerGetControlDetails;
+else
+	alias mixerGetControlDetailsA mixerGetControlDetails;
+
+enum {
+	MIXER_GETCONTROLDETAILSF_VALUE     = 0x00000000,
+	MIXER_GETCONTROLDETAILSF_LISTTEXT  = 0x00000001,
+	MIXER_GETCONTROLDETAILSF_QUERYMASK = 0x0000000F,
+}
+export extern(Windows) MMRESULT mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS pmxcd, DWORD fdwDetails);
+enum {
+	MIXER_SETCONTROLDETAILSF_VALUE     = 0x00000000,
+	MIXER_SETCONTROLDETAILSF_CUSTOM    = 0x00000001,
+	MIXER_SETCONTROLDETAILSF_QUERYMASK = 0x0000000F,
+}
+
+enum {
+	TIMERR_NOERROR = 0,
+	TIMERR_NOCANDO = TIMERR_BASE+1,
+	TIMERR_STRUCT  = TIMERR_BASE+33,
+}
+alias extern(Windows) void function(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2) TIMECALLBACK;
+alias TIMECALLBACK LPTIMECALLBACK;
+
+enum {
+	TIME_ONESHOT  = 0x0000,
+	TIME_PERIODIC = 0x0001,
+}
+enum {
+	TIME_CALLBACK_FUNCTION    = 0x0000,
+	TIME_CALLBACK_EVENT_SET   = 0x0010,
+	TIME_CALLBACK_EVENT_PULSE = 0x0020,
+}
+
+//(WINVER >= _WIN32_WINNT_WINXP)
+	enum TIME_KILL_SYNCHRONOUS = 0x0100;
+
+struct TIMECAPS {
+	UINT wPeriodMin;
+	UINT wPeriodMax;
+}
+alias TIMECAPS* PTIMECAPS;
+alias TIMECAPS* NPTIMECAPS;
+alias TIMECAPS* LPTIMECAPS;
+
+export extern(Windows) MMRESULT timeGetSystemTime(LPMMTIME pmmt, UINT cbmmt);
+export extern(Windows) DWORD timeGetTime();
+export extern(Windows) MMRESULT timeSetEvent(UINT uDelay, UINT uResolution, LPTIMECALLBACK fptc, DWORD_PTR dwUser, UINT fuEvent);
+export extern(Windows) MMRESULT timeKillEvent(UINT uTimerID);
+export extern(Windows) MMRESULT timeGetDevCaps(LPTIMECAPS ptc, UINT cbtc);
+export extern(Windows) MMRESULT timeBeginPeriod(UINT uPeriod);
+export extern(Windows) MMRESULT timeEndPeriod(UINT uPeriod);
+
+enum {
+	JOYERR_NOERROR   = 0,
+	JOYERR_PARMS     = JOYERR_BASE+5,
+	JOYERR_NOCANDO   = JOYERR_BASE+6,
+	JOYERR_UNPLUGGED = JOYERR_BASE+7,
+}
+enum {
+	JOY_BUTTON1    = 0x0001,
+	JOY_BUTTON2    = 0x0002,
+	JOY_BUTTON3    = 0x0004,
+	JOY_BUTTON4    = 0x0008,
+	JOY_BUTTON1CHG = 0x0100,
+	JOY_BUTTON2CHG = 0x0200,
+	JOY_BUTTON3CHG = 0x0400,
+	JOY_BUTTON4CHG = 0x0800,
+	JOY_BUTTON5    = 0x00000010,
+	JOY_BUTTON6    = 0x00000020,
+	JOY_BUTTON7    = 0x00000040,
+	JOY_BUTTON8    = 0x00000080,
+	JOY_BUTTON9    = 0x00000100,
+	JOY_BUTTON10   = 0x00000200,
+	JOY_BUTTON11   = 0x00000400,
+	JOY_BUTTON12   = 0x00000800,
+	JOY_BUTTON13   = 0x00001000,
+	JOY_BUTTON14   = 0x00002000,
+	JOY_BUTTON15   = 0x00004000,
+	JOY_BUTTON16   = 0x00008000,
+	JOY_BUTTON17   = 0x00010000,
+	JOY_BUTTON18   = 0x00020000,
+	JOY_BUTTON19   = 0x00040000,
+	JOY_BUTTON20   = 0x00080000,
+	JOY_BUTTON21   = 0x00100000,
+	JOY_BUTTON22   = 0x00200000,
+	JOY_BUTTON23   = 0x00400000,
+	JOY_BUTTON24   = 0x00800000,
+	JOY_BUTTON25   = 0x01000000,
+	JOY_BUTTON26   = 0x02000000,
+	JOY_BUTTON27   = 0x04000000,
+	JOY_BUTTON28   = 0x08000000,
+	JOY_BUTTON29   = 0x10000000,
+	JOY_BUTTON30   = 0x20000000,
+	JOY_BUTTON31   = 0x40000000,
+	JOY_BUTTON32   = 0x80000000,
+}
+enum {
+	JOY_POVCENTERED = -1,
+	JOY_POVFORWARD  = 0,
+	JOY_POVRIGHT    = 9000,
+	JOY_POVBACKWARD = 18000,
+	JOY_POVLEFT     = 27000,
+}
+enum {
+	JOY_RETURNX        = 0x00000001,
+	JOY_RETURNY        = 0x00000002,
+	JOY_RETURNZ        = 0x00000004,
+	JOY_RETURNR        = 0x00000008,
+	JOY_RETURNU        = 0x00000010,
+	JOY_RETURNV        = 0x00000020,
+	JOY_RETURNPOV      = 0x00000040,
+	JOY_RETURNBUTTONS  = 0x00000080,
+	JOY_RETURNRAWDATA  = 0x00000100,
+	JOY_RETURNPOVCTS   = 0x00000200,
+	JOY_RETURNCENTERED = 0x00000400,
+	JOY_USEDEADZONE    = 0x00000800,
+	JOY_RETURNALL      = JOY_RETURNX | JOY_RETURNY | JOY_RETURNZ | 	 JOY_RETURNR | JOY_RETURNU | JOY_RETURNV | 	 JOY_RETURNPOV | JOY_RETURNBUTTONS,
+	JOY_CAL_READALWAYS = 0x00010000,
+	JOY_CAL_READXYONLY = 0x00020000,
+	JOY_CAL_READ3      = 0x00040000,
+	JOY_CAL_READ4      = 0x00080000,
+	JOY_CAL_READXONLY  = 0x00100000,
+	JOY_CAL_READYONLY  = 0x00200000,
+	JOY_CAL_READ5      = 0x00400000,
+	JOY_CAL_READ6      = 0x00800000,
+	JOY_CAL_READZONLY  = 0x01000000,
+	JOY_CAL_READRONLY  = 0x02000000,
+	JOY_CAL_READUONLY  = 0x04000000,
+	JOY_CAL_READVONLY  = 0x08000000,
+}
+enum {
+	JOYSTICKID1 = 0,
+	JOYSTICKID2 = 1,
+}
+enum {
+	JOYCAPS_HASZ    = 0x0001,
+	JOYCAPS_HASR    = 0x0002,
+	JOYCAPS_HASU    = 0x0004,
+	JOYCAPS_HASV    = 0x0008,
+	JOYCAPS_HASPOV  = 0x0010,
+	JOYCAPS_POV4DIR = 0x0020,
+	JOYCAPS_POVCTS  = 0x0040,
+}
+
+private struct JOYCAPS_T(T) {
+	WORD wMid;
+	WORD wPid;
+	T[MAXPNAMELEN] szPname;
+	UINT wXmin;
+	UINT wXmax;
+	UINT wYmin;
+	UINT wYmax;
+	UINT wZmin;
+	UINT wZmax;
+	UINT wNumButtons;
+	UINT wPeriodMin;
+	UINT wPeriodMax;
+	UINT wRmin;
+	UINT wRmax;
+	UINT wUmin;
+	UINT wUmax;
+	UINT wVmin;
+	UINT wVmax;
+	UINT wCaps;
+	UINT wMaxAxes;
+	UINT wNumAxes;
+	UINT wMaxButtons;
+	T[MAXPNAMELEN] szRegKey;
+	T[MAX_JOYSTICKOEMVXDNAME] szOEMVxD;
+}
+alias JOYCAPS_T!(CHAR) JOYCAPSA;
+alias JOYCAPSA* PJOYCAPSA;
+alias JOYCAPSA* NPJOYCAPSA;
+alias JOYCAPSA* LPJOYCAPSA;
+alias JOYCAPS_T!(WCHAR) JOYCAPSW;
+alias JOYCAPSW* PJOYCAPSW;
+alias JOYCAPSW* NPJOYCAPSW;
+alias JOYCAPSW* LPJOYCAPSW;
+version(UNICODE){
+	alias JOYCAPSW JOYCAPS;
+	alias PJOYCAPSW PJOYCAPS;
+	alias NPJOYCAPSW NPJOYCAPS;
+	alias LPJOYCAPSW LPJOYCAPS;
+}else{
+	alias JOYCAPSA JOYCAPS;
+	alias PJOYCAPSA PJOYCAPS;
+	alias NPJOYCAPSA NPJOYCAPS;
+	alias LPJOYCAPSA LPJOYCAPS;
+}
+
+private struct JOYCAPS2_T(T) {
+	WORD wMid;
+	WORD wPid;
+	T[MAXPNAMELEN] szPname;
+	UINT wXmin;
+	UINT wXmax;
+	UINT wYmin;
+	UINT wYmax;
+	UINT wZmin;
+	UINT wZmax;
+	UINT wNumButtons;
+	UINT wPeriodMin;
+	UINT wPeriodMax;
+	UINT wRmin;
+	UINT wRmax;
+	UINT wUmin;
+	UINT wUmax;
+	UINT wVmin;
+	UINT wVmax;
+	UINT wCaps;
+	UINT wMaxAxes;
+	UINT wNumAxes;
+	UINT wMaxButtons;
+	T[MAXPNAMELEN] szRegKey;
+	T[MAX_JOYSTICKOEMVXDNAME] szOEMVxD;
+	GUID ManufacturerGuid;
+	GUID ProductGuid;
+	GUID NameGuid;
+}
+alias JOYCAPS2_T!(CHAR) JOYCAPS2A;
+alias JOYCAPS2A* PJOYCAPS2A;
+alias JOYCAPS2A* NPJOYCAPS2A;
+alias JOYCAPS2A* LPJOYCAPS2A;
+alias JOYCAPS2_T!(WCHAR) JOYCAPS2W;
+alias JOYCAPS2W* PJOYCAPS2W;
+alias JOYCAPS2W* NPJOYCAPS2W;
+alias JOYCAPS2W* LPJOYCAPS2W;
+version(UNICODE){
+	alias JOYCAPS2W JOYCAPS2;
+	alias PJOYCAPS2W PJOYCAPS2;
+	alias NPJOYCAPS2W NPJOYCAPS2;
+	alias LPJOYCAPS2W LPJOYCAPS2;
+}else{
+	alias JOYCAPS2A JOYCAPS2;
+	alias PJOYCAPS2A PJOYCAPS2;
+	alias NPJOYCAPS2A NPJOYCAPS2;
+	alias LPJOYCAPS2A LPJOYCAPS2;
+}
+
+struct JOYINFO {
+	UINT wXpos;
+	UINT wYpos;
+	UINT wZpos;
+	UINT wButtons;
+}
+alias JOYINFO* PJOYINFO;
+alias JOYINFO* NPJOYINFO;
+alias JOYINFO* LPJOYINFO;
+
+struct JOYINFOEX {
+	DWORD dwSize;
+	DWORD dwFlags;
+	DWORD dwXpos;
+	DWORD dwYpos;
+	DWORD dwZpos;
+	DWORD dwRpos;
+	DWORD dwUpos;
+	DWORD dwVpos;
+	DWORD dwButtons;
+	DWORD dwButtonNumber;
+	DWORD dwPOV;
+	DWORD dwReserved1;
+	DWORD dwReserved2;
+}
+alias JOYINFOEX* PJOYINFOEX;
+alias JOYINFOEX* NPJOYINFOEX;
+alias JOYINFOEX* LPJOYINFOEX;
+
+export extern(Windows) UINT joyGetNumDevs();
+export extern(Windows) MMRESULT joyGetDevCapsA(UINT_PTR uJoyID, LPJOYCAPSA pjc, UINT cbjc);
+export extern(Windows) MMRESULT joyGetDevCapsW(UINT_PTR uJoyID, LPJOYCAPSW pjc, UINT cbjc);
+version(UNICODE)
+	alias joyGetDevCapsW joyGetDevCaps;
+else
+	alias joyGetDevCapsA joyGetDevCaps;
+
+export extern(Windows) MMRESULT joyGetPos(UINT uJoyID, LPJOYINFO pji);
+export extern(Windows) MMRESULT joyGetPosEx(UINT uJoyID, LPJOYINFOEX pji);
+
+export extern(Windows) MMRESULT joyGetThreshold(UINT uJoyID, LPUINT puThreshold);
+export extern(Windows) MMRESULT joyReleaseCapture(UINT uJoyID);
+export extern(Windows) MMRESULT joySetCapture(HWND hwnd, UINT uJoyID, UINT uPeriod, BOOL fChanged);
+export extern(Windows) MMRESULT joySetThreshold(UINT uJoyID, UINT uThreshold);
+
+enum {
+	MMIOERR_BASE             = 256,
+	MMIOERR_FILENOTFOUND     = MMIOERR_BASE + 1,
+	MMIOERR_OUTOFMEMORY      = MMIOERR_BASE + 2,
+	MMIOERR_CANNOTOPEN       = MMIOERR_BASE + 3,
+	MMIOERR_CANNOTCLOSE      = MMIOERR_BASE + 4,
+	MMIOERR_CANNOTREAD       = MMIOERR_BASE + 5,
+	MMIOERR_CANNOTWRITE      = MMIOERR_BASE + 6,
+	MMIOERR_CANNOTSEEK       = MMIOERR_BASE + 7,
+	MMIOERR_CANNOTEXPAND     = MMIOERR_BASE + 8,
+	MMIOERR_CHUNKNOTFOUND    = MMIOERR_BASE + 9,
+	MMIOERR_UNBUFFERED       = MMIOERR_BASE + 10,
+	MMIOERR_PATHNOTFOUND     = MMIOERR_BASE + 11,
+	MMIOERR_ACCESSDENIED     = MMIOERR_BASE + 12,
+	MMIOERR_SHARINGVIOLATION = MMIOERR_BASE + 13,
+	MMIOERR_NETWORKERROR     = MMIOERR_BASE + 14,
+	MMIOERR_TOOMANYOPENFILES = MMIOERR_BASE + 15,
+	MMIOERR_INVALIDFILE      = MMIOERR_BASE + 16,
+}
+
+enum CFSEPCHAR = '+';
+
+alias DWORD FOURCC;
+alias char* HPSTR;
+enum HMMIO : HANDLE {init = (HANDLE).init}
+alias extern(Windows) LRESULT function(LPSTR lpmmioinfo, UINT uMsg, LPARAM lParam1, LPARAM lParam2) MMIOPROC;
+alias MMIOPROC LPMMIOPROC;
+
+struct MMIOINFO {
+	DWORD dwFlags;
+	FOURCC fccIOProc;
+	LPMMIOPROC pIOProc;
+	UINT wErrorRet;
+	HTASK htask;
+	LONG cchBuffer;
+	HPSTR pchBuffer;
+	HPSTR pchNext;
+	HPSTR pchEndRead;
+	HPSTR pchEndWrite;
+	LONG lBufOffset;
+	LONG lDiskOffset;
+	DWORD[3] adwInfo;
+	DWORD dwReserved1;
+	DWORD dwReserved2;
+	HMMIO hmmio;
+}
+alias MMIOINFO* PMMIOINFO;
+alias MMIOINFO* NPMMIOINFO;
+alias MMIOINFO* LPMMIOINFO;
+alias const(MMIOINFO)* LPCMMIOINFO;
+
+struct MMCKINFO {
+	FOURCC ckid;
+	DWORD cksize;
+	FOURCC fccType;
+	DWORD dwDataOffset;
+	DWORD dwFlags;
+}
+alias MMCKINFO* PMMCKINFO;
+alias MMCKINFO* NPMMCKINFO;
+alias MMCKINFO* LPMMCKINFO;
+alias const(MMCKINFO)* LPCMMCKINFO;
+
+enum {
+	MMIO_RWMODE      = 0x00000003,
+	MMIO_SHAREMODE   = 0x00000070,
+	MMIO_CREATE      = 0x00001000,
+	MMIO_PARSE       = 0x00000100,
+	MMIO_DELETE      = 0x00000200,
+	MMIO_EXIST       = 0x00004000,
+	MMIO_ALLOCBUF    = 0x00010000,
+	MMIO_GETTEMP     = 0x00020000,
+	MMIO_DIRTY       = 0x10000000,
+	MMIO_READ        = 0x00000000,
+	MMIO_WRITE       = 0x00000001,
+	MMIO_READWRITE   = 0x00000002,
+	MMIO_COMPAT      = 0x00000000,
+	MMIO_EXCLUSIVE   = 0x00000010,
+	MMIO_DENYWRITE   = 0x00000020,
+	MMIO_DENYREAD    = 0x00000030,
+	MMIO_DENYNONE    = 0x00000040,
+	MMIO_FHOPEN      = 0x0010,
+	MMIO_EMPTYBUF    = 0x0010,
+	MMIO_TOUPPER     = 0x0010,
+	MMIO_INSTALLPROC = 0x00010000,
+	MMIO_GLOBALPROC  = 0x10000000,
+	MMIO_REMOVEPROC  = 0x00020000,
+	MMIO_UNICODEPROC = 0x01000000,
+	MMIO_FINDPROC    = 0x00040000,
+	MMIO_FINDCHUNK   = 0x0010,
+	MMIO_FINDRIFF    = 0x0020,
+	MMIO_FINDLIST    = 0x0040,
+	MMIO_CREATERIFF  = 0x0020,
+	MMIO_CREATELIST  = 0x0040,
+}
+enum {
+	MMIOM_READ       = MMIO_READ,
+	MMIOM_WRITE      = MMIO_WRITE,
+	MMIOM_SEEK       = 2,
+	MMIOM_OPEN       = 3,
+	MMIOM_CLOSE      = 4,
+	MMIOM_WRITEFLUSH = 5,
+	MMIOM_RENAME     = 6,
+	MMIOM_USER       = 0x8000,
+}
+
+alias MAKEFOURCC mmioFOURCC;
+
+enum FOURCC_RIFF = mmioFOURCC('R', 'I', 'F', 'F');
+enum FOURCC_LIST = mmioFOURCC('L', 'I', 'S', 'T');
+enum FOURCC_DOS = mmioFOURCC('D', 'O', 'S', ' ');
+enum FOURCC_MEM = mmioFOURCC('M', 'E', 'M', ' ');
+
+enum {
+	SEEK_SET = 0,
+	SEEK_CUR = 1,
+	SEEK_END = 2,
+}
+
+enum MMIO_DEFAULTBUFFER = 8192;
+
+export extern(Windows) FOURCC mmioStringToFOURCCA(LPCSTR sz, UINT uFlags);
+export extern(Windows) FOURCC mmioStringToFOURCCW(LPCWSTR sz, UINT uFlags);
+version(UNICODE)
+	alias mmioStringToFOURCCW mmioStringToFOURCC;
+else
+	alias mmioStringToFOURCCA mmioStringToFOURCC;
+
+export extern(Windows) LPMMIOPROC mmioInstallIOProcA(FOURCC fccIOProc, LPMMIOPROC pIOProc, DWORD dwFlags);
+export extern(Windows) LPMMIOPROC mmioInstallIOProcW(FOURCC fccIOProc, LPMMIOPROC pIOProc, DWORD dwFlags);
+version(UNICODE)
+	alias mmioInstallIOProcW mmioInstallIOProc;
+else
+	alias mmioInstallIOProcA mmioInstallIOProc;
+
+export extern(Windows) HMMIO mmioOpenA(LPSTR pszFileName, LPMMIOINFO pmmioinfo, DWORD fdwOpen);
+export extern(Windows) HMMIO mmioOpenW(LPWSTR pszFileName, LPMMIOINFO pmmioinfo, DWORD fdwOpen);
+version(UNICODE)
+	alias mmioOpenW mmioOpen;
+else
+	alias mmioOpenA mmioOpen;
+
+export extern(Windows) MMRESULT mmioRenameA(LPCSTR pszFileName, LPCSTR pszNewFileName, LPCMMIOINFO pmmioinfo, DWORD fdwRename);
+export extern(Windows) MMRESULT mmioRenameW(LPCWSTR pszFileName, LPCWSTR pszNewFileName, LPCMMIOINFO pmmioinfo, DWORD fdwRename);
+version(UNICODE)
+	alias mmioRenameW mmioRename;
+else
+	alias mmioRenameA mmioRename;
+
+export extern(Windows) MMRESULT mmioClose(HMMIO hmmio, UINT fuClose);
+export extern(Windows) LONG mmioRead(HMMIO hmmio, HPSTR pch, LONG cch);
+export extern(Windows) LONG mmioWrite(HMMIO hmmio, const(char)* pch, LONG cch);
+export extern(Windows) LONG mmioSeek(HMMIO hmmio, LONG lOffset, int iOrigin);
+export extern(Windows) MMRESULT mmioGetInfo(HMMIO hmmio, LPMMIOINFO pmmioinfo, UINT fuInfo);
+export extern(Windows) MMRESULT mmioSetInfo(HMMIO hmmio, LPCMMIOINFO pmmioinfo, UINT fuInfo);
+export extern(Windows) MMRESULT mmioSetBuffer(HMMIO hmmio, LPSTR pchBuffer, LONG cchBuffer, UINT fuBuffer);
+export extern(Windows) MMRESULT mmioFlush(HMMIO hmmio, UINT fuFlush);
+export extern(Windows) MMRESULT mmioAdvance(HMMIO hmmio, LPMMIOINFO pmmioinfo, UINT fuAdvance);
+export extern(Windows) LRESULT mmioSendMessage(HMMIO hmmio, UINT uMsg, LPARAM lParam1, LPARAM lParam2);
+export extern(Windows) MMRESULT mmioDescend(HMMIO hmmio, LPMMCKINFO pmmcki, const(MMCKINFO)* pmmckiParent, UINT fuDescend);
+export extern(Windows) MMRESULT mmioAscend(HMMIO hmmio, LPMMCKINFO pmmcki, UINT fuAscend);
+export extern(Windows) MMRESULT mmioCreateChunk(HMMIO hmmio, LPMMCKINFO pmmcki, UINT fuCreate);
+
+alias DWORD MCIERROR;
+alias UINT MCIDEVICEID;
+
+alias extern(Windows) UINT function(MCIDEVICEID mciId, DWORD dwYieldData) YIELDPROC;
+
+export extern(Windows) MCIERROR mciSendCommandA(MCIDEVICEID mciId, UINT uMsg, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
+export extern(Windows) MCIERROR mciSendCommandW(MCIDEVICEID mciId, UINT uMsg, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
+version(UNICODE)
+	alias mciSendCommandW mciSendCommand;
+else
+	alias mciSendCommandA mciSendCommand;
+
+export extern(Windows) MCIERROR mciSendStringA(LPCSTR lpstrCommand, LPSTR lpstrReturnString, UINT uReturnLength, HWND hwndCallback);
+export extern(Windows) MCIERROR mciSendStringW(LPCWSTR lpstrCommand, LPWSTR lpstrReturnString, UINT uReturnLength, HWND hwndCallback);
+version(UNICODE)
+	alias mciSendStringW mciSendString;
+else
+	alias mciSendStringA mciSendString;
+
+export extern(Windows) MCIDEVICEID mciGetDeviceIDA(LPCSTR pszDevice);
+export extern(Windows) MCIDEVICEID mciGetDeviceIDW(LPCWSTR pszDevice);
+version(UNICODE)
+	alias mciGetDeviceIDW mciGetDeviceID;
+else
+	alias mciGetDeviceIDA mciGetDeviceID;
+
+export extern(Windows) MCIDEVICEID mciGetDeviceIDFromElementIDA(DWORD dwElementID, LPCSTR lpstrType);
+export extern(Windows) MCIDEVICEID mciGetDeviceIDFromElementIDW(DWORD dwElementID, LPCWSTR lpstrType);
+version(UNICODE)
+	alias mciGetDeviceIDFromElementIDW mciGetDeviceIDFromElementID;
+else
+	alias mciGetDeviceIDFromElementIDA mciGetDeviceIDFromElementID;
+
+export extern(Windows) BOOL mciGetErrorStringA(MCIERROR mcierr, LPSTR pszText, UINT cchText);
+export extern(Windows) BOOL mciGetErrorStringW(  MCIERROR mcierr, LPWSTR pszText, UINT cchText);
+version(UNICODE)
+	alias mciGetErrorStringW mciGetErrorString;
+else
+	alias mciGetErrorStringA mciGetErrorString;
+
+export extern(Windows) BOOL mciSetYieldProc(MCIDEVICEID mciId, YIELDPROC fpYieldProc, DWORD dwYieldData);
+export extern(Windows) HTASK mciGetCreatorTask(MCIDEVICEID mciId);
+export extern(Windows) YIELDPROC mciGetYieldProc(MCIDEVICEID mciId, LPDWORD pdwYieldData);
+//export extern(Windows) BOOL mciExecute(LPCSTR pszCommand); //(WINVER < 0x030a)
+
+enum {
+	MCIERR_INVALID_DEVICE_ID        = MCIERR_BASE + 1,
+	MCIERR_UNRECOGNIZED_KEYWORD     = MCIERR_BASE + 3,
+	MCIERR_UNRECOGNIZED_COMMAND     = MCIERR_BASE + 5,
+	MCIERR_HARDWARE                 = MCIERR_BASE + 6,
+	MCIERR_INVALID_DEVICE_NAME      = MCIERR_BASE + 7,
+	MCIERR_OUT_OF_MEMORY            = MCIERR_BASE + 8,
+	MCIERR_DEVICE_OPEN              = MCIERR_BASE + 9,
+	MCIERR_CANNOT_LOAD_DRIVER       = MCIERR_BASE + 10,
+	MCIERR_MISSING_COMMAND_STRING   = MCIERR_BASE + 11,
+	MCIERR_PARAM_OVERFLOW           = MCIERR_BASE + 12,
+	MCIERR_MISSING_STRING_ARGUMENT  = MCIERR_BASE + 13,
+	MCIERR_BAD_INTEGER              = MCIERR_BASE + 14,
+	MCIERR_PARSER_INTERNAL          = MCIERR_BASE + 15,
+	MCIERR_DRIVER_INTERNAL          = MCIERR_BASE + 16,
+	MCIERR_MISSING_PARAMETER        = MCIERR_BASE + 17,
+	MCIERR_UNSUPPORTED_FUNCTION     = MCIERR_BASE + 18,
+	MCIERR_FILE_NOT_FOUND           = MCIERR_BASE + 19,
+	MCIERR_DEVICE_NOT_READY         = MCIERR_BASE + 20,
+	MCIERR_INTERNAL                 = MCIERR_BASE + 21,
+	MCIERR_DRIVER                   = MCIERR_BASE + 22,
+	MCIERR_CANNOT_USE_ALL           = MCIERR_BASE + 23,
+	MCIERR_MULTIPLE                 = MCIERR_BASE + 24,
+	MCIERR_EXTENSION_NOT_FOUND      = MCIERR_BASE + 25,
+	MCIERR_OUTOFRANGE               = MCIERR_BASE + 26,
+	MCIERR_FLAGS_NOT_COMPATIBLE     = MCIERR_BASE + 28,
+	MCIERR_FILE_NOT_SAVED           = MCIERR_BASE + 30,
+	MCIERR_DEVICE_TYPE_REQUIRED     = MCIERR_BASE + 31,
+	MCIERR_DEVICE_LOCKED            = MCIERR_BASE + 32,
+	MCIERR_DUPLICATE_ALIAS          = MCIERR_BASE + 33,
+	MCIERR_BAD_CONSTANT             = MCIERR_BASE + 34,
+	MCIERR_MUST_USE_SHAREABLE       = MCIERR_BASE + 35,
+	MCIERR_MISSING_DEVICE_NAME      = MCIERR_BASE + 36,
+	MCIERR_BAD_TIME_FORMAT          = MCIERR_BASE + 37,
+	MCIERR_NO_CLOSING_QUOTE         = MCIERR_BASE + 38,
+	MCIERR_DUPLICATE_FLAGS          = MCIERR_BASE + 39,
+	MCIERR_INVALID_FILE             = MCIERR_BASE + 40,
+	MCIERR_NULL_PARAMETER_BLOCK     = MCIERR_BASE + 41,
+	MCIERR_UNNAMED_RESOURCE         = MCIERR_BASE + 42,
+	MCIERR_NEW_REQUIRES_ALIAS       = MCIERR_BASE + 43,
+	MCIERR_NOTIFY_ON_AUTO_OPEN      = MCIERR_BASE + 44,
+	MCIERR_NO_ELEMENT_ALLOWED       = MCIERR_BASE + 45,
+	MCIERR_NONAPPLICABLE_FUNCTION   = MCIERR_BASE + 46,
+	MCIERR_ILLEGAL_FOR_AUTO_OPEN    = MCIERR_BASE + 47,
+	MCIERR_FILENAME_REQUIRED        = MCIERR_BASE + 48,
+	MCIERR_EXTRA_CHARACTERS         = MCIERR_BASE + 49,
+	MCIERR_DEVICE_NOT_INSTALLED     = MCIERR_BASE + 50,
+	MCIERR_GET_CD                   = MCIERR_BASE + 51,
+	MCIERR_SET_CD                   = MCIERR_BASE + 52,
+	MCIERR_SET_DRIVE                = MCIERR_BASE + 53,
+	MCIERR_DEVICE_LENGTH            = MCIERR_BASE + 54,
+	MCIERR_DEVICE_ORD_LENGTH        = MCIERR_BASE + 55,
+	MCIERR_NO_INTEGER               = MCIERR_BASE + 56,
+	MCIERR_WAVE_OUTPUTSINUSE        = MCIERR_BASE + 64,
+	MCIERR_WAVE_SETOUTPUTINUSE      = MCIERR_BASE + 65,
+	MCIERR_WAVE_INPUTSINUSE         = MCIERR_BASE + 66,
+	MCIERR_WAVE_SETINPUTINUSE       = MCIERR_BASE + 67,
+	MCIERR_WAVE_OUTPUTUNSPECIFIED   = MCIERR_BASE + 68,
+	MCIERR_WAVE_INPUTUNSPECIFIED    = MCIERR_BASE + 69,
+	MCIERR_WAVE_OUTPUTSUNSUITABLE   = MCIERR_BASE + 70,
+	MCIERR_WAVE_SETOUTPUTUNSUITABLE = MCIERR_BASE + 71,
+	MCIERR_WAVE_INPUTSUNSUITABLE    = MCIERR_BASE + 72,
+	MCIERR_WAVE_SETINPUTUNSUITABLE  = MCIERR_BASE + 73,
+	MCIERR_SEQ_DIV_INCOMPATIBLE     = MCIERR_BASE + 80,
+	MCIERR_SEQ_PORT_INUSE           = MCIERR_BASE + 81,
+	MCIERR_SEQ_PORT_NONEXISTENT     = MCIERR_BASE + 82,
+	MCIERR_SEQ_PORT_MAPNODEVICE     = MCIERR_BASE + 83,
+	MCIERR_SEQ_PORT_MISCERROR       = MCIERR_BASE + 84,
+	MCIERR_SEQ_TIMER                = MCIERR_BASE + 85,
+	MCIERR_SEQ_PORTUNSPECIFIED      = MCIERR_BASE + 86,
+	MCIERR_SEQ_NOMIDIPRESENT        = MCIERR_BASE + 87,
+	MCIERR_NO_WINDOW                = MCIERR_BASE + 90,
+	MCIERR_CREATEWINDOW             = MCIERR_BASE + 91,
+	MCIERR_FILE_READ                = MCIERR_BASE + 92,
+	MCIERR_FILE_WRITE               = MCIERR_BASE + 93,
+	MCIERR_NO_IDENTITY              = MCIERR_BASE + 94,
+	MCIERR_CUSTOM_DRIVER_BASE       = MCIERR_BASE + 256,
+}
+
+enum {
+	MCI_FIRST         = DRV_MCI_FIRST,
+	MCI_OPEN          = 0x0803,
+	MCI_CLOSE         = 0x0804,
+	MCI_ESCAPE        = 0x0805,
+	MCI_PLAY          = 0x0806,
+	MCI_SEEK          = 0x0807,
+	MCI_STOP          = 0x0808,
+	MCI_PAUSE         = 0x0809,
+	MCI_INFO          = 0x080A,
+	MCI_GETDEVCAPS    = 0x080B,
+	MCI_SPIN          = 0x080C,
+	MCI_SET           = 0x080D,
+	MCI_STEP          = 0x080E,
+	MCI_RECORD        = 0x080F,
+	MCI_SYSINFO       = 0x0810,
+	MCI_BREAK         = 0x0811,
+	MCI_SAVE          = 0x0813,
+	MCI_STATUS        = 0x0814,
+	MCI_CUE           = 0x0830,
+	MCI_REALIZE       = 0x0840,
+	MCI_WINDOW        = 0x0841,
+	MCI_PUT           = 0x0842,
+	MCI_WHERE         = 0x0843,
+	MCI_FREEZE        = 0x0844,
+	MCI_UNFREEZE      = 0x0845,
+	MCI_LOAD          = 0x0850,
+	MCI_CUT           = 0x0851,
+	MCI_COPY          = 0x0852,
+	MCI_PASTE         = 0x0853,
+	MCI_UPDATE        = 0x0854,
+	MCI_RESUME        = 0x0855,
+	MCI_DELETE        = 0x0856,
+	MCI_USER_MESSAGES = DRV_MCI_FIRST + 0x400,
+	MCI_LAST          = 0x0FFF,
+}
+enum MCI_ALL_DEVICE_ID = cast(MCIDEVICEID)-1;
+enum {
+	MCI_DEVTYPE_VCR            = 513,
+	MCI_DEVTYPE_VIDEODISC      = 514,
+	MCI_DEVTYPE_OVERLAY        = 515,
+	MCI_DEVTYPE_CD_AUDIO       = 516,
+	MCI_DEVTYPE_DAT            = 517,
+	MCI_DEVTYPE_SCANNER        = 518,
+	MCI_DEVTYPE_ANIMATION      = 519,
+	MCI_DEVTYPE_DIGITAL_VIDEO  = 520,
+	MCI_DEVTYPE_OTHER          = 521,
+	MCI_DEVTYPE_WAVEFORM_AUDIO = 522,
+	MCI_DEVTYPE_SEQUENCER      = 523,
+	MCI_DEVTYPE_FIRST          = MCI_DEVTYPE_VCR,
+	MCI_DEVTYPE_LAST           = MCI_DEVTYPE_SEQUENCER,
+	MCI_DEVTYPE_FIRST_USER     = 0x1000,
+}
+enum {
+	MCI_MODE_NOT_READY = MCI_STRING_OFFSET + 12,
+	MCI_MODE_STOP      = MCI_STRING_OFFSET + 13,
+	MCI_MODE_PLAY      = MCI_STRING_OFFSET + 14,
+	MCI_MODE_RECORD    = MCI_STRING_OFFSET + 15,
+	MCI_MODE_SEEK      = MCI_STRING_OFFSET + 16,
+	MCI_MODE_PAUSE     = MCI_STRING_OFFSET + 17,
+	MCI_MODE_OPEN      = MCI_STRING_OFFSET + 18,
+}
+enum {
+	MCI_FORMAT_MILLISECONDS = 0,
+	MCI_FORMAT_HMS          = 1,
+	MCI_FORMAT_MSF          = 2,
+	MCI_FORMAT_FRAMES       = 3,
+	MCI_FORMAT_SMPTE_24     = 4,
+	MCI_FORMAT_SMPTE_25     = 5,
+	MCI_FORMAT_SMPTE_30     = 6,
+	MCI_FORMAT_SMPTE_30DROP = 7,
+	MCI_FORMAT_BYTES        = 8,
+	MCI_FORMAT_SAMPLES      = 9,
+	MCI_FORMAT_TMSF         = 10,
+}
+
+pure nothrow
+BYTE MCI_MSF_MINUTE(DWORD msf)
+{
+	return cast(BYTE)msf;
+}
+
+pure nothrow
+BYTE MCI_MSF_SECOND(DWORD msf)
+{
+	return cast(BYTE)((cast(WORD)msf) >> 8);
+}
+
+pure nothrow
+BYTE MCI_MSF_FRAME(DWORD msf)
+{
+	return cast(BYTE)(msf >> 16);
+}
+
+pure nothrow
+DWORD MCI_MAKE_MSF(BYTE m, BYTE s, BYTE f)
+{
+	return cast(DWORD)(m | (cast(WORD)s << 8) | (cast(DWORD)f << 16));
+}
+
+pure nothrow
+BYTE MCI_TMSF_TRACK(DWORD tmsf)
+{
+	return cast(BYTE)tmsf;
+}
+
+pure nothrow
+BYTE MCI_TMSF_MINUTE(DWORD tmsf)
+{
+	return cast(BYTE)((cast(WORD)tmsf) >> 8);
+}
+
+pure nothrow
+BYTE MCI_TMSF_SECOND(DWORD tmsf)
+{
+	return cast(BYTE)(tmsf >> 16);
+}
+
+pure nothrow
+BYTE MCI_TMSF_FRAME(DWORD tmsf)
+{
+	return cast(BYTE)(tmsf >> 24);
+}
+
+pure nothrow
+DWORD MCI_MAKE_TMSF(BYTE t, BYTE m, BYTE s, BYTE f)
+{
+	return cast(DWORD)((t | (cast(WORD)m << 8)) | ((cast(DWORD)s | (cast(WORD)f << 8)) << 16));
+}
+
+pure nothrow
+BYTE MCI_HMS_HOUR(DWORD hms)
+{
+	return cast(BYTE)hms;
+}
+
+pure nothrow
+BYTE MCI_HMS_MINUTE(DWORD hms)
+{
+	return cast(BYTE)(cast(WORD)hms >> 8);
+}
+
+pure nothrow
+BYTE MCI_HMS_SECOND(DWORD hms)
+{
+	return cast(BYTE)(hms >> 16);
+}
+
+pure nothrow
+DWORD MCI_MAKE_HMS(BYTE h, BYTE m, BYTE s)
+{
+	return cast(DWORD)(h | (cast(WORD)m << 8) | (cast(DWORD)s << 16));
+}
+
+enum {
+	MCI_NOTIFY_SUCCESSFUL = 0x0001,
+	MCI_NOTIFY_SUPERSEDED = 0x0002,
+	MCI_NOTIFY_ABORTED    = 0x0004,
+	MCI_NOTIFY_FAILURE    = 0x0008,
+}
+enum {
+	MCI_NOTIFY                     = 0x00000001,
+	MCI_WAIT                       = 0x00000002,
+	MCI_FROM                       = 0x00000004,
+	MCI_TO                         = 0x00000008,
+	MCI_TRACK                      = 0x00000010,
+	MCI_OPEN_SHAREABLE             = 0x00000100,
+	MCI_OPEN_ELEMENT               = 0x00000200,
+	MCI_OPEN_ALIAS                 = 0x00000400,
+	MCI_OPEN_ELEMENT_ID            = 0x00000800,
+	MCI_OPEN_TYPE_ID               = 0x00001000,
+	MCI_OPEN_TYPE                  = 0x00002000,
+	MCI_SEEK_TO_START              = 0x00000100,
+	MCI_SEEK_TO_END                = 0x00000200,
+	MCI_STATUS_ITEM                = 0x00000100,
+	MCI_STATUS_START               = 0x00000200,
+	MCI_STATUS_LENGTH              = 0x00000001,
+	MCI_STATUS_POSITION            = 0x00000002,
+	MCI_STATUS_NUMBER_OF_TRACKS    = 0x00000003,
+	MCI_STATUS_MODE                = 0x00000004,
+	MCI_STATUS_MEDIA_PRESENT       = 0x00000005,
+	MCI_STATUS_TIME_FORMAT         = 0x00000006,
+	MCI_STATUS_READY               = 0x00000007,
+	MCI_STATUS_CURRENT_TRACK       = 0x00000008,
+	MCI_INFO_PRODUCT               = 0x00000100,
+	MCI_INFO_FILE                  = 0x00000200,
+	MCI_INFO_MEDIA_UPC             = 0x00000400,
+	MCI_INFO_MEDIA_IDENTITY        = 0x00000800,
+	MCI_INFO_NAME                  = 0x00001000,
+	MCI_INFO_COPYRIGHT             = 0x00002000,
+	MCI_GETDEVCAPS_ITEM            = 0x00000100,
+	MCI_GETDEVCAPS_CAN_RECORD      = 0x00000001,
+	MCI_GETDEVCAPS_HAS_AUDIO       = 0x00000002,
+	MCI_GETDEVCAPS_HAS_VIDEO       = 0x00000003,
+	MCI_GETDEVCAPS_DEVICE_TYPE     = 0x00000004,
+	MCI_GETDEVCAPS_USES_FILES      = 0x00000005,
+	MCI_GETDEVCAPS_COMPOUND_DEVICE = 0x00000006,
+	MCI_GETDEVCAPS_CAN_EJECT       = 0x00000007,
+	MCI_GETDEVCAPS_CAN_PLAY        = 0x00000008,
+	MCI_GETDEVCAPS_CAN_SAVE        = 0x00000009,
+	MCI_SYSINFO_QUANTITY           = 0x00000100,
+	MCI_SYSINFO_OPEN               = 0x00000200,
+	MCI_SYSINFO_NAME               = 0x00000400,
+	MCI_SYSINFO_INSTALLNAME        = 0x00000800,
+	MCI_SET_DOOR_OPEN              = 0x00000100,
+	MCI_SET_DOOR_CLOSED            = 0x00000200,
+	MCI_SET_TIME_FORMAT            = 0x00000400,
+	MCI_SET_AUDIO                  = 0x00000800,
+	MCI_SET_VIDEO                  = 0x00001000,
+	MCI_SET_ON                     = 0x00002000,
+	MCI_SET_OFF                    = 0x00004000,
+	MCI_SET_AUDIO_ALL              = 0x00000000,
+	MCI_SET_AUDIO_LEFT             = 0x00000001,
+	MCI_SET_AUDIO_RIGHT            = 0x00000002,
+	MCI_BREAK_KEY                  = 0x00000100,
+	MCI_BREAK_HWND                 = 0x00000200,
+	MCI_BREAK_OFF                  = 0x00000400,
+	MCI_RECORD_INSERT              = 0x00000100,
+	MCI_RECORD_OVERWRITE           = 0x00000200,
+	MCI_SAVE_FILE                  = 0x00000100,
+	MCI_LOAD_FILE                  = 0x00000100,
+}
+
+struct MCI_GENERIC_PARMS {
+	DWORD_PTR dwCallback;
+}
+alias MCI_GENERIC_PARMS* PMCI_GENERIC_PARMS;
+alias MCI_GENERIC_PARMS* LPMCI_GENERIC_PARMS;
+
+private struct MCI_OPEN_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	MCIDEVICEID wDeviceID;
+	T lpstrDeviceType;
+	T lpstrElementName;
+	T lpstrAlias;
+}
+alias MCI_OPEN_PARMS_T!(LPCSTR) MCI_OPEN_PARMSA;
+alias MCI_OPEN_PARMSA* PMCI_OPEN_PARMSA;
+alias MCI_OPEN_PARMSA* LPMCI_OPEN_PARMSA;
+alias MCI_OPEN_PARMS_T!(LPCWSTR) MCI_OPEN_PARMSW;
+alias MCI_OPEN_PARMSW* PMCI_OPEN_PARMSW;
+alias MCI_OPEN_PARMSW* LPMCI_OPEN_PARMSW;
+version(UNICODE){
+	alias MCI_OPEN_PARMSW MCI_OPEN_PARMS;
+	alias PMCI_OPEN_PARMSW PMCI_OPEN_PARMS;
+	alias LPMCI_OPEN_PARMSW LPMCI_OPEN_PARMS;
+}else{
+	alias MCI_OPEN_PARMSA MCI_OPEN_PARMS;
+	alias PMCI_OPEN_PARMSA PMCI_OPEN_PARMS;
+	alias LPMCI_OPEN_PARMSA LPMCI_OPEN_PARMS;
+}
+
+struct MCI_PLAY_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwFrom;
+	DWORD dwTo;
+}
+alias MCI_PLAY_PARMS* PMCI_PLAY_PARMS;
+alias MCI_PLAY_PARMS* LPMCI_PLAY_PARMS;
+
+struct MCI_SEEK_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwTo;
+}
+alias MCI_SEEK_PARMS* PMCI_SEEK_PARMS;
+alias MCI_SEEK_PARMS* LPMCI_SEEK_PARMS;
+
+struct MCI_STATUS_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD_PTR dwReturn;
+	DWORD dwItem;
+	DWORD dwTrack;
+}
+alias MCI_STATUS_PARMS* PMCI_STATUS_PARMS;
+alias MCI_STATUS_PARMS* LPMCI_STATUS_PARMS;
+
+
+private struct MCI_INFO_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	T lpstrReturn;
+	DWORD dwRetSize;
+}
+alias MCI_INFO_PARMS_T!(LPSTR) MCI_INFO_PARMSA;
+alias MCI_INFO_PARMSA* LPMCI_INFO_PARMSA;
+alias MCI_INFO_PARMS_T!(LPWSTR) MCI_INFO_PARMSW;
+alias MCI_INFO_PARMSW* LPMCI_INFO_PARMSW;
+version(UNICODE){
+	alias MCI_INFO_PARMSW MCI_INFO_PARMS;
+	alias LPMCI_INFO_PARMSW LPMCI_INFO_PARM;
+}else{
+	alias MCI_INFO_PARMSA MCI_INFO_PARMS;
+	alias LPMCI_INFO_PARMSA LPMCI_INFO_PARMS;
+}
+
+struct MCI_GETDEVCAPS_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwReturn;
+	DWORD dwItem;
+}
+alias MCI_GETDEVCAPS_PARMS* PMCI_GETDEVCAPS_PARMS;
+alias MCI_GETDEVCAPS_PARMS* LPMCI_GETDEVCAPS_PARMS;
+
+private struct MCI_SYSINFO_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	T lpstrReturn;
+	DWORD dwRetSize;
+	DWORD dwNumber;
+	UINT wDeviceType;
+}
+alias MCI_SYSINFO_PARMS_T!(LPSTR) MCI_SYSINFO_PARMSA;
+alias MCI_SYSINFO_PARMSA* PMCI_SYSINFO_PARMSA;
+alias MCI_SYSINFO_PARMSA* LPMCI_SYSINFO_PARMSA;
+alias MCI_SYSINFO_PARMS_T!(LPWSTR) MCI_SYSINFO_PARMSW;
+alias MCI_SYSINFO_PARMSW* PMCI_SYSINFO_PARMSW;
+alias MCI_SYSINFO_PARMSW* LPMCI_SYSINFO_PARMSW;
+version(UNICODE){
+	alias MCI_SYSINFO_PARMSW MCI_SYSINFO_PARMS;
+	alias PMCI_SYSINFO_PARMSW PMCI_SYSINFO_PARMS;
+	alias LPMCI_SYSINFO_PARMSW LPMCI_SYSINFO_PARMS;
+}else{
+	alias MCI_SYSINFO_PARMSA MCI_SYSINFO_PARMS;
+	alias PMCI_SYSINFO_PARMSA PMCI_SYSINFO_PARMS;
+	alias LPMCI_SYSINFO_PARMSA LPMCI_SYSINFO_PARMS;
+}
+
+struct MCI_SET_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwTimeFormat;
+	DWORD dwAudio;
+}
+alias MCI_SET_PARMS* PMCI_SET_PARMS;
+alias MCI_SET_PARMS* LPMCI_SET_PARMS;
+
+struct MCI_BREAK_PARMS {
+	DWORD_PTR dwCallback;
+	int nVirtKey;
+	HWND hwndBreak;
+}
+alias MCI_BREAK_PARMS* PMCI_BREAK_PARMS;
+alias MCI_BREAK_PARMS* LPMCI_BREAK_PARMS;
+
+private struct MCI_SAVE_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	T lpfilename;
+}
+alias MCI_SAVE_PARMS_T!(LPCSTR) MCI_SAVE_PARMSA;
+alias MCI_SAVE_PARMSA* PMCI_SAVE_PARMSA;
+alias MCI_SAVE_PARMSA* LPMCI_SAVE_PARMSA;
+alias MCI_SAVE_PARMS_T!(LPCWSTR) MCI_SAVE_PARMSW;
+alias MCI_SAVE_PARMSW* PMCI_SAVE_PARMSW;
+alias MCI_SAVE_PARMSW* LPMCI_SAVE_PARMSW;
+version(UNICODE){
+	alias MCI_SAVE_PARMSW MCI_SAVE_PARMS;
+	alias PMCI_SAVE_PARMSW PMCI_SAVE_PARMS;
+	alias LPMCI_SAVE_PARMSW LPMCI_SAVE_PARMS;
+}else{
+	alias MCI_SAVE_PARMSA MCI_SAVE_PARMS;
+	alias PMCI_SAVE_PARMSA PMCI_SAVE_PARMS;
+	alias LPMCI_SAVE_PARMSA LPMCI_SAVE_PARMS;
+}
+
+private struct MCI_LOAD_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	T lpfilename;
+}
+alias MCI_LOAD_PARMS_T!(LPCSTR) MCI_LOAD_PARMSA;
+alias MCI_LOAD_PARMSA* PMCI_LOAD_PARMSA;
+alias MCI_LOAD_PARMSA* LPMCI_LOAD_PARMSA;
+alias MCI_LOAD_PARMS_T!(LPCWSTR) MCI_LOAD_PARMSW;
+alias MCI_LOAD_PARMSW* PMCI_LOAD_PARMSW;
+alias MCI_LOAD_PARMSW* LPMCI_LOAD_PARMSW;
+version(UNICODE){
+	alias MCI_LOAD_PARMSW MCI_LOAD_PARMS;
+	alias PMCI_LOAD_PARMSW PMCI_LOAD_PARMS;
+	alias LPMCI_LOAD_PARMSW LPMCI_LOAD_PARMS;
+}else{
+	alias MCI_LOAD_PARMSA MCI_LOAD_PARMS;
+	alias PMCI_LOAD_PARMSA PMCI_LOAD_PARMS;
+	alias LPMCI_LOAD_PARMSA LPMCI_LOAD_PARMS;
+}
+
+struct MCI_RECORD_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwFrom;
+	DWORD dwTo;
+}
+alias MCI_RECORD_PARMS* LPMCI_RECORD_PARMS;
+
+enum {
+	MCI_VD_MODE_PARK              = MCI_VD_OFFSET + 1,
+	MCI_VD_MEDIA_CLV              = MCI_VD_OFFSET + 2,
+	MCI_VD_MEDIA_CAV              = MCI_VD_OFFSET + 3,
+	MCI_VD_MEDIA_OTHER            = MCI_VD_OFFSET + 4,
+	MCI_VD_FORMAT_TRACK           = 0x4001,
+	MCI_VD_PLAY_REVERSE           = 0x00010000,
+	MCI_VD_PLAY_FAST              = 0x00020000,
+	MCI_VD_PLAY_SPEED             = 0x00040000,
+	MCI_VD_PLAY_SCAN              = 0x00080000,
+	MCI_VD_PLAY_SLOW              = 0x00100000,
+	MCI_VD_SEEK_REVERSE           = 0x00010000,
+	MCI_VD_STATUS_SPEED           = 0x00004002,
+	MCI_VD_STATUS_FORWARD         = 0x00004003,
+	MCI_VD_STATUS_MEDIA_TYPE      = 0x00004004,
+	MCI_VD_STATUS_SIDE            = 0x00004005,
+	MCI_VD_STATUS_DISC_SIZE       = 0x00004006,
+	MCI_VD_GETDEVCAPS_CLV         = 0x00010000,
+	MCI_VD_GETDEVCAPS_CAV         = 0x00020000,
+	MCI_VD_SPIN_UP                = 0x00010000,
+	MCI_VD_SPIN_DOWN              = 0x00020000,
+	MCI_VD_GETDEVCAPS_CAN_REVERSE = 0x00004002,
+	MCI_VD_GETDEVCAPS_FAST_RATE   = 0x00004003,
+	MCI_VD_GETDEVCAPS_SLOW_RATE   = 0x00004004,
+	MCI_VD_GETDEVCAPS_NORMAL_RATE = 0x00004005,
+	MCI_VD_STEP_FRAMES            = 0x00010000,
+	MCI_VD_STEP_REVERSE           = 0x00020000,
+	MCI_VD_ESCAPE_STRING          = 0x00000100,
+}
+
+struct MCI_VD_PLAY_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwFrom;
+	DWORD dwTo;
+	DWORD dwSpeed;
+}
+alias MCI_VD_PLAY_PARMS* PMCI_VD_PLAY_PARMS;
+alias MCI_VD_PLAY_PARMS* LPMCI_VD_PLAY_PARMS;
+
+struct MCI_VD_STEP_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwFrames;
+}
+alias MCI_VD_STEP_PARMS* PMCI_VD_STEP_PARMS;
+alias MCI_VD_STEP_PARMS* LPMCI_VD_STEP_PARMS;
+
+private struct MCI_VD_ESCAPE_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	T lpstrCommand;
+}
+alias MCI_VD_ESCAPE_PARMS_T!(LPCSTR) MCI_VD_ESCAPE_PARMSA;
+alias MCI_VD_ESCAPE_PARMSA* PMCI_VD_ESCAPE_PARMSA;
+alias MCI_VD_ESCAPE_PARMSA* LPMCI_VD_ESCAPE_PARMSA;
+alias MCI_VD_ESCAPE_PARMS_T!(LPCWSTR) MCI_VD_ESCAPE_PARMSW;
+alias MCI_VD_ESCAPE_PARMSW* PMCI_VD_ESCAPE_PARMSW;
+alias MCI_VD_ESCAPE_PARMSW* LPMCI_VD_ESCAPE_PARMSW;
+version(UNICODE){
+	alias MCI_VD_ESCAPE_PARMSW MCI_VD_ESCAPE_PARMS;
+	alias PMCI_VD_ESCAPE_PARMSW PMCI_VD_ESCAPE_PARMS;
+	alias LPMCI_VD_ESCAPE_PARMSW LPMCI_VD_ESCAPE_PARMS;
+}else{
+	alias MCI_VD_ESCAPE_PARMSA MCI_VD_ESCAPE_PARMS;
+	alias PMCI_VD_ESCAPE_PARMSA PMCI_VD_ESCAPE_PARMS;
+	alias LPMCI_VD_ESCAPE_PARMSA LPMCI_VD_ESCAPE_PARMS;
+}
+
+enum {
+	MCI_CDA_STATUS_TYPE_TRACK = 0x00004001,
+	MCI_CDA_TRACK_AUDIO       = MCI_CD_OFFSET + 0,
+	MCI_CDA_TRACK_OTHER       = MCI_CD_OFFSET + 1,
+}
+enum {
+	MCI_WAVE_PCM                   = MCI_WAVE_OFFSET + 0,
+	MCI_WAVE_MAPPER                = MCI_WAVE_OFFSET + 1,
+	MCI_WAVE_OPEN_BUFFER           = 0x00010000,
+	MCI_WAVE_SET_FORMATTAG         = 0x00010000,
+	MCI_WAVE_SET_CHANNELS          = 0x00020000,
+	MCI_WAVE_SET_SAMPLESPERSEC     = 0x00040000,
+	MCI_WAVE_SET_AVGBYTESPERSEC    = 0x00080000,
+	MCI_WAVE_SET_BLOCKALIGN        = 0x00100000,
+	MCI_WAVE_SET_BITSPERSAMPLE     = 0x00200000,
+	MCI_WAVE_INPUT                 = 0x00400000,
+	MCI_WAVE_OUTPUT                = 0x00800000,
+	MCI_WAVE_STATUS_FORMATTAG      = 0x00004001,
+	MCI_WAVE_STATUS_CHANNELS       = 0x00004002,
+	MCI_WAVE_STATUS_SAMPLESPERSEC  = 0x00004003,
+	MCI_WAVE_STATUS_AVGBYTESPERSEC = 0x00004004,
+	MCI_WAVE_STATUS_BLOCKALIGN     = 0x00004005,
+	MCI_WAVE_STATUS_BITSPERSAMPLE  = 0x00004006,
+	MCI_WAVE_STATUS_LEVEL          = 0x00004007,
+	MCI_WAVE_SET_ANYINPUT          = 0x04000000,
+	MCI_WAVE_SET_ANYOUTPUT         = 0x08000000,
+	MCI_WAVE_GETDEVCAPS_INPUTS     = 0x00004001,
+	MCI_WAVE_GETDEVCAPS_OUTPUTS    = 0x00004002,
+}
+
+private struct MCI_WAVE_OPEN_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	MCIDEVICEID wDeviceID;
+	T lpstrDeviceType;
+	T lpstrElementName;
+	T lpstrAlias;
+	DWORD dwBufferSeconds;
+}
+alias MCI_WAVE_OPEN_PARMS_T!(LPCSTR) MCI_WAVE_OPEN_PARMSA;
+alias MCI_WAVE_OPEN_PARMSA* PMCI_WAVE_OPEN_PARMSA;
+alias MCI_WAVE_OPEN_PARMSA* LPMCI_WAVE_OPEN_PARMSA;
+alias MCI_WAVE_OPEN_PARMS_T!(LPCWSTR) MCI_WAVE_OPEN_PARMSW;
+alias MCI_WAVE_OPEN_PARMSW* PMCI_WAVE_OPEN_PARMSW;
+alias MCI_WAVE_OPEN_PARMSW* LPMCI_WAVE_OPEN_PARMSW;
+version(UNICODE){
+	alias MCI_WAVE_OPEN_PARMSW MCI_WAVE_OPEN_PARMS;
+	alias PMCI_WAVE_OPEN_PARMSW PMCI_WAVE_OPEN_PARMS;
+	alias LPMCI_WAVE_OPEN_PARMSW LPMCI_WAVE_OPEN_PARMS;
+}else{
+	alias MCI_WAVE_OPEN_PARMSA MCI_WAVE_OPEN_PARMS;
+	alias PMCI_WAVE_OPEN_PARMSA PMCI_WAVE_OPEN_PARMS;
+	alias LPMCI_WAVE_OPEN_PARMSA LPMCI_WAVE_OPEN_PARMS;
+}
+
+struct MCI_WAVE_DELETE_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwFrom;
+	DWORD dwTo;
+}
+alias MCI_WAVE_DELETE_PARMS* PMCI_WAVE_DELETE_PARMS;
+alias MCI_WAVE_DELETE_PARMS* LPMCI_WAVE_DELETE_PARMS;
+
+struct MCI_WAVE_SET_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwTimeFormat;
+	DWORD dwAudio;
+	UINT wInput;
+	UINT wOutput;
+	WORD wFormatTag;
+	WORD wReserved2;
+	WORD nChannels;
+	WORD wReserved3;
+	DWORD nSamplesPerSec;
+	DWORD nAvgBytesPerSec;
+	WORD nBlockAlign;
+	WORD wReserved4;
+	WORD wBitsPerSample;
+	WORD wReserved5;
+}
+alias MCI_WAVE_SET_PARMS* PMCI_WAVE_SET_PARMS;
+alias MCI_WAVE_SET_PARMS* LPMCI_WAVE_SET_PARMS;
+
+enum {
+	MCI_SEQ_DIV_PPQN         = 0 + MCI_SEQ_OFFSET,
+	MCI_SEQ_DIV_SMPTE_24     = 1 + MCI_SEQ_OFFSET,
+	MCI_SEQ_DIV_SMPTE_25     = 2 + MCI_SEQ_OFFSET,
+	MCI_SEQ_DIV_SMPTE_30DROP = 3 + MCI_SEQ_OFFSET,
+	MCI_SEQ_DIV_SMPTE_30     = 4 + MCI_SEQ_OFFSET,
+}
+enum {
+	MCI_SEQ_FORMAT_SONGPTR = 0x4001,
+	MCI_SEQ_FILE           = 0x4002,
+	MCI_SEQ_MIDI           = 0x4003,
+	MCI_SEQ_SMPTE          = 0x4004,
+	MCI_SEQ_NONE           = 65533,
+	MCI_SEQ_MAPPER         = 65535,
+}
+enum {
+	MCI_SEQ_STATUS_TEMPO     = 0x00004002,
+	MCI_SEQ_STATUS_PORT      = 0x00004003,
+	MCI_SEQ_STATUS_SLAVE     = 0x00004007,
+	MCI_SEQ_STATUS_MASTER    = 0x00004008,
+	MCI_SEQ_STATUS_OFFSET    = 0x00004009,
+	MCI_SEQ_STATUS_DIVTYPE   = 0x0000400A,
+	MCI_SEQ_STATUS_NAME      = 0x0000400B,
+	MCI_SEQ_STATUS_COPYRIGHT = 0x0000400C,
+	MCI_SEQ_SET_TEMPO        = 0x00010000,
+	MCI_SEQ_SET_PORT         = 0x00020000,
+	MCI_SEQ_SET_SLAVE        = 0x00040000,
+	MCI_SEQ_SET_MASTER       = 0x00080000,
+	MCI_SEQ_SET_OFFSET       = 0x01000000,
+}
+struct MCI_SEQ_SET_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwTimeFormat;
+	DWORD dwAudio;
+	DWORD dwTempo;
+	DWORD dwPort;
+	DWORD dwSlave;
+	DWORD dwMaster;
+	DWORD dwOffset;
+}
+alias MCI_SEQ_SET_PARMS* PMCI_SEQ_SET_PARMS;
+alias MCI_SEQ_SET_PARMS* LPMCI_SEQ_SET_PARMS;
+
+enum {
+	MCI_ANIM_OPEN_WS                = 0x00010000,
+	MCI_ANIM_OPEN_PARENT            = 0x00020000,
+	MCI_ANIM_OPEN_NOSTATIC          = 0x00040000,
+	MCI_ANIM_PLAY_SPEED             = 0x00010000,
+	MCI_ANIM_PLAY_REVERSE           = 0x00020000,
+	MCI_ANIM_PLAY_FAST              = 0x00040000,
+	MCI_ANIM_PLAY_SLOW              = 0x00080000,
+	MCI_ANIM_PLAY_SCAN              = 0x00100000,
+	MCI_ANIM_STEP_REVERSE           = 0x00010000,
+	MCI_ANIM_STEP_FRAMES            = 0x00020000,
+	MCI_ANIM_STATUS_SPEED           = 0x00004001,
+	MCI_ANIM_STATUS_FORWARD         = 0x00004002,
+	MCI_ANIM_STATUS_HWND            = 0x00004003,
+	MCI_ANIM_STATUS_HPAL            = 0x00004004,
+	MCI_ANIM_STATUS_STRETCH         = 0x00004005,
+	MCI_ANIM_INFO_TEXT              = 0x00010000,
+	MCI_ANIM_GETDEVCAPS_CAN_REVERSE = 0x00004001,
+	MCI_ANIM_GETDEVCAPS_FAST_RATE   = 0x00004002,
+	MCI_ANIM_GETDEVCAPS_SLOW_RATE   = 0x00004003,
+	MCI_ANIM_GETDEVCAPS_NORMAL_RATE = 0x00004004,
+	MCI_ANIM_GETDEVCAPS_PALETTES    = 0x00004006,
+	MCI_ANIM_GETDEVCAPS_CAN_STRETCH = 0x00004007,
+	MCI_ANIM_GETDEVCAPS_MAX_WINDOWS = 0x00004008,
+	MCI_ANIM_REALIZE_NORM           = 0x00010000,
+	MCI_ANIM_REALIZE_BKGD           = 0x00020000,
+	MCI_ANIM_WINDOW_HWND            = 0x00010000,
+	MCI_ANIM_WINDOW_STATE           = 0x00040000,
+	MCI_ANIM_WINDOW_TEXT            = 0x00080000,
+	MCI_ANIM_WINDOW_ENABLE_STRETCH  = 0x00100000,
+	MCI_ANIM_WINDOW_DISABLE_STRETCH = 0x00200000,
+	MCI_ANIM_WINDOW_DEFAULT         = 0x00000000,
+	MCI_ANIM_RECT                   = 0x00010000,
+	MCI_ANIM_PUT_SOURCE             = 0x00020000,
+	MCI_ANIM_PUT_DESTINATION        = 0x00040000,
+	MCI_ANIM_WHERE_SOURCE           = 0x00020000,
+	MCI_ANIM_WHERE_DESTINATION      = 0x00040000,
+	MCI_ANIM_UPDATE_HDC             = 0x00020000,
+}
+
+private struct MCI_ANIM_OPEN_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	MCIDEVICEID wDeviceID;
+	T lpstrDeviceType;
+	T lpstrElementName;
+	T lpstrAlias;
+	DWORD dwStyle;
+	HWND hWndParent;
+}
+alias MCI_ANIM_OPEN_PARMS_T!(LPCSTR) MCI_ANIM_OPEN_PARMSA;
+alias MCI_ANIM_OPEN_PARMSA* PMCI_ANIM_OPEN_PARMSA;
+alias MCI_ANIM_OPEN_PARMSA* LPMCI_ANIM_OPEN_PARMSA;
+alias MCI_ANIM_OPEN_PARMS_T!(LPCWSTR) MCI_ANIM_OPEN_PARMSW;
+alias MCI_ANIM_OPEN_PARMSW* PMCI_ANIM_OPEN_PARMSW;
+alias MCI_ANIM_OPEN_PARMSW* LPMCI_ANIM_OPEN_PARMSW;
+version(UNICODE){
+	alias MCI_ANIM_OPEN_PARMSW MCI_ANIM_OPEN_PARMS;
+	alias PMCI_ANIM_OPEN_PARMSW PMCI_ANIM_OPEN_PARMS;
+	alias LPMCI_ANIM_OPEN_PARMSW LPMCI_ANIM_OPEN_PARMS;
+}else{
+	alias MCI_ANIM_OPEN_PARMSA MCI_ANIM_OPEN_PARMS;
+	alias PMCI_ANIM_OPEN_PARMSA PMCI_ANIM_OPEN_PARMS;
+	alias LPMCI_ANIM_OPEN_PARMSA LPMCI_ANIM_OPEN_PARMS;
+}
+
+struct MCI_ANIM_PLAY_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwFrom;
+	DWORD dwTo;
+	DWORD dwSpeed;
+}
+alias MCI_ANIM_PLAY_PARMS* PMCI_ANIM_PLAY_PARMS;
+alias MCI_ANIM_PLAY_PARMS* LPMCI_ANIM_PLAY_PARMS;
+
+struct MCI_ANIM_STEP_PARMS {
+	DWORD_PTR dwCallback;
+	DWORD dwFrames;
+}
+alias MCI_ANIM_STEP_PARMS* PMCI_ANIM_STEP_PARMS;
+alias MCI_ANIM_STEP_PARMS* LPMCI_ANIM_STEP_PARMS;
+
+private struct MCI_ANIM_WINDOW_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	HWND hWnd;
+	UINT nCmdShow;
+	T lpstrText;
+}
+alias MCI_ANIM_WINDOW_PARMS_T!(LPCSTR) MCI_ANIM_WINDOW_PARMSA;
+alias MCI_ANIM_WINDOW_PARMSA* PMCI_ANIM_WINDOW_PARMSA;
+alias MCI_ANIM_WINDOW_PARMSA* LPMCI_ANIM_WINDOW_PARMSA;
+alias MCI_ANIM_WINDOW_PARMS_T!(LPCWSTR) MCI_ANIM_WINDOW_PARMSW;
+alias MCI_ANIM_WINDOW_PARMSW* PMCI_ANIM_WINDOW_PARMSW;
+alias MCI_ANIM_WINDOW_PARMSW* LPMCI_ANIM_WINDOW_PARMSW;
+version(UNICODE){
+	alias MCI_ANIM_WINDOW_PARMSW MCI_ANIM_WINDOW_PARMS;
+	alias PMCI_ANIM_WINDOW_PARMSW PMCI_ANIM_WINDOW_PARMS;
+	alias LPMCI_ANIM_WINDOW_PARMSW LPMCI_ANIM_WINDOW_PARMS;
+}else{
+	alias MCI_ANIM_WINDOW_PARMSA MCI_ANIM_WINDOW_PARMS;
+	alias PMCI_ANIM_WINDOW_PARMSA PMCI_ANIM_WINDOW_PARMS;
+	alias LPMCI_ANIM_WINDOW_PARMSA LPMCI_ANIM_WINDOW_PARMS;
+}
+
+struct MCI_ANIM_RECT_PARMS {
+	DWORD_PTR dwCallback;
+	version(none){  //MCI_USE_OFFEXT
+		POINT ptOffset;
+		POINT ptExtent;
+	}else{
+		RECT rc;
+	}
+}
+alias MCI_ANIM_RECT_PARMS* PMCI_ANIM_RECT_PARMS;
+alias MCI_ANIM_RECT_PARMS* LPMCI_ANIM_RECT_PARMS;
+
+struct MCI_ANIM_UPDATE_PARMS {
+	DWORD_PTR dwCallback;
+	RECT rc;
+	HDC hDC;
+}
+alias MCI_ANIM_UPDATE_PARMS* PMCI_ANIM_UPDATE_PARMS;
+alias MCI_ANIM_UPDATE_PARMS* LPMCI_ANIM_UPDATE_PARMS;
+
+enum {
+	MCI_OVLY_OPEN_WS                = 0x00010000,
+	MCI_OVLY_OPEN_PARENT            = 0x00020000,
+	MCI_OVLY_STATUS_HWND            = 0x00004001,
+	MCI_OVLY_STATUS_STRETCH         = 0x00004002,
+	MCI_OVLY_INFO_TEXT              = 0x00010000,
+	MCI_OVLY_GETDEVCAPS_CAN_STRETCH = 0x00004001,
+	MCI_OVLY_GETDEVCAPS_CAN_FREEZE  = 0x00004002,
+	MCI_OVLY_GETDEVCAPS_MAX_WINDOWS = 0x00004003,
+	MCI_OVLY_WINDOW_HWND            = 0x00010000,
+	MCI_OVLY_WINDOW_STATE           = 0x00040000,
+	MCI_OVLY_WINDOW_TEXT            = 0x00080000,
+	MCI_OVLY_WINDOW_ENABLE_STRETCH  = 0x00100000,
+	MCI_OVLY_WINDOW_DISABLE_STRETCH = 0x00200000,
+	MCI_OVLY_WINDOW_DEFAULT         = 0x00000000,
+	MCI_OVLY_RECT                   = 0x00010000,
+	MCI_OVLY_PUT_SOURCE             = 0x00020000,
+	MCI_OVLY_PUT_DESTINATION        = 0x00040000,
+	MCI_OVLY_PUT_FRAME              = 0x00080000,
+	MCI_OVLY_PUT_VIDEO              = 0x00100000,
+	MCI_OVLY_WHERE_SOURCE           = 0x00020000,
+	MCI_OVLY_WHERE_DESTINATION      = 0x00040000,
+	MCI_OVLY_WHERE_FRAME            = 0x00080000,
+	MCI_OVLY_WHERE_VIDEO            = 0x00100000,
+}
+
+private struct MCI_OVLY_OPEN_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	MCIDEVICEID wDeviceID;
+	T lpstrDeviceType;
+	T lpstrElementName;
+	T lpstrAlias;
+	DWORD dwStyle;
+	HWND hWndParent;
+}
+alias MCI_OVLY_OPEN_PARMS_T!(LPCSTR) MCI_OVLY_OPEN_PARMSA;
+alias MCI_OVLY_OPEN_PARMSA* PMCI_OVLY_OPEN_PARMSA;
+alias MCI_OVLY_OPEN_PARMSA* LPMCI_OVLY_OPEN_PARMSA;
+alias MCI_OVLY_OPEN_PARMS_T!(LPCWSTR) MCI_OVLY_OPEN_PARMSW;
+alias MCI_OVLY_OPEN_PARMSW* PMCI_OVLY_OPEN_PARMSW;
+alias MCI_OVLY_OPEN_PARMSW* LPMCI_OVLY_OPEN_PARMSW;
+version(UNICODE){
+	alias MCI_OVLY_OPEN_PARMSW MCI_OVLY_OPEN_PARMS;
+	alias PMCI_OVLY_OPEN_PARMSW PMCI_OVLY_OPEN_PARMS;
+	alias LPMCI_OVLY_OPEN_PARMSW LPMCI_OVLY_OPEN_PARMS;
+}else{
+	alias MCI_OVLY_OPEN_PARMSA MCI_OVLY_OPEN_PARMS;
+	alias PMCI_OVLY_OPEN_PARMSA PMCI_OVLY_OPEN_PARMS;
+	alias LPMCI_OVLY_OPEN_PARMSA LPMCI_OVLY_OPEN_PARMS;
+}
+
+private struct MCI_OVLY_WINDOW_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	HWND hWnd;
+	UINT nCmdShow;
+	T lpstrText;
+}
+alias MCI_OVLY_WINDOW_PARMS_T!(LPCSTR) MCI_OVLY_WINDOW_PARMSA;
+alias MCI_OVLY_WINDOW_PARMSA* PMCI_OVLY_WINDOW_PARMSA;
+alias MCI_OVLY_WINDOW_PARMSA* LPMCI_OVLY_WINDOW_PARMSA;
+alias MCI_OVLY_WINDOW_PARMS_T!(LPCWSTR) MCI_OVLY_WINDOW_PARMSW;
+alias MCI_OVLY_WINDOW_PARMSW* PMCI_OVLY_WINDOW_PARMSW;
+alias MCI_OVLY_WINDOW_PARMSW* LPMCI_OVLY_WINDOW_PARMSW;
+version(UNICODE){
+	alias MCI_OVLY_WINDOW_PARMSW MCI_OVLY_WINDOW_PARMS;
+	alias PMCI_OVLY_WINDOW_PARMSW PMCI_OVLY_WINDOW_PARMS;
+	alias LPMCI_OVLY_WINDOW_PARMSW LPMCI_OVLY_WINDOW_PARMS;
+}else{
+	alias MCI_OVLY_WINDOW_PARMSA MCI_OVLY_WINDOW_PARMS;
+	alias PMCI_OVLY_WINDOW_PARMSA PMCI_OVLY_WINDOW_PARMS;
+	alias LPMCI_OVLY_WINDOW_PARMSA LPMCI_OVLY_WINDOW_PARMS;
+}
+
+struct MCI_OVLY_RECT_PARMS {
+	DWORD_PTR dwCallback;
+	version(none){ // MCI_USE_OFFEXT
+		POINT ptOffset;
+		POINT ptExtent;
+	}else{
+		RECT rc;
+	}
+}
+alias MCI_OVLY_RECT_PARMS* PMCI_OVLY_RECT_PARMS;
+alias MCI_OVLY_RECT_PARMS* LPMCI_OVLY_RECT_PARMS;
+
+private struct MCI_OVLY_SAVE_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	T lpfilename;
+	RECT rc;
+}
+alias MCI_OVLY_SAVE_PARMS_T!(LPCSTR) MCI_OVLY_SAVE_PARMSA;
+alias MCI_OVLY_SAVE_PARMSA* PMCI_OVLY_SAVE_PARMSA;
+alias MCI_OVLY_SAVE_PARMSA* LPMCI_OVLY_SAVE_PARMSA;
+alias MCI_OVLY_SAVE_PARMS_T!(LPCWSTR) MCI_OVLY_SAVE_PARMSW;
+alias MCI_OVLY_SAVE_PARMSW* PMCI_OVLY_SAVE_PARMSW;
+alias MCI_OVLY_SAVE_PARMSW* LPMCI_OVLY_SAVE_PARMSW;
+version(UNICODE){
+	alias MCI_OVLY_SAVE_PARMSW MCI_OVLY_SAVE_PARMS;
+	alias PMCI_OVLY_SAVE_PARMSW PMCI_OVLY_SAVE_PARMS;
+	alias LPMCI_OVLY_SAVE_PARMSW LPMCI_OVLY_SAVE_PARMS;
+}else{
+	alias MCI_OVLY_SAVE_PARMSA MCI_OVLY_SAVE_PARMS;
+	alias PMCI_OVLY_SAVE_PARMSA PMCI_OVLY_SAVE_PARMS;
+	alias LPMCI_OVLY_SAVE_PARMSA LPMCI_OVLY_SAVE_PARMS;
+}
+
+private struct MCI_OVLY_LOAD_PARMS_T(T) {
+	DWORD_PTR dwCallback;
+	T lpfilename;
+	RECT rc;
+}
+alias MCI_OVLY_LOAD_PARMS_T!(LPCSTR) MCI_OVLY_LOAD_PARMSA;
+alias MCI_OVLY_LOAD_PARMSA* PMCI_OVLY_LOAD_PARMSA;
+alias MCI_OVLY_LOAD_PARMSA* LPMCI_OVLY_LOAD_PARMSA;
+alias MCI_OVLY_LOAD_PARMS_T!(LPCWSTR) MCI_OVLY_LOAD_PARMSW;
+alias MCI_OVLY_LOAD_PARMSW* PMCI_OVLY_LOAD_PARMSW;
+alias MCI_OVLY_LOAD_PARMSW* LPMCI_OVLY_LOAD_PARMSW;
+version(UNICODE){
+	alias MCI_OVLY_LOAD_PARMSW MCI_OVLY_LOAD_PARMS;
+	alias PMCI_OVLY_LOAD_PARMSW PMCI_OVLY_LOAD_PARMS;
+	alias LPMCI_OVLY_LOAD_PARMSW LPMCI_OVLY_LOAD_PARMS;
+}else{
+	alias MCI_OVLY_LOAD_PARMSA MCI_OVLY_LOAD_PARMS;
+	alias PMCI_OVLY_LOAD_PARMSA PMCI_OVLY_LOAD_PARMS;
+	alias LPMCI_OVLY_LOAD_PARMSA LPMCI_OVLY_LOAD_PARMS;
+}
+
+enum {
+	NEWTRANSPARENT  = 3,
+	QUERYROPSUPPORT = 40,
+	SELECTDIB       = 41,
+}
+
+pure nothrow
+LONG DIBINDEX(WORD n)
+{
+	return MAKELONG(n, 0x10FF);
+}
+
+enum SC_SCREENSAVE = 0xF140;
+
+} // extern(C)
+}// align(1)

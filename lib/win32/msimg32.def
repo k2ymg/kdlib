@@ -1,0 +1,5 @@
+LIBRARY "msimg32.dll"
+EXPORTS
+	_AlphaBlend@44=AlphaBlend
+	_GradientFill@24=GradientFill
+	_TransparentBlt@44=TransparentBlt

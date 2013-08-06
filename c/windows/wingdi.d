@@ -1,0 +1,5137 @@
+/** wingdi.d
+
+Converted from 'wingdi.h'.
+
+Version: V7.0
+Authors: Koji Kishita
+*/
+module c.windows.wingdi;
+
+
+import c.windows.sdkddkver;
+import c.windows.windef;
+import c.windows.basetsd;
+
+
+extern(C){
+
+enum {
+	R2_BLACK       = 1,
+	R2_NOTMERGEPEN = 2,
+	R2_MASKNOTPEN  = 3,
+	R2_NOTCOPYPEN  = 4,
+	R2_MASKPENNOT  = 5,
+	R2_NOT         = 6,
+	R2_XORPEN      = 7,
+	R2_NOTMASKPEN  = 8,
+	R2_MASKPEN     = 9,
+	R2_NOTXORPEN   = 10,
+	R2_NOP         = 11,
+	R2_MERGENOTPEN = 12,
+	R2_COPYPEN     = 13,
+	R2_MERGEPENNOT = 14,
+	R2_MERGEPEN    = 15,
+	R2_WHITE       = 16,
+	R2_LAST        = 16,
+}
+
+enum {
+	SRCCOPY        = 0x00CC0020,
+	SRCPAINT       = 0x00EE0086,
+	SRCAND         = 0x008800C6,
+	SRCINVERT      = 0x00660046,
+	SRCERASE       = 0x00440328,
+	NOTSRCCOPY     = 0x00330008,
+	NOTSRCERASE    = 0x001100A6,
+	MERGECOPY      = 0x00C000CA,
+	MERGEPAINT     = 0x00BB0226,
+	PATCOPY        = 0x00F00021,
+	PATPAINT       = 0x00FB0A09,
+	PATINVERT      = 0x005A0049,
+	DSTINVERT      = 0x00550009,
+	BLACKNESS      = 0x00000042,
+	WHITENESS      = 0x00FF0062,
+	NOMIRRORBITMAP = 0x80000000,
+	CAPTUREBLT     = 0x40000000,
+}
+
+pure nothrow
+DWORD MAKEROP4(DWORD fore, DWORD back)
+{
+	return  ((back << 8) & 0xFF000000) | fore;
+}
+
+enum GDI_ERROR = 0xFFFFFFFF;
+//(_WIN32_WINNT >= _WIN32_WINNT_WINXP)
+//	const HANDLE HGDI_ERROR = LongToHandle(0xFFFFFFFF); todo: DMD bug
+//}else{
+//	const HANDLE HGDI_ERROR = cast(HANDLE)-1;
+//}
+
+enum {
+	ERROR         = 0,
+	NULLREGION    = 1,
+	SIMPLEREGION  = 2,
+	COMPLEXREGION = 3,
+	RGN_ERROR     = ERROR,
+}
+
+enum {
+	RGN_AND  = 1,
+	RGN_OR   = 2,
+	RGN_XOR  = 3,
+	RGN_DIFF = 4,
+	RGN_COPY = 5,
+	RGN_MIN  = RGN_AND,
+	RGN_MAX  = RGN_COPY,
+}
+
+enum {
+	BLACKONWHITE      = 1,
+	WHITEONBLACK      = 2,
+	COLORONCOLOR      = 3,
+	HALFTONE          = 4,
+	MAXSTRETCHBLTMODE = 4,
+}
+
+enum {
+	STRETCH_ANDSCANS    = BLACKONWHITE,
+	STRETCH_ORSCANS     = WHITEONBLACK,
+	STRETCH_DELETESCANS = COLORONCOLOR,
+	STRETCH_HALFTONE    = HALFTONE,
+}
+
+enum {
+	ALTERNATE     = 1,
+	WINDING       = 2,
+	POLYFILL_LAST = 2,
+}
+
+enum {
+	LAYOUT_RTL                        = 0x00000001,
+	LAYOUT_BTT                        = 0x00000002,
+	LAYOUT_VBH                        = 0x00000004,
+	LAYOUT_ORIENTATIONMASK            = LAYOUT_RTL | LAYOUT_BTT | LAYOUT_VBH,
+	LAYOUT_BITMAPORIENTATIONPRESERVED = 0x00000008
+}
+
+enum {
+	TA_NOUPDATECP     = 0,
+	TA_UPDATECP       = 1,
+	TA_LEFT           = 0,
+	TA_RIGHT          = 2,
+	TA_CENTER         = 6,
+	TA_TOP            = 0,
+	TA_BOTTOM         = 8,
+	TA_BASELINE       = 24,
+	TA_RTLREADING     = 256,
+	TA_MASK           = TA_BASELINE + TA_CENTER + TA_UPDATECP + TA_RTLREADING,
+}
+
+enum {
+	VTA_BASELINE = TA_BASELINE,
+	VTA_LEFT     = TA_BOTTOM,
+	VTA_RIGHT    = TA_TOP,
+	VTA_CENTER   = TA_CENTER,
+	VTA_BOTTOM   = TA_RIGHT,
+	VTA_TOP      = TA_LEFT,
+}
+
+enum {
+	ETO_OPAQUE         = 0x0002,
+	ETO_CLIPPED        = 0x0004,
+	ETO_GLYPH_INDEX    = 0x0010,
+	ETO_RTLREADING     = 0x0080,
+	ETO_NUMERICSLOCAL  = 0x0400,
+	ETO_NUMERICSLATIN  = 0x0800,
+	ETO_IGNORELANGUAGE = 0x1000,
+	ETO_PDY            = 0x2000,
+	//(_WIN32_WINNT >= _WIN32_WINNT_LONGHORN)
+		ETO_REVERSE_INDEX_MAP = 0x10000,
+}
+
+enum ASPECT_FILTERING = 0x0001;
+
+enum {
+	DCB_RESET      = 0x0001,
+	DCB_ACCUMULATE = 0x0002,
+	DCB_DIRTY      = DCB_ACCUMULATE,
+	DCB_SET        = DCB_RESET | DCB_ACCUMULATE,
+	DCB_ENABLE     = 0x0004,
+	DCB_DISABLE    = 0x0008,
+}
+
+enum {
+	META_SETBKCOLOR            = 0x0201,
+	META_SETBKMODE             = 0x0102,
+	META_SETMAPMODE            = 0x0103,
+	META_SETROP2               = 0x0104,
+	META_SETRELABS             = 0x0105,
+	META_SETPOLYFILLMODE       = 0x0106,
+	META_SETSTRETCHBLTMODE     = 0x0107,
+	META_SETTEXTCHAREXTRA      = 0x0108,
+	META_SETTEXTCOLOR          = 0x0209,
+	META_SETTEXTJUSTIFICATION  = 0x020A,
+	META_SETWINDOWORG          = 0x020B,
+	META_SETWINDOWEXT          = 0x020C,
+	META_SETVIEWPORTORG        = 0x020D,
+	META_SETVIEWPORTEXT        = 0x020E,
+	META_OFFSETWINDOWORG       = 0x020F,
+	META_SCALEWINDOWEXT        = 0x0410,
+	META_OFFSETVIEWPORTORG     = 0x0211,
+	META_SCALEVIEWPORTEXT      = 0x0412,
+	META_LINETO                = 0x0213,
+	META_MOVETO                = 0x0214,
+	META_EXCLUDECLIPRECT       = 0x0415,
+	META_INTERSECTCLIPRECT     = 0x0416,
+	META_ARC                   = 0x0817,
+	META_ELLIPSE               = 0x0418,
+	META_FLOODFILL             = 0x0419,
+	META_PIE                   = 0x081A,
+	META_RECTANGLE             = 0x041B,
+	META_ROUNDRECT             = 0x061C,
+	META_PATBLT                = 0x061D,
+	META_SAVEDC                = 0x001E,
+	META_SETPIXEL              = 0x041F,
+	META_OFFSETCLIPRGN         = 0x0220,
+	META_TEXTOUT               = 0x0521,
+	META_BITBLT                = 0x0922,
+	META_STRETCHBLT            = 0x0B23,
+	META_POLYGON               = 0x0324,
+	META_POLYLINE              = 0x0325,
+	META_ESCAPE                = 0x0626,
+	META_RESTOREDC             = 0x0127,
+	META_FILLREGION            = 0x0228,
+	META_FRAMEREGION           = 0x0429,
+	META_INVERTREGION          = 0x012A,
+	META_PAINTREGION           = 0x012B,
+	META_SELECTCLIPREGION      = 0x012C,
+	META_SELECTOBJECT          = 0x012D,
+	META_SETTEXTALIGN          = 0x012E,
+	META_CHORD                 = 0x0830,
+	META_SETMAPPERFLAGS        = 0x0231,
+	META_EXTTEXTOUT            = 0x0a32,
+	META_SETDIBTODEV           = 0x0d33,
+	META_SELECTPALETTE         = 0x0234,
+	META_REALIZEPALETTE        = 0x0035,
+	META_ANIMATEPALETTE        = 0x0436,
+	META_SETPALENTRIES         = 0x0037,
+	META_POLYPOLYGON           = 0x0538,
+	META_RESIZEPALETTE         = 0x0139,
+	META_DIBBITBLT             = 0x0940,
+	META_DIBSTRETCHBLT         = 0x0b41,
+	META_DIBCREATEPATTERNBRUSH = 0x0142,
+	META_STRETCHDIB            = 0x0f43,
+	META_EXTFLOODFILL          = 0x0548,
+	META_SETLAYOUT             = 0x0149,
+	META_DELETEOBJECT          = 0x01f0,
+	META_CREATEPALETTE         = 0x00f7,
+	META_CREATEPATTERNBRUSH    = 0x01F9,
+	META_CREATEPENINDIRECT     = 0x02FA,
+	META_CREATEFONTINDIRECT    = 0x02FB,
+	META_CREATEBRUSHINDIRECT   = 0x02FC,
+	META_CREATEREGION          = 0x06FF,
+}
+
+struct DRAWPATRECT {
+	POINT ptPosition;
+	POINT ptSize;
+	WORD wStyle;
+	WORD wPattern;
+}
+alias DRAWPATRECT* PDRAWPATRECT;
+
+enum {
+	NEWFRAME                = 1,
+	ABORTDOC                = 2,
+	NEXTBAND                = 3,
+	SETCOLORTABLE           = 4,
+	GETCOLORTABLE           = 5,
+	FLUSHOUTPUT             = 6,
+	DRAFTMODE               = 7,
+	QUERYESCSUPPORT         = 8,
+	SETABORTPROC            = 9,
+	STARTDOC                = 10,
+	ENDDOC                  = 11,
+	GETPHYSPAGESIZE         = 12,
+	GETPRINTINGOFFSET       = 13,
+	GETSCALINGFACTOR        = 14,
+	MFCOMMENT               = 15,
+	GETPENWIDTH             = 16,
+	SETCOPYCOUNT            = 17,
+	SELECTPAPERSOURCE       = 18,
+	DEVICEDATA              = 19,
+	PASSTHROUGH             = 19,
+	GETTECHNOLGY            = 20,
+	GETTECHNOLOGY           = 20,
+	SETLINECAP              = 21,
+	SETLINEJOIN             = 22,
+	SETMITERLIMIT           = 23,
+	BANDINFO                = 24,
+	DRAWPATTERNRECT         = 25,
+	GETVECTORPENSIZE        = 26,
+	GETVECTORBRUSHSIZE      = 27,
+	ENABLEDUPLEX            = 28,
+	GETSETPAPERBINS         = 29,
+	GETSETPRINTORIENT       = 30,
+	ENUMPAPERBINS           = 31,
+	SETDIBSCALING           = 32,
+	EPSPRINTING             = 33,
+	ENUMPAPERMETRICS        = 34,
+	GETSETPAPERMETRICS      = 35,
+	POSTSCRIPT_DATA         = 37,
+	POSTSCRIPT_IGNORE       = 38,
+	MOUSETRAILS             = 39,
+	GETDEVICEUNITS          = 42,
+	GETEXTENDEDTEXTMETRICS  = 256,
+	GETEXTENTTABLE          = 257,
+	GETPAIRKERNTABLE        = 258,
+	GETTRACKKERNTABLE       = 259,
+	EXTTEXTOUT              = 512,
+	GETFACENAME             = 513,
+	DOWNLOADFACE            = 514,
+	ENABLERELATIVEWIDTHS    = 768,
+	ENABLEPAIRKERNING       = 769,
+	SETKERNTRACK            = 770,
+	SETALLJUSTVALUES        = 771,
+	SETCHARSET              = 772,
+	STRETCHBLT              = 2048,
+	METAFILE_DRIVER         = 2049,
+	GETSETSCREENPARAMS      = 3072,
+	QUERYDIBSUPPORT         = 3073,
+	BEGIN_PATH              = 4096,
+	CLIP_TO_PATH            = 4097,
+	END_PATH                = 4098,
+	EXT_DEVICE_CAPS         = 4099,
+	RESTORE_CTM             = 4100,
+	SAVE_CTM                = 4101,
+	SET_ARC_DIRECTION       = 4102,
+	SET_BACKGROUND_COLOR    = 4103,
+	SET_POLY_MODE           = 4104,
+	SET_SCREEN_ANGLE        = 4105,
+	SET_SPREAD              = 4106,
+	TRANSFORM_CTM           = 4107,
+	SET_CLIP_BOX            = 4108,
+	SET_BOUNDS              = 4109,
+	SET_MIRROR_MODE         = 4110,
+	OPENCHANNEL             = 4110,
+	DOWNLOADHEADER          = 4111,
+	CLOSECHANNEL            = 4112,
+	POSTSCRIPT_PASSTHROUGH  = 4115,
+	ENCAPSULATED_POSTSCRIPT = 4116,
+	POSTSCRIPT_IDENTIFY     = 4117,
+	POSTSCRIPT_INJECTION    = 4118,
+	CHECKJPEGFORMAT         = 4119,
+	CHECKPNGFORMAT          = 4120,
+	GET_PS_FEATURESETTING   = 4121,
+	GDIPLUS_TS_QUERYVER     = 4122,
+	GDIPLUS_TS_RECORD       = 4123,
+}
+
+//(_WIN32_WINNT >= _WIN32_WINNT_LONGHORN)
+	enum {
+		MILCORE_TS_QUERYVER_RESULT_FALSE = 0x0,
+		MILCORE_TS_QUERYVER_RESULT_TRUE  = 0x7FFFFFFF,
+	}
+
+enum SPCLPASSTHROUGH2 = 4568;
+
+enum {
+	PSIDENT_GDICENTRIC = 0,
+	PSIDENT_PSCENTRIC  = 1,
+}
+
+
+struct PSINJECTDATA {
+	DWORD DataBytes;
+	WORD InjectionPoint;
+	WORD PageNumber;
+}
+alias PSINJECTDATA* PPSINJECTDATA;
+
+enum {
+	PSINJECT_BEGINSTREAM                = 1,
+	PSINJECT_PSADOBE                    = 2,
+	PSINJECT_PAGESATEND                 = 3,
+	PSINJECT_PAGES                      = 4,
+	PSINJECT_DOCNEEDEDRES               = 5,
+	PSINJECT_DOCSUPPLIEDRES             = 6,
+	PSINJECT_PAGEORDER                  = 7,
+	PSINJECT_ORIENTATION                = 8,
+	PSINJECT_BOUNDINGBOX                = 9,
+	PSINJECT_DOCUMENTPROCESSCOLORS      = 10,
+	PSINJECT_COMMENTS                   = 11,
+	PSINJECT_BEGINDEFAULTS              = 12,
+	PSINJECT_ENDDEFAULTS                = 13,
+	PSINJECT_BEGINPROLOG                = 14,
+	PSINJECT_ENDPROLOG                  = 15,
+	PSINJECT_BEGINSETUP                 = 16,
+	PSINJECT_ENDSETUP                   = 17,
+	PSINJECT_TRAILER                    = 18,
+	PSINJECT_EOF                        = 19,
+	PSINJECT_ENDSTREAM                  = 20,
+	PSINJECT_DOCUMENTPROCESSCOLORSATEND = 21,
+	PSINJECT_PAGENUMBER                 = 100,
+	PSINJECT_BEGINPAGESETUP             = 101,
+	PSINJECT_ENDPAGESETUP               = 102,
+	PSINJECT_PAGETRAILER                = 103,
+	PSINJECT_PLATECOLOR                 = 104,
+	PSINJECT_SHOWPAGE                   = 105,
+	PSINJECT_PAGEBBOX                   = 106,
+	PSINJECT_ENDPAGECOMMENTS            = 107,
+	PSINJECT_VMSAVE                     = 200,
+	PSINJECT_VMRESTORE                  = 201,
+	PSINJECT_DLFONT                     = 0xdddddddd,
+}
+
+enum {
+	FEATURESETTING_NUP       = 0,
+	FEATURESETTING_OUTPUT    = 1,
+	FEATURESETTING_PSLEVEL   = 2,
+	FEATURESETTING_CUSTPAPER = 3,
+	FEATURESETTING_MIRROR    = 4,
+	FEATURESETTING_NEGATIVE  = 5,
+	FEATURESETTING_PROTOCOL  = 6,
+	//(_WIN32_WINNT >= _WIN32_WINNT_WINXP)
+		FEATURESETTING_PRIVATE_BEGIN = 0x1000,
+		FEATURESETTING_PRIVATE_END   = 0x1FFF,
+}
+
+struct PSFEATURE_OUTPUT {
+	BOOL bPageIndependent;
+	BOOL bSetPageDevice;
+}
+alias PSFEATURE_OUTPUT* PPSFEATURE_OUTPUT;
+
+struct PSFEATURE_CUSTPAPER {
+	LONG lOrientation;
+	LONG lWidth;
+	LONG lHeight;
+	LONG lWidthOffset;
+	LONG lHeightOffset;
+}
+alias PSFEATURE_CUSTPAPER* PPSFEATURE_CUSTPAPER;
+
+enum {
+	PSPROTOCOL_ASCII  = 0,
+	PSPROTOCOL_BCP    = 1,
+	PSPROTOCOL_TBCP   = 2,
+	PSPROTOCOL_BINARY = 3,
+}
+
+enum {
+	QDI_SETDIBITS   = 1,
+	QDI_GETDIBITS   = 2,
+	QDI_DIBTOSCREEN = 4,
+	QDI_STRETCHDIB  = 8,
+}
+
+enum {
+	SP_NOTREPORTED = 0x4000,
+	SP_ERROR       = -1,
+	SP_APPABORT    = -2,
+	SP_USERABORT   = -3,
+	SP_OUTOFDISK   = -4,
+	SP_OUTOFMEMORY = -5,
+}
+
+enum PR_JOBSTATUS = 0x0000;
+
+enum {
+	OBJ_PEN         = 1,
+	OBJ_BRUSH       = 2,
+	OBJ_DC          = 3,
+	OBJ_METADC      = 4,
+	OBJ_PAL         = 5,
+	OBJ_FONT        = 6,
+	OBJ_BITMAP      = 7,
+	OBJ_REGION      = 8,
+	OBJ_METAFILE    = 9,
+	OBJ_MEMDC       = 10,
+	OBJ_EXTPEN      = 11,
+	OBJ_ENHMETADC   = 12,
+	OBJ_ENHMETAFILE = 13,
+	OBJ_COLORSPACE  = 14,
+	GDI_OBJ_LAST    = OBJ_COLORSPACE,
+}
+
+enum {
+	MWT_IDENTITY      = 1,
+	MWT_LEFTMULTIPLY  = 2,
+	MWT_RIGHTMULTIPLY = 3,
+	MWT_MIN           = MWT_IDENTITY,
+	MWT_MAX           = MWT_RIGHTMULTIPLY,
+}
+
+struct XFORM {
+	FLOAT eM11;
+	FLOAT eM12;
+	FLOAT eM21;
+	FLOAT eM22;
+	FLOAT eDx;
+	FLOAT eDy;
+}
+alias XFORM* PXFORM;
+alias XFORM* LPXFORM;
+
+struct BITMAP {
+	LONG bmType;
+	LONG bmWidth;
+	LONG bmHeight;
+	LONG bmWidthBytes;
+	WORD bmPlanes;
+	WORD bmBitsPixel;
+	LPVOID bmBits;
+}
+alias BITMAP* PBITMAP;
+alias BITMAP* NPBITMAP;
+alias BITMAP* LPBITMAP;
+
+align(1)
+struct RGBTRIPLE {
+	BYTE rgbtBlue;
+	BYTE rgbtGreen;
+	BYTE rgbtRed;
+}
+alias RGBTRIPLE* PRGBTRIPLE;
+alias RGBTRIPLE* NPRGBTRIPLE;
+alias RGBTRIPLE* LPRGBTRIPLE;
+
+struct RGBQUAD {
+	BYTE rgbBlue;
+	BYTE rgbGreen;
+	BYTE rgbRed;
+	BYTE rgbReserved;
+}
+alias RGBQUAD* LPRGBQUAD;
+
+enum {
+	CS_ENABLE           = 0x00000001,
+	CS_DISABLE          = 0x00000002,
+	CS_DELETE_TRANSFORM = 0x00000003,
+}
+
+enum LCS_SIGNATURE = ('P' << 24) | ('S' << 16) | ('O' << 8) | 'C';
+enum LCS_sRGB = ('s' << 24) | ('R' << 16) |  ('G' << 8) | 'B';
+enum LCS_WINDOWS_COLOR_SPACE = ('W' << 24) | ('i' << 16) | ('n' << 8) | ' ';
+
+alias LONG LCSCSTYPE;
+enum LCS_CALIBRATED_RGB = 0x00000000;
+
+alias LONG LCSGAMUTMATCH;
+enum {
+	LCS_GM_BUSINESS         = 0x00000001,
+	LCS_GM_GRAPHICS         = 0x00000002,
+	LCS_GM_IMAGES           = 0x00000004,
+	LCS_GM_ABS_COLORIMETRIC = 0x00000008,
+}
+
+enum {
+	CM_OUT_OF_GAMUT = 255,
+	CM_IN_GAMUT     = 0,
+}
+
+enum {
+	ICM_ADDPROFILE          = 1,
+	ICM_DELETEPROFILE       = 2,
+	ICM_QUERYPROFILE        = 3,
+	ICM_SETDEFAULTPROFILE   = 4,
+	ICM_REGISTERICMATCHER   = 5,
+	ICM_UNREGISTERICMATCHER = 6,
+	ICM_QUERYMATCH          = 7,
+}
+
+pure nothrow
+BYTE GetKValue(DWORD cmyk)
+{
+	return cast(BYTE)cmyk;
+}
+
+pure nothrow
+BYTE GetYValue(DWORD cmyk)
+{
+	return cast(BYTE)(cmyk >> 8);
+}
+
+pure nothrow
+BYTE GetMValue(DWORD cmyk)
+{
+	return cast(BYTE)(cmyk >> 16);
+}
+
+pure nothrow
+BYTE GetCValue(DWORD cmyk)
+{
+	return cast(BYTE)(cmyk >> 24);
+}
+
+pure nothrow
+COLORREF CMYK(BYTE c, BYTE m, BYTE y, BYTE k)
+{
+	return cast(COLORREF)(k | ((cast(WORD)y) << 8) | ((cast(DWORD)m) << 16) | ((cast(DWORD)c) << 24));
+}
+
+alias int FXPT16DOT16;
+alias FXPT16DOT16* LPFXPT16DOT16;
+alias int FXPT2DOT30;
+alias FXPT2DOT30* LPFXPT2DOT30;
+
+struct CIEXYZ {
+	FXPT2DOT30 ciexyzX;
+	FXPT2DOT30 ciexyzY;
+	FXPT2DOT30 ciexyzZ;
+}
+alias CIEXYZ* LPCIEXYZ;
+
+struct CIEXYZTRIPLE {
+	CIEXYZ ciexyzRed;
+	CIEXYZ ciexyzGreen;
+	CIEXYZ ciexyzBlue;
+}
+alias CIEXYZTRIPLE* LPCIEXYZTRIPLE;
+
+struct LOGCOLORSPACEA {
+	DWORD lcsSignature;
+	DWORD lcsVersion;
+	DWORD lcsSize;
+	LCSCSTYPE lcsCSType;
+	LCSGAMUTMATCH lcsIntent;
+	CIEXYZTRIPLE lcsEndpoints;
+	DWORD lcsGammaRed;
+	DWORD lcsGammaGreen;
+	DWORD lcsGammaBlue;
+	CHAR[MAX_PATH] lcsFilename;
+}
+alias LOGCOLORSPACEA* LPLOGCOLORSPACEA;
+struct LOGCOLORSPACEW {
+	DWORD lcsSignature;
+	DWORD lcsVersion;
+	DWORD lcsSize;
+	LCSCSTYPE lcsCSType;
+	LCSGAMUTMATCH lcsIntent;
+	CIEXYZTRIPLE lcsEndpoints;
+	DWORD lcsGammaRed;
+	DWORD lcsGammaGreen;
+	DWORD lcsGammaBlue;
+	WCHAR[MAX_PATH] lcsFilename;
+}
+alias LOGCOLORSPACEW* LPLOGCOLORSPACEW;
+version(UNICODE){
+	alias LOGCOLORSPACEW LOGCOLORSPACE;
+	alias LPLOGCOLORSPACEW LPLOGCOLORSPACE;
+}else{
+	alias LOGCOLORSPACEA LOGCOLORSPACE;
+	alias LPLOGCOLORSPACEA LPLOGCOLORSPACE;
+}
+
+struct BITMAPCOREHEADER {
+	DWORD bcSize;
+	WORD bcWidth;
+	WORD bcHeight;
+	WORD bcPlanes;
+	WORD bcBitCount;
+}
+alias BITMAPCOREHEADER* LPBITMAPCOREHEADER;
+alias BITMAPCOREHEADER* PBITMAPCOREHEADER;
+
+struct BITMAPINFOHEADER {
+	DWORD biSize;
+	LONG biWidth;
+	LONG biHeight;
+	WORD biPlanes;
+	WORD biBitCount;
+	DWORD biCompression;
+	DWORD biSizeImage;
+	LONG biXPelsPerMeter;
+	LONG biYPelsPerMeter;
+	DWORD biClrUsed;
+	DWORD biClrImportant;
+}
+alias BITMAPINFOHEADER* LPBITMAPINFOHEADER;
+alias BITMAPINFOHEADER* PBITMAPINFOHEADER;
+
+struct BITMAPV4HEADER {
+	DWORD bV4Size;
+	LONG bV4Width;
+	LONG bV4Height;
+	WORD bV4Planes;
+	WORD bV4BitCount;
+	DWORD bV4V4Compression;
+	DWORD bV4SizeImage;
+	LONG bV4XPelsPerMeter;
+	LONG bV4YPelsPerMeter;
+	DWORD bV4ClrUsed;
+	DWORD bV4ClrImportant;
+	DWORD bV4RedMask;
+	DWORD bV4GreenMask;
+	DWORD bV4BlueMask;
+	DWORD bV4AlphaMask;
+	DWORD bV4CSType;
+	CIEXYZTRIPLE bV4Endpoints;
+	DWORD bV4GammaRed;
+	DWORD bV4GammaGreen;
+	DWORD bV4GammaBlue;
+}
+alias BITMAPV4HEADER* LPBITMAPV4HEADER;
+alias BITMAPV4HEADER* PBITMAPV4HEADER;
+
+struct BITMAPV5HEADER {
+	DWORD bV5Size;
+	LONG bV5Width;
+	LONG bV5Height;
+	WORD bV5Planes;
+	WORD bV5BitCount;
+	DWORD bV5Compression;
+	DWORD bV5SizeImage;
+	LONG bV5XPelsPerMeter;
+	LONG bV5YPelsPerMeter;
+	DWORD bV5ClrUsed;
+	DWORD bV5ClrImportant;
+	DWORD bV5RedMask;
+	DWORD bV5GreenMask;
+	DWORD bV5BlueMask;
+	DWORD bV5AlphaMask;
+	DWORD bV5CSType;
+	CIEXYZTRIPLE bV5Endpoints;
+	DWORD bV5GammaRed;
+	DWORD bV5GammaGreen;
+	DWORD bV5GammaBlue;
+	DWORD bV5Intent;
+	DWORD bV5ProfileData;
+	DWORD bV5ProfileSize;
+	DWORD bV5Reserved;
+}
+alias BITMAPV5HEADER* LPBITMAPV5HEADER;
+alias BITMAPV5HEADER* PBITMAPV5HEADER;
+
+enum PROFILE_LINKED = ('L' << 24) | ('I' << 16) | ('N' << 8) | 'K';
+enum PROFILE_EMBEDDED = ('M' << 24) | ('B' << 16) | ('E' << 8) | 'D';
+
+enum {
+	BI_RGB       = 0,
+	BI_RLE8      = 1,
+	BI_RLE4      = 2,
+	BI_BITFIELDS = 3,
+	BI_JPEG      = 4,
+	BI_PNG       = 5,
+}
+
+struct BITMAPINFO {
+	BITMAPINFOHEADER bmiHeader;
+	RGBQUAD[1] bmiColors;
+}
+alias BITMAPINFO* LPBITMAPINFO;
+alias BITMAPINFO* PBITMAPINFO;
+
+struct BITMAPCOREINFO {
+	BITMAPCOREHEADER bmciHeader;
+	RGBTRIPLE[1] bmciColors;
+}
+alias BITMAPCOREINFO* LPBITMAPCOREINFO;
+alias BITMAPCOREINFO* PBITMAPCOREINFO;
+
+align(2)
+struct BITMAPFILEHEADER {
+	WORD bfType;
+	DWORD bfSize;
+	WORD bfReserved1;
+	WORD bfReserved2;
+	DWORD bfOffBits;
+}
+alias BITMAPFILEHEADER* LPBITMAPFILEHEADER;
+alias BITMAPFILEHEADER* PBITMAPFILEHEADER;
+
+pure nothrow
+POINTS MAKEPOINTS(DWORD l)
+{
+	return  *(cast(POINTS*)&l);
+}
+
+struct FONTSIGNATURE {
+	DWORD[4] fsUsb;
+	DWORD[2] fsCsb;
+}
+alias FONTSIGNATURE* PFONTSIGNATURE;
+alias FONTSIGNATURE* LPFONTSIGNATURE;
+
+struct CHARSETINFO {
+	UINT ciCharset;
+	UINT ciACP;
+	FONTSIGNATURE fs;
+}
+alias CHARSETINFO* PCHARSETINFO;
+alias CHARSETINFO* NPCHARSETINFO;
+alias CHARSETINFO* LPCHARSETINFO;
+
+enum {
+	TCI_SRCCHARSET  = 1,
+	TCI_SRCCODEPAGE = 2,
+	TCI_SRCFONTSIG  = 3,
+	//(_WIN32_WINNT >= _WIN32_WINNT_WINXP)
+		TCI_SRCLOCALE = 0x1000,
+}
+
+struct LOCALESIGNATURE {
+	DWORD[4] lsUsb;
+	DWORD[2] lsCsbDefault;
+	DWORD[2] lsCsbSupported;
+}
+alias LOCALESIGNATURE* PLOCALESIGNATURE;
+alias LOCALESIGNATURE* LPLOCALESIGNATURE;
+
+
+struct HANDLETABLE {
+	HGDIOBJ[1] objectHandle;
+}
+alias HANDLETABLE* PHANDLETABLE;
+alias HANDLETABLE* LPHANDLETABLE;
+
+struct METARECORD {
+	DWORD rdSize;
+	WORD rdFunction;
+	WORD[1] rdParm;
+}
+alias METARECORD* PMETARECORD;
+alias METARECORD* LPMETARECORD;
+
+struct METAFILEPICT {
+	LONG mm;
+	LONG xExt;
+	LONG yExt;
+	HMETAFILE hMF;
+}
+alias METAFILEPICT* LPMETAFILEPICT;
+
+align(2)
+struct METAHEADER {
+	WORD mtType;
+	WORD mtHeaderSize;
+	WORD mtVersion;
+	DWORD mtSize;
+	WORD mtNoObjects;
+	DWORD mtMaxRecord;
+	WORD mtNoParameters;
+}
+alias METAHEADER* PMETAHEADER;
+alias METAHEADER* LPMETAHEADER;
+
+struct ENHMETARECORD {
+	DWORD iType;
+	DWORD nSize;
+	DWORD[1] dParm;
+}
+alias ENHMETARECORD* PENHMETARECORD;
+alias ENHMETARECORD* LPENHMETARECORD;
+
+struct ENHMETAHEADER {
+	DWORD iType;
+	DWORD nSize;
+	RECTL rclBounds;
+	RECTL rclFrame;
+	DWORD dSignature;
+	DWORD nVersion;
+	DWORD nBytes;
+	DWORD nRecords;
+	WORD nHandles;
+	WORD sReserved;
+	DWORD nDescription;
+	DWORD offDescription;
+	DWORD nPalEntries;
+	SIZEL szlDevice;
+	SIZEL szlMillimeters;
+	DWORD cbPixelFormat;
+	DWORD offPixelFormat;
+	DWORD bOpenGL;
+	SIZEL szlMicrometers;
+}
+alias ENHMETAHEADER* PENHMETAHEADER;
+alias ENHMETAHEADER* LPENHMETAHEADER;
+
+enum {
+	TMPF_FIXED_PITCH = 0x01,
+	TMPF_VECTOR      = 0x02,
+	TMPF_DEVICE      = 0x08,
+	TMPF_TRUETYPE    = 0x04,
+}
+
+version(UNICODE)
+	alias WCHAR BCHAR;
+else
+	alias BYTE BCHAR;
+
+align(4)
+struct TEXTMETRICA {
+	LONG tmHeight;
+	LONG tmAscent;
+	LONG tmDescent;
+	LONG tmInternalLeading;
+	LONG tmExternalLeading;
+	LONG tmAveCharWidth;
+	LONG tmMaxCharWidth;
+	LONG tmWeight;
+	LONG tmOverhang;
+	LONG tmDigitizedAspectX;
+	LONG tmDigitizedAspectY;
+	BYTE tmFirstChar;
+	BYTE tmLastChar;
+	BYTE tmDefaultChar;
+	BYTE tmBreakChar;
+	BYTE tmItalic;
+	BYTE tmUnderlined;
+	BYTE tmStruckOut;
+	BYTE tmPitchAndFamily;
+	BYTE tmCharSet;
+}
+alias TEXTMETRICA* PTEXTMETRICA;
+alias TEXTMETRICA* NPTEXTMETRICA;
+alias TEXTMETRICA* LPTEXTMETRICA;
+
+align(4)
+struct TEXTMETRICW {
+	LONG tmHeight;
+	LONG tmAscent;
+	LONG tmDescent;
+	LONG tmInternalLeading;
+	LONG tmExternalLeading;
+	LONG tmAveCharWidth;
+	LONG tmMaxCharWidth;
+	LONG tmWeight;
+	LONG tmOverhang;
+	LONG tmDigitizedAspectX;
+	LONG tmDigitizedAspectY;
+	WCHAR tmFirstChar;
+	WCHAR tmLastChar;
+	WCHAR tmDefaultChar;
+	WCHAR tmBreakChar;
+	BYTE tmItalic;
+	BYTE tmUnderlined;
+	BYTE tmStruckOut;
+	BYTE tmPitchAndFamily;
+	BYTE tmCharSet;
+}
+alias TEXTMETRICW* PTEXTMETRICW;
+alias TEXTMETRICW* NPTEXTMETRICW;
+alias TEXTMETRICW* LPTEXTMETRICW;
+
+version(UNICODE){
+	alias TEXTMETRICW TEXTMETRIC;
+	alias PTEXTMETRICW PTEXTMETRIC;
+	alias NPTEXTMETRICW NPTEXTMETRIC;
+	alias LPTEXTMETRICW LPTEXTMETRIC;
+}else{
+	alias TEXTMETRICA TEXTMETRIC;
+	alias PTEXTMETRICA PTEXTMETRIC;
+	alias NPTEXTMETRICA NPTEXTMETRIC;
+	alias LPTEXTMETRICA LPTEXTMETRIC;
+}
+
+enum {
+	NTM_REGULAR = 0x00000040,
+	NTM_BOLD    = 0x00000020,
+	NTM_ITALIC  = 0x00000001,
+}
+
+enum {
+	NTM_NONNEGATIVE_AC = 0x00010000,
+	NTM_PS_OPENTYPE    = 0x00020000,
+	NTM_TT_OPENTYPE    = 0x00040000,
+	NTM_MULTIPLEMASTER = 0x00080000,
+	NTM_TYPE1          = 0x00100000,
+	NTM_DSIG           = 0x00200000,
+}
+
+align(4)
+struct NEWTEXTMETRICA {
+	LONG tmHeight;
+	LONG tmAscent;
+	LONG tmDescent;
+	LONG tmInternalLeading;
+	LONG tmExternalLeading;
+	LONG tmAveCharWidth;
+	LONG tmMaxCharWidth;
+	LONG tmWeight;
+	LONG tmOverhang;
+	LONG tmDigitizedAspectX;
+	LONG tmDigitizedAspectY;
+	BYTE tmFirstChar;
+	BYTE tmLastChar;
+	BYTE tmDefaultChar;
+	BYTE tmBreakChar;
+	BYTE tmItalic;
+	BYTE tmUnderlined;
+	BYTE tmStruckOut;
+	BYTE tmPitchAndFamily;
+	BYTE tmCharSet;
+	DWORD ntmFlags;
+	UINT ntmSizeEM;
+	UINT ntmCellHeight;
+	UINT ntmAvgWidth;
+}
+alias NEWTEXTMETRICA* PNEWTEXTMETRICA;
+alias NEWTEXTMETRICA* NPNEWTEXTMETRICA;
+alias NEWTEXTMETRICA* LPNEWTEXTMETRICA;
+
+align(4)
+struct NEWTEXTMETRICW {
+	LONG tmHeight;
+	LONG tmAscent;
+	LONG tmDescent;
+	LONG tmInternalLeading;
+	LONG tmExternalLeading;
+	LONG tmAveCharWidth;
+	LONG tmMaxCharWidth;
+	LONG tmWeight;
+	LONG tmOverhang;
+	LONG tmDigitizedAspectX;
+	LONG tmDigitizedAspectY;
+	WCHAR tmFirstChar;
+	WCHAR tmLastChar;
+	WCHAR tmDefaultChar;
+	WCHAR tmBreakChar;
+	BYTE tmItalic;
+	BYTE tmUnderlined;
+	BYTE tmStruckOut;
+	BYTE tmPitchAndFamily;
+	BYTE tmCharSet;
+	DWORD ntmFlags;
+	UINT ntmSizeEM;
+	UINT ntmCellHeight;
+	UINT ntmAvgWidth;
+}
+alias NEWTEXTMETRICW* PNEWTEXTMETRICW;
+alias NEWTEXTMETRICW* NPNEWTEXTMETRICW;
+alias NEWTEXTMETRICW* LPNEWTEXTMETRICW;
+
+version(UNICODE){
+	alias NEWTEXTMETRICW NEWTEXTMETRIC;
+	alias PNEWTEXTMETRICW PNEWTEXTMETRIC;
+	alias NPNEWTEXTMETRICW NPNEWTEXTMETRIC;
+	alias LPNEWTEXTMETRICW LPNEWTEXTMETRIC;
+}else{
+	alias NEWTEXTMETRICA NEWTEXTMETRIC;
+	alias PNEWTEXTMETRICA PNEWTEXTMETRIC;
+	alias NPNEWTEXTMETRICA NPNEWTEXTMETRIC;
+	alias LPNEWTEXTMETRICA LPNEWTEXTMETRIC;
+}
+
+struct NEWTEXTMETRICEXA {
+	NEWTEXTMETRICA ntmTm;
+	FONTSIGNATURE ntmFontSig;
+}
+struct NEWTEXTMETRICEXW {
+	NEWTEXTMETRICW ntmTm;
+	FONTSIGNATURE ntmFontSig;
+}
+version(UNICODE)
+	alias NEWTEXTMETRICEXW NEWTEXTMETRICEX;
+else
+	alias NEWTEXTMETRICEXA NEWTEXTMETRICEX;
+
+struct PELARRAY {
+	LONG paXCount;
+	LONG paYCount;
+	LONG paXExt;
+	LONG paYExt;
+	BYTE paRGBs;
+}
+alias PELARRAY* PPELARRAY;
+alias PELARRAY* NPPELARRAY;
+alias PELARRAY* LPPELARRAY;
+
+struct LOGBRUSH {
+	UINT lbStyle;
+	COLORREF lbColor;
+	ULONG_PTR lbHatch;
+}
+alias LOGBRUSH* PLOGBRUSH;
+alias LOGBRUSH* NPLOGBRUSH;
+alias LOGBRUSH* LPLOGBRUSH;
+
+struct LOGBRUSH32 {
+	UINT lbStyle;
+	COLORREF lbColor;
+	ULONG lbHatch;
+}
+alias LOGBRUSH32* PLOGBRUSH32;
+alias LOGBRUSH32* NPLOGBRUSH32;
+alias LOGBRUSH32* LPLOGBRUSH32;
+
+alias LOGBRUSH PATTERN;
+alias PATTERN* PPATTERN;
+alias PATTERN* NPPATTERN;
+alias PATTERN* LPPATTERN;
+
+struct LOGPEN {
+	UINT lopnStyle;
+	POINT lopnWidth;
+	COLORREF lopnColor;
+}
+alias LOGPEN* PLOGPEN;
+alias LOGPEN* NPLOGPEN;
+alias LOGPEN* LPLOGPEN;
+
+struct EXTLOGPEN {
+	DWORD elpPenStyle;
+	DWORD elpWidth;
+	UINT elpBrushStyle;
+	COLORREF elpColor;
+	ULONG_PTR elpHatch;
+	DWORD elpNumEntries;
+	DWORD[1] elpStyleEntry;
+}
+alias EXTLOGPEN* PEXTLOGPEN;
+alias EXTLOGPEN* NPEXTLOGPEN;
+alias EXTLOGPEN* LPEXTLOGPEN;
+
+struct EXTLOGPEN32 {
+	DWORD elpPenStyle;
+	DWORD elpWidth;
+	UINT elpBrushStyle;
+	COLORREF elpColor;
+	ULONG elpHatch;
+	DWORD elpNumEntries;
+	DWORD[1] elpStyleEntry;
+}
+alias EXTLOGPEN32* PEXTLOGPEN32;
+alias EXTLOGPEN32* NPEXTLOGPEN32;
+alias EXTLOGPEN32* LPEXTLOGPEN32;
+
+struct PALETTEENTRY {
+	BYTE peRed;
+	BYTE peGreen;
+	BYTE peBlue;
+	BYTE peFlags;
+}
+alias PALETTEENTRY* PPALETTEENTRY;
+alias PALETTEENTRY* LPPALETTEENTRY;
+
+struct LOGPALETTE {
+	WORD palVersion;
+	WORD palNumEntries;
+	PALETTEENTRY[1] palPalEntry;
+}
+alias LOGPALETTE* PLOGPALETTE;
+alias LOGPALETTE* NPLOGPALETTE;
+alias LOGPALETTE* LPLOGPALETTE;
+
+enum LF_FACESIZE = 32;
+
+struct LOGFONTA {
+	LONG lfHeight;
+	LONG lfWidth;
+	LONG lfEscapement;
+	LONG lfOrientation;
+	LONG lfWeight;
+	BYTE lfItalic;
+	BYTE lfUnderline;
+	BYTE lfStrikeOut;
+	BYTE lfCharSet;
+	BYTE lfOutPrecision;
+	BYTE lfClipPrecision;
+	BYTE lfQuality;
+	BYTE lfPitchAndFamily;
+	CHAR[LF_FACESIZE] lfFaceName;
+}
+alias LOGFONTA* PLOGFONTA;
+alias LOGFONTA* NPLOGFONTA;
+alias LOGFONTA* LPLOGFONTA;
+
+struct LOGFONTW {
+	LONG lfHeight;
+	LONG lfWidth;
+	LONG lfEscapement;
+	LONG lfOrientation;
+	LONG lfWeight;
+	BYTE lfItalic;
+	BYTE lfUnderline;
+	BYTE lfStrikeOut;
+	BYTE lfCharSet;
+	BYTE lfOutPrecision;
+	BYTE lfClipPrecision;
+	BYTE lfQuality;
+	BYTE lfPitchAndFamily;
+	WCHAR[LF_FACESIZE] lfFaceName;
+}
+alias LOGFONTW* PLOGFONTW;
+alias LOGFONTW* NPLOGFONTW;
+alias LOGFONTW* LPLOGFONTW;
+
+version(UNICODE){
+	alias LOGFONTW LOGFONT;
+	alias PLOGFONTW PLOGFONT;
+	alias NPLOGFONTW NPLOGFONT;
+	alias LPLOGFONTW LPLOGFONT;
+}else{
+	alias LOGFONTA LOGFONT;
+	alias PLOGFONTA PLOGFONT;
+	alias NPLOGFONTA NPLOGFONT;
+	alias LPLOGFONTA LPLOGFONT;
+}
+
+enum LF_FULLFACESIZE = 64;
+
+struct ENUMLOGFONTA {
+	LOGFONTA elfLogFont;
+	BYTE[LF_FULLFACESIZE] elfFullName;
+	BYTE[LF_FACESIZE] elfStyle;
+}
+alias ENUMLOGFONTA* LPENUMLOGFONTA;
+
+struct ENUMLOGFONTW {
+	LOGFONTW elfLogFont;
+	WCHAR[LF_FULLFACESIZE] elfFullName;
+	WCHAR[LF_FACESIZE] elfStyle;
+}
+alias ENUMLOGFONTW* LPENUMLOGFONTW;
+
+version(UNICODE){
+	alias ENUMLOGFONTW ENUMLOGFONT;
+	alias LPENUMLOGFONTW LPENUMLOGFONT;
+}else{
+	alias ENUMLOGFONTA ENUMLOGFONT;
+	alias LPENUMLOGFONTA LPENUMLOGFONT;
+}
+
+struct ENUMLOGFONTEXA {
+	LOGFONTA elfLogFont;
+	BYTE[LF_FULLFACESIZE] elfFullName;
+	BYTE[LF_FACESIZE] elfStyle;
+	BYTE[LF_FACESIZE] elfScript;
+}
+alias ENUMLOGFONTEXA* LPENUMLOGFONTEXA;
+
+struct ENUMLOGFONTEXW {
+	LOGFONTW elfLogFont;
+	WCHAR[LF_FULLFACESIZE] elfFullName;
+	WCHAR[LF_FACESIZE] elfStyle;
+	WCHAR[LF_FACESIZE] elfScript;
+}
+alias ENUMLOGFONTEXW* LPENUMLOGFONTEXW;
+version(UNICODE){
+	alias ENUMLOGFONTEXW ENUMLOGFONTEX;
+	alias LPENUMLOGFONTEXW LPENUMLOGFONTEX;
+}else{
+	alias ENUMLOGFONTEXA ENUMLOGFONTEX;
+	alias LPENUMLOGFONTEXA LPENUMLOGFONTEX;
+}
+
+enum {
+	OUT_DEFAULT_PRECIS        = 0,
+	OUT_STRING_PRECIS         = 1,
+	OUT_CHARACTER_PRECIS      = 2,
+	OUT_STROKE_PRECIS         = 3,
+	OUT_TT_PRECIS             = 4,
+	OUT_DEVICE_PRECIS         = 5,
+	OUT_RASTER_PRECIS         = 6,
+	OUT_TT_ONLY_PRECIS        = 7,
+	OUT_OUTLINE_PRECIS        = 8,
+	OUT_SCREEN_OUTLINE_PRECIS = 9,
+	OUT_PS_ONLY_PRECIS        = 10,
+}
+
+enum {
+	CLIP_DEFAULT_PRECIS   = 0,
+	CLIP_CHARACTER_PRECIS = 1,
+	CLIP_STROKE_PRECIS    = 2,
+	CLIP_MASK             = 0xf,
+	CLIP_LH_ANGLES        = 1 << 4,
+	CLIP_TT_ALWAYS        = 2 << 4,
+	//(_WIN32_WINNT >= _WIN32_WINNT_LONGHORN)
+		CLIP_DFA_DISABLE = 4 << 4,
+	CLIP_EMBEDDED        = 8 << 4,
+}
+
+enum {
+	DEFAULT_QUALITY = 0,
+	DRAFT_QUALITY   = 1,
+	PROOF_QUALITY   = 2,
+	NONANTIALIASED_QUALITY = 3,
+	ANTIALIASED_QUALITY    = 4,
+	//(_WIN32_WINNT >= _WIN32_WINNT_WINXP)
+		CLEARTYPE_QUALITY         = 5,
+		CLEARTYPE_NATURAL_QUALITY = 6,
+}
+
+enum {
+	DEFAULT_PITCH  = 0,
+	FIXED_PITCH    = 1,
+	VARIABLE_PITCH = 2,
+}
+enum MONO_FONT = 8;
+
+enum {
+	ANSI_CHARSET        = 0,
+	DEFAULT_CHARSET     = 1,
+	SYMBOL_CHARSET      = 2,
+	SHIFTJIS_CHARSET    = 128,
+	HANGEUL_CHARSET     = 129,
+	HANGUL_CHARSET      = 129,
+	GB2312_CHARSET      = 134,
+	CHINESEBIG5_CHARSET = 136,
+	OEM_CHARSET         = 255,
+	JOHAB_CHARSET       = 130,
+	HEBREW_CHARSET      = 177,
+	ARABIC_CHARSET      = 178,
+	GREEK_CHARSET       = 161,
+	TURKISH_CHARSET     = 162,
+	VIETNAMESE_CHARSET  = 163,
+	THAI_CHARSET        = 222,
+	EASTEUROPE_CHARSET  = 238,
+	RUSSIAN_CHARSET     = 204,
+	MAC_CHARSET         = 77,
+	BALTIC_CHARSET      = 186,
+}
+enum {
+	FS_LATIN1      = 0x00000001,
+	FS_LATIN2      = 0x00000002,
+	FS_CYRILLIC    = 0x00000004,
+	FS_GREEK       = 0x00000008,
+	FS_TURKISH     = 0x00000010,
+	FS_HEBREW      = 0x00000020,
+	FS_ARABIC      = 0x00000040,
+	FS_BALTIC      = 0x00000080,
+	FS_VIETNAMESE  = 0x00000100,
+	FS_THAI        = 0x00010000,
+	FS_JISJAPAN    = 0x00020000,
+	FS_CHINESESIMP = 0x00040000,
+	FS_WANSUNG     = 0x00080000,
+	FS_CHINESETRAD = 0x00100000,
+	FS_JOHAB       = 0x00200000,
+	FS_SYMBOL      = 0x80000000,
+}
+
+enum {
+	FF_DONTCARE   = 0 << 4,
+	FF_ROMAN      = 1 << 4,
+	FF_SWISS      = 2 << 4,
+	FF_MODERN     = 3 << 4,
+	FF_SCRIPT     = 4 << 4,
+	FF_DECORATIVE = 5 << 4,
+}
+
+enum {
+	FW_DONTCARE   = 0,
+	FW_THIN       = 100,
+	FW_EXTRALIGHT = 200,
+	FW_LIGHT      = 300,
+	FW_NORMAL     = 400,
+	FW_MEDIUM     = 500,
+	FW_SEMIBOLD   = 600,
+	FW_BOLD       = 700,
+	FW_EXTRABOLD  = 800,
+	FW_HEAVY      = 900,
+	FW_ULTRALIGHT = FW_EXTRALIGHT,
+	FW_REGULAR    = FW_NORMAL,
+	FW_DEMIBOLD   = FW_SEMIBOLD,
+	FW_ULTRABOLD  = FW_EXTRABOLD,
+	FW_BLACK      = FW_HEAVY,
+}
+
+enum {
+	PANOSE_COUNT              = 10,
+	PAN_FAMILYTYPE_INDEX      = 0,
+	PAN_SERIFSTYLE_INDEX      = 1,
+	PAN_WEIGHT_INDEX          = 2,
+	PAN_PROPORTION_INDEX      = 3,
+	PAN_CONTRAST_INDEX        = 4,
+	PAN_STROKEVARIATION_INDEX = 5,
+	PAN_ARMSTYLE_INDEX        = 6,
+	PAN_LETTERFORM_INDEX      = 7,
+	PAN_MIDLINE_INDEX         = 8,
+	PAN_XHEIGHT_INDEX         = 9,
+	PAN_CULTURE_LATIN         = 0,
+}
+
+struct PANOSE {
+	BYTE bFamilyType;
+	BYTE bSerifStyle;
+	BYTE bWeight;
+	BYTE bProportion;
+	BYTE bContrast;
+	BYTE bStrokeVariation;
+	BYTE bArmStyle;
+	BYTE bLetterform;
+	BYTE bMidline;
+	BYTE bXHeight;
+}
+alias PANOSE* LPPANOSE;
+
+enum {
+	PAN_ANY                        = 0,
+	PAN_NO_FIT                     = 1,
+
+	PAN_FAMILY_TEXT_DISPLAY        = 2,
+	PAN_FAMILY_SCRIPT              = 3,
+	PAN_FAMILY_DECORATIVE          = 4,
+	PAN_FAMILY_PICTORIAL           = 5,
+
+	PAN_SERIF_COVE                 = 2,
+	PAN_SERIF_OBTUSE_COVE          = 3,
+	PAN_SERIF_SQUARE_COVE          = 4,
+	PAN_SERIF_OBTUSE_SQUARE_COVE   = 5,
+	PAN_SERIF_SQUARE               = 6,
+	PAN_SERIF_THIN                 = 7,
+	PAN_SERIF_BONE                 = 8,
+	PAN_SERIF_EXAGGERATED          = 9,
+	PAN_SERIF_TRIANGLE             = 10,
+	PAN_SERIF_NORMAL_SANS          = 11,
+	PAN_SERIF_OBTUSE_SANS          = 12,
+	PAN_SERIF_PERP_SANS            = 13,
+	PAN_SERIF_FLARED               = 14,
+	PAN_SERIF_ROUNDED              = 15,
+
+	PAN_WEIGHT_VERY_LIGHT          = 2,
+	PAN_WEIGHT_LIGHT               = 3,
+	PAN_WEIGHT_THIN                = 4,
+	PAN_WEIGHT_BOOK                = 5,
+	PAN_WEIGHT_MEDIUM              = 6,
+	PAN_WEIGHT_DEMI                = 7,
+	PAN_WEIGHT_BOLD                = 8,
+	PAN_WEIGHT_HEAVY               = 9,
+	PAN_WEIGHT_BLACK               = 10,
+	PAN_WEIGHT_NORD                = 11,
+
+	PAN_PROP_OLD_STYLE             = 2,
+	PAN_PROP_MODERN                = 3,
+	PAN_PROP_EVEN_WIDTH            = 4,
+	PAN_PROP_EXPANDED              = 5,
+	PAN_PROP_CONDENSED             = 6,
+	PAN_PROP_VERY_EXPANDED         = 7,
+	PAN_PROP_VERY_CONDENSED        = 8,
+	PAN_PROP_MONOSPACED            = 9,
+
+	PAN_CONTRAST_NONE              = 2,
+	PAN_CONTRAST_VERY_LOW          = 3,
+	PAN_CONTRAST_LOW               = 4,
+	PAN_CONTRAST_MEDIUM_LOW        = 5,
+	PAN_CONTRAST_MEDIUM            = 6,
+	PAN_CONTRAST_MEDIUM_HIGH       = 7,
+	PAN_CONTRAST_HIGH              = 8,
+	PAN_CONTRAST_VERY_HIGH         = 9,
+
+	PAN_STROKE_GRADUAL_DIAG        = 2,
+	PAN_STROKE_GRADUAL_TRAN        = 3,
+	PAN_STROKE_GRADUAL_VERT        = 4,
+	PAN_STROKE_GRADUAL_HORZ        = 5,
+	PAN_STROKE_RAPID_VERT          = 6,
+	PAN_STROKE_RAPID_HORZ          = 7,
+	PAN_STROKE_INSTANT_VERT        = 8,
+
+	PAN_STRAIGHT_ARMS_HORZ         = 2,
+	PAN_STRAIGHT_ARMS_WEDGE        = 3,
+	PAN_STRAIGHT_ARMS_VERT         = 4,
+	PAN_STRAIGHT_ARMS_SINGLE_SERIF = 5,
+	PAN_STRAIGHT_ARMS_DOUBLE_SERIF = 6,
+	PAN_BENT_ARMS_HORZ             = 7,
+	PAN_BENT_ARMS_WEDGE            = 8,
+	PAN_BENT_ARMS_VERT             = 9,
+	PAN_BENT_ARMS_SINGLE_SERIF     = 10,
+	PAN_BENT_ARMS_DOUBLE_SERIF     = 11,
+
+	PAN_LETT_NORMAL_CONTACT        = 2,
+	PAN_LETT_NORMAL_WEIGHTED       = 3,
+	PAN_LETT_NORMAL_BOXED          = 4,
+	PAN_LETT_NORMAL_FLATTENED      = 5,
+	PAN_LETT_NORMAL_ROUNDED        = 6,
+	PAN_LETT_NORMAL_OFF_CENTER     = 7,
+	PAN_LETT_NORMAL_SQUARE         = 8,
+	PAN_LETT_OBLIQUE_CONTACT       = 9,
+	PAN_LETT_OBLIQUE_WEIGHTED      = 10,
+	PAN_LETT_OBLIQUE_BOXED         = 11,
+	PAN_LETT_OBLIQUE_FLATTENED     = 12,
+	PAN_LETT_OBLIQUE_ROUNDED       = 13,
+	PAN_LETT_OBLIQUE_OFF_CENTER    = 14,
+	PAN_LETT_OBLIQUE_SQUARE        = 15,
+
+	PAN_MIDLINE_STANDARD_TRIMMED   = 2,
+	PAN_MIDLINE_STANDARD_POINTED   = 3,
+	PAN_MIDLINE_STANDARD_SERIFED   = 4,
+	PAN_MIDLINE_HIGH_TRIMMED       = 5,
+	PAN_MIDLINE_HIGH_POINTED       = 6,
+	PAN_MIDLINE_HIGH_SERIFED       = 7,
+	PAN_MIDLINE_CONSTANT_TRIMMED   = 8,
+	PAN_MIDLINE_CONSTANT_POINTED   = 9,
+	PAN_MIDLINE_CONSTANT_SERIFED   = 10,
+	PAN_MIDLINE_LOW_TRIMMED        = 11,
+	PAN_MIDLINE_LOW_POINTED        = 12,
+	PAN_MIDLINE_LOW_SERIFED        = 13,
+
+	PAN_XHEIGHT_CONSTANT_SMALL     = 2,
+	PAN_XHEIGHT_CONSTANT_STD       = 3,
+	PAN_XHEIGHT_CONSTANT_LARGE     = 4,
+	PAN_XHEIGHT_DUCKING_SMALL      = 5,
+	PAN_XHEIGHT_DUCKING_STD        = 6,
+	PAN_XHEIGHT_DUCKING_LARGE      = 7,
+}
+
+enum ELF_VENDOR_SIZE = 4;
+
+struct EXTLOGFONTA {
+	LOGFONTA elfLogFont;
+	BYTE[LF_FULLFACESIZE] elfFullName;
+	BYTE[LF_FACESIZE] elfStyle;
+	DWORD elfVersion;
+	DWORD elfStyleSize;
+	DWORD elfMatch;
+	DWORD elfReserved;
+	BYTE[ELF_VENDOR_SIZE] elfVendorId;
+	DWORD elfCulture;
+	PANOSE elfPanose;
+}
+alias EXTLOGFONTA* PEXTLOGFONTA;
+alias EXTLOGFONTA* NPEXTLOGFONTA;
+alias EXTLOGFONTA* LPEXTLOGFONTA;
+
+struct EXTLOGFONTW {
+	LOGFONTW elfLogFont;
+	WCHAR[LF_FULLFACESIZE] elfFullName;
+	WCHAR[LF_FACESIZE] elfStyle;
+	DWORD elfVersion;
+	DWORD elfStyleSize;
+	DWORD elfMatch;
+	DWORD elfReserved;
+	BYTE[ELF_VENDOR_SIZE] elfVendorId;
+	DWORD elfCulture;
+	PANOSE elfPanose;
+}
+alias EXTLOGFONTW* PEXTLOGFONTW;
+alias EXTLOGFONTW* NPEXTLOGFONTW;
+alias EXTLOGFONTW* LPEXTLOGFONTW;
+
+version(UNICODE){
+	alias EXTLOGFONTW EXTLOGFONT;
+	alias PEXTLOGFONTW PEXTLOGFONT;
+	alias NPEXTLOGFONTW NPEXTLOGFONT;
+	alias LPEXTLOGFONTW LPEXTLOGFONT;
+}else{
+	alias EXTLOGFONTA EXTLOGFONT;
+	alias PEXTLOGFONTA PEXTLOGFONT;
+	alias NPEXTLOGFONTA NPEXTLOGFONT;
+	alias LPEXTLOGFONTA LPEXTLOGFONT;
+}
+
+enum {
+	ELF_VERSION       = 0,
+	ELF_CULTURE_LATIN = 0,
+}
+
+enum {
+	RASTER_FONTTYPE   = 0x0001,
+	DEVICE_FONTTYPE   = 0x0002,
+	TRUETYPE_FONTTYPE = 0x0004,
+}
+
+pure nothrow
+COLORREF RGB(BYTE r, BYTE g, BYTE b)
+{
+	return cast(COLORREF)(r | ((cast(WORD)g) << 8) | ((cast(DWORD)b) << 16));
+}
+
+pure nothrow
+COLORREF PALETTERGB(BYTE r, BYTE g, BYTE b)
+{
+	return 0x02000000 | RGB(r, g, b);
+}
+
+pure nothrow
+COLORREF PALETTEINDEX(WORD i)
+{
+	return cast(COLORREF)(0x01000000 | i);
+}
+
+enum {
+	PC_RESERVED   = 0x01,
+	PC_EXPLICIT   = 0x02,
+	PC_NOCOLLAPSE = 0x04,
+}
+
+pure nothrow
+BYTE GetRValue(DWORD rgb)
+{
+	return LOBYTE(rgb);
+}
+
+pure nothrow
+BYTE GetGValue(DWORD rgb)
+{
+	return LOBYTE((cast(WORD)rgb) >> 8);
+}
+
+pure nothrow
+BYTE GetBValue(DWORD rgb)
+{
+	return LOBYTE(rgb >> 16);
+}
+
+enum {
+	TRANSPARENT = 1,
+	OPAQUE      = 2,
+	BKMODE_LAST = 2,
+}
+
+enum {
+	GM_COMPATIBLE = 1,
+	GM_ADVANCED   = 2,
+	GM_LAST       = 2,
+}
+
+enum {
+	PT_CLOSEFIGURE = 0x01,
+	PT_LINETO      = 0x02,
+	PT_BEZIERTO    = 0x04,
+	PT_MOVETO      = 0x06,
+}
+
+enum {
+	MM_TEXT        = 1,
+	MM_LOMETRIC    = 2,
+	MM_HIMETRIC    = 3,
+	MM_LOENGLISH   = 4,
+	MM_HIENGLISH   = 5,
+	MM_TWIPS       = 6,
+	MM_ISOTROPIC   = 7,
+	MM_ANISOTROPIC = 8,
+}
+
+enum {
+	MM_MIN            = MM_TEXT,
+	MM_MAX            = MM_ANISOTROPIC,
+	MM_MAX_FIXEDSCALE = MM_TWIPS,
+}
+
+enum {
+	ABSOLUTE = 1,
+	RELATIVE = 2,
+}
+
+enum {
+	WHITE_BRUSH         = 0,
+	LTGRAY_BRUSH        = 1,
+	GRAY_BRUSH          = 2,
+	DKGRAY_BRUSH        = 3,
+	BLACK_BRUSH         = 4,
+	NULL_BRUSH          = 5,
+	HOLLOW_BRUSH        = NULL_BRUSH,
+	WHITE_PEN           = 6,
+	BLACK_PEN           = 7,
+	NULL_PEN            = 8,
+	OEM_FIXED_FONT      = 10,
+	ANSI_FIXED_FONT     = 11,
+	ANSI_VAR_FONT       = 12,
+	SYSTEM_FONT         = 13,
+	DEVICE_DEFAULT_FONT = 14,
+	DEFAULT_PALETTE     = 15,
+	SYSTEM_FIXED_FONT   = 16,
+	DEFAULT_GUI_FONT    = 17,
+	DC_BRUSH            = 18,
+	DC_PEN              = 19,
+	STOCK_LAST          = 19,
+}
+
+enum CLR_INVALID = 0xFFFFFFFF;
+
+enum {
+	BS_SOLID         = 0,
+	BS_NULL          = 1,
+	BS_HOLLOW        = BS_NULL,
+	BS_HATCHED       = 2,
+	BS_PATTERN       = 3,
+	BS_INDEXED       = 4,
+	BS_DIBPATTERN    = 5,
+	BS_DIBPATTERNPT  = 6,
+	BS_PATTERN8X8    = 7,
+	BS_DIBPATTERN8X8 = 8,
+	BS_MONOPATTERN   = 9,
+}
+
+enum {
+	HS_HORIZONTAL = 0,
+	HS_VERTICAL   = 1,
+	HS_FDIAGONAL  = 2,
+	HS_BDIAGONAL  = 3,
+	HS_CROSS      = 4,
+	HS_DIAGCROSS  = 5,
+	HS_API_MAX    = 12,
+}
+
+enum {
+	PS_SOLID         = 0,
+	PS_DASH          = 1,
+	PS_DOT           = 2,
+	PS_DASHDOT       = 3,
+	PS_DASHDOTDOT    = 4,
+	PS_NULL          = 5,
+	PS_INSIDEFRAME   = 6,
+	PS_USERSTYLE     = 7,
+	PS_ALTERNATE     = 8,
+	PS_STYLE_MASK    = 0x0000000F,
+
+	PS_ENDCAP_ROUND  = 0x00000000,
+	PS_ENDCAP_SQUARE = 0x00000100,
+	PS_ENDCAP_FLAT   = 0x00000200,
+	PS_ENDCAP_MASK   = 0x00000F00,
+
+	PS_JOIN_ROUND    = 0x00000000,
+	PS_JOIN_BEVEL    = 0x00001000,
+	PS_JOIN_MITER    = 0x00002000,
+	PS_JOIN_MASK     = 0x0000F000,
+
+	PS_COSMETIC      = 0x00000000,
+	PS_GEOMETRIC     = 0x00010000,
+	PS_TYPE_MASK     = 0x000F0000,
+}
+
+enum {
+	AD_COUNTERCLOCKWISE = 1,
+	AD_CLOCKWISE        = 2,
+}
+
+enum {
+	DRIVERVERSION = 0,
+	TECHNOLOGY    = 2,
+	HORZSIZE      = 4,
+	VERTSIZE      = 6,
+	HORZRES       = 8,
+	VERTRES       = 10,
+	BITSPIXEL     = 12,
+	PLANES        = 14,
+	NUMBRUSHES    = 16,
+	NUMPENS       = 18,
+	NUMMARKERS    = 20,
+	NUMFONTS      = 22,
+	NUMCOLORS     = 24,
+	PDEVICESIZE   = 26,
+	CURVECAPS     = 28,
+	LINECAPS      = 30,
+	POLYGONALCAPS = 32,
+	TEXTCAPS      = 34,
+	CLIPCAPS      = 36,
+	RASTERCAPS    = 38,
+	ASPECTX       = 40,
+	ASPECTY       = 42,
+	ASPECTXY      = 44,
+
+	LOGPIXELSX    = 88,
+	LOGPIXELSY    = 90,
+
+	SIZEPALETTE  = 104,
+	NUMRESERVED  = 106,
+	COLORRES     = 108,
+}
+
+enum {
+	PHYSICALWIDTH   = 110,
+	PHYSICALHEIGHT  = 111,
+	PHYSICALOFFSETX = 112,
+	PHYSICALOFFSETY = 113,
+	SCALINGFACTORX  = 114,
+	SCALINGFACTORY  = 115,
+	VREFRESH        = 116,
+	DESKTOPVERTRES  = 117,
+	DESKTOPHORZRES  = 118,
+	BLTALIGNMENT    = 119,
+	SHADEBLENDCAPS  = 120,
+	COLORMGMTCAPS   = 121,
+}
+
+enum {
+	DT_PLOTTER    = 0,
+	DT_RASDISPLAY = 1,
+	DT_RASPRINTER = 2,
+	DT_RASCAMERA  = 3,
+	DT_CHARSTREAM = 4,
+	DT_METAFILE   = 5,
+	DT_DISPFILE   = 6,
+}
+
+enum {
+	CC_NONE       = 0,
+	CC_CIRCLES    = 1,
+	CC_PIE        = 2,
+	CC_CHORD      = 4,
+	CC_ELLIPSES   = 8,
+	CC_WIDE       = 16,
+	CC_STYLED     = 32,
+	CC_WIDESTYLED = 64,
+	CC_INTERIORS  = 128,
+	CC_ROUNDRECT  = 256,
+}
+
+enum {
+	LC_NONE       = 0,
+	LC_POLYLINE   = 2,
+	LC_MARKER     = 4,
+	LC_POLYMARKER = 8,
+	LC_WIDE       = 16,
+	LC_STYLED     = 32,
+	LC_WIDESTYLED = 64,
+	LC_INTERIORS  = 128,
+}
+
+enum {
+	PC_NONE        = 0,
+	PC_POLYGON     = 1,
+	PC_RECTANGLE   = 2,
+	PC_WINDPOLYGON = 4,
+	PC_TRAPEZOID   = 4,
+	PC_SCANLINE    = 8,
+	PC_WIDE        = 16,
+	PC_STYLED      = 32,
+	PC_WIDESTYLED  = 64,
+	PC_INTERIORS   = 128,
+	PC_POLYPOLYGON = 256,
+	PC_PATHS       = 512,
+}
+
+enum {
+	CP_NONE      = 0,
+	CP_RECTANGLE = 1,
+	CP_REGION    = 2,
+}
+
+enum {
+	TC_OP_CHARACTER = 0x00000001,
+	TC_OP_STROKE    = 0x00000002,
+	TC_CP_STROKE    = 0x00000004,
+	TC_CR_90        = 0x00000008,
+	TC_CR_ANY       = 0x00000010,
+	TC_SF_X_YINDEP  = 0x00000020,
+	TC_SA_DOUBLE    = 0x00000040,
+	TC_SA_INTEGER   = 0x00000080,
+	TC_SA_CONTIN    = 0x00000100,
+	TC_EA_DOUBLE    = 0x00000200,
+	TC_IA_ABLE      = 0x00000400,
+	TC_UA_ABLE      = 0x00000800,
+	TC_SO_ABLE      = 0x00001000,
+	TC_RA_ABLE      = 0x00002000,
+	TC_VA_ABLE      = 0x00004000,
+	TC_RESERVED     = 0x00008000,
+	TC_SCROLLBLT    = 0x00010000,
+}
+
+enum {
+	RC_NONE,
+	RC_BITBLT       = 1,
+	RC_BANDING      = 2,
+	RC_SCALING      = 4,
+	RC_BITMAP64     = 8,
+	RC_GDI20_OUTPUT = 0x0010,
+	RC_GDI20_STATE  = 0x0020,
+	RC_SAVEBITMAP   = 0x0040,
+	RC_DI_BITMAP    = 0x0080,
+	RC_PALETTE      = 0x0100,
+	RC_DIBTODEV     = 0x0200,
+	RC_BIGFONT      = 0x0400,
+	RC_STRETCHBLT   = 0x0800,
+	RC_FLOODFILL    = 0x1000,
+	RC_STRETCHDIB   = 0x2000,
+	RC_OP_DX_OUTPUT = 0x4000,
+	RC_DEVBITS      = 0x8000,
+}
+
+enum {
+	SB_NONE          = 0x00000000,
+	SB_CONST_ALPHA   = 0x00000001,
+	SB_PIXEL_ALPHA   = 0x00000002,
+	SB_PREMULT_ALPHA = 0x00000004,
+	SB_GRAD_RECT     = 0x00000010,
+	SB_GRAD_TRI      = 0x00000020,
+}
+
+enum {
+	CM_NONE       = 0x00000000,
+	CM_DEVICE_ICM = 0x00000001,
+	CM_GAMMA_RAMP = 0x00000002,
+	CM_CMYK_COLOR = 0x00000004,
+}
+
+enum {
+	DIB_RGB_COLORS = 0,
+	DIB_PAL_COLORS = 1,
+}
+
+enum {
+	SYSPAL_ERROR       = 0,
+	SYSPAL_STATIC      = 1,
+	SYSPAL_NOSTATIC    = 2,
+	SYSPAL_NOSTATIC256 = 3,
+}
+
+enum CBM_INIT = 0x04L;
+
+enum {
+	 FLOODFILLBORDER  = 0,
+	 FLOODFILLSURFACE = 1,
+}
+
+enum CCHDEVICENAME = 32;
+
+enum CCHFORMNAME = 32;
+
+//(_WIN32_WINNT >= (OSVER(NTDDI_WINXPSP2) >> 16))
+	struct DEVMODEA {
+		BYTE[CCHDEVICENAME] dmDeviceName;
+		WORD dmSpecVersion;
+		WORD dmDriverVersion;
+		WORD dmSize;
+		WORD dmDriverExtra;
+		DWORD dmFields;
+		union {
+			struct {
+				short dmOrientation;
+				short dmPaperSize;
+				short dmPaperLength;
+				short dmPaperWidth;
+				short dmScale;
+				short dmCopies;
+				short dmDefaultSource;
+				short dmPrintQuality;
+			}
+			struct {
+				POINTL dmPosition;
+				DWORD  dmDisplayOrientation;
+				DWORD  dmDisplayFixedOutput;
+			}
+		}
+		short dmColor;
+		short dmDuplex;
+		short dmYResolution;
+		short dmTTOption;
+		short dmCollate;
+		BYTE[CCHFORMNAME] dmFormName;
+		WORD dmLogPixels;
+		DWORD dmBitsPerPel;
+		DWORD dmPelsWidth;
+		DWORD dmPelsHeight;
+		union {
+			DWORD dmDisplayFlags;
+			DWORD dmNup;
+		}
+		DWORD dmDisplayFrequency;
+
+		DWORD dmICMMethod;
+		DWORD dmICMIntent;
+		DWORD dmMediaType;
+		DWORD dmDitherType;
+		DWORD dmReserved1;
+		DWORD dmReserved2;
+		DWORD dmPanningWidth;
+		DWORD dmPanningHeight;
+	}
+	alias DEVMODEA* PDEVMODEA;
+	alias DEVMODEA* NPDEVMODEA;
+	alias DEVMODEA* LPDEVMODEA;
+
+	struct DEVMODEW {
+		WCHAR[CCHDEVICENAME] dmDeviceName;
+		WORD dmSpecVersion;
+		WORD dmDriverVersion;
+		WORD dmSize;
+		WORD dmDriverExtra;
+		DWORD dmFields;
+		union {
+			struct {
+				short dmOrientation;
+				short dmPaperSize;
+				short dmPaperLength;
+				short dmPaperWidth;
+				short dmScale;
+				short dmCopies;
+				short dmDefaultSource;
+				short dmPrintQuality;
+			}
+			struct {
+				POINTL dmPosition;
+				DWORD dmDisplayOrientation;
+				DWORD dmDisplayFixedOutput;
+			}
+		}
+		short dmColor;
+		short dmDuplex;
+		short dmYResolution;
+		short dmTTOption;
+		short dmCollate;
+		WCHAR[CCHFORMNAME] dmFormName;
+		WORD dmLogPixels;
+		DWORD dmBitsPerPel;
+		DWORD dmPelsWidth;
+		DWORD dmPelsHeight;
+		union {
+			DWORD dmDisplayFlags;
+			DWORD dmNup;
+		}
+		DWORD  dmDisplayFrequency;
+		DWORD dmICMMethod;
+		DWORD dmICMIntent;
+		DWORD dmMediaType;
+		DWORD dmDitherType;
+		DWORD dmReserved1;
+		DWORD dmReserved2;
+		DWORD dmPanningWidth;
+		DWORD dmPanningHeight;
+	}
+	alias DEVMODEW* PDEVMODEW;
+	alias DEVMODEW* NPDEVMODEW;
+	alias DEVMODEW* LPDEVMODEW;
+
+	version(UNICODE){
+		alias DEVMODEW DEVMODE;
+		alias PDEVMODEW PDEVMODE;
+		alias NPDEVMODEW NPDEVMODE;
+		alias LPDEVMODEW LPDEVMODE;
+	}else{
+		alias DEVMODEA DEVMODE;
+		alias PDEVMODEA PDEVMODE;
+		alias NPDEVMODEA NPDEVMODE;
+		alias LPDEVMODEA LPDEVMODE;
+	}
+/*}else{
+	struct DEVMODEA {
+		BYTE[CCHDEVICENAME] dmDeviceName;
+		WORD dmSpecVersion;
+		WORD dmDriverVersion;
+		WORD dmSize;
+		WORD dmDriverExtra;
+		DWORD dmFields;
+		union {
+			struct {
+				short dmOrientation;
+				short dmPaperSize;
+				short dmPaperLength;
+				short dmPaperWidth;
+			}
+			POINTL dmPosition;
+		}
+		short dmScale;
+		short dmCopies;
+		short dmDefaultSource;
+		short dmPrintQuality;
+		short dmColor;
+		short dmDuplex;
+		short dmYResolution;
+		short dmTTOption;
+		short dmCollate;
+		BYTE[CCHFORMNAME] dmFormName;
+		WORD dmLogPixels;
+		DWORD dmBitsPerPel;
+		DWORD dmPelsWidth;
+		DWORD dmPelsHeight;
+		union {
+			DWORD dmDisplayFlags;
+			DWORD dmNup;
+		}
+		DWORD dmDisplayFrequency;
+		DWORD dmICMMethod;
+		DWORD dmICMIntent;
+		DWORD dmMediaType;
+		DWORD dmDitherType;
+		DWORD dmReserved1;
+		DWORD dmReserved2;
+		DWORD dmPanningWidth;
+		DWORD dmPanningHeight;
+	}
+	alias DEVMODEA* PDEVMODEA;
+	alias DEVMODEA* NPDEVMODEA;
+	alias DEVMODEA* LPDEVMODEA;
+
+	struct DEVMODEW {
+		WCHAR[CCHDEVICENAME] dmDeviceName;
+		WORD dmSpecVersion;
+		WORD dmDriverVersion;
+		WORD dmSize;
+		WORD dmDriverExtra;
+		DWORD dmFields;
+		union {
+			struct {
+				short dmOrientation;
+				short dmPaperSize;
+				short dmPaperLength;
+				short dmPaperWidth;
+			}
+			POINTL dmPosition;
+		}
+		short dmScale;
+		short dmCopies;
+		short dmDefaultSource;
+		short dmPrintQuality;
+		short dmColor;
+		short dmDuplex;
+		short dmYResolution;
+		short dmTTOption;
+		short dmCollate;
+		WCHAR[CCHFORMNAME]  dmFormName;
+		WORD dmLogPixels;
+		DWORD dmBitsPerPel;
+		DWORD dmPelsWidth;
+		DWORD dmPelsHeight;
+		union {
+			DWORD dmDisplayFlags;
+			DWORD dmNup;
+		}
+		DWORD dmDisplayFrequency;
+		DWORD dmICMMethod;
+		DWORD dmICMIntent;
+		DWORD dmMediaType;
+		DWORD dmDitherType;
+		DWORD dmReserved1;
+		DWORD dmReserved2;
+		DWORD dmPanningWidth;
+		DWORD dmPanningHeight;
+	}
+	alias DEVMODEW* PDEVMODEW;
+	alias DEVMODEW* NPDEVMODEW;
+	alias DEVMODEW* LPDEVMODEW;
+
+	version(UNICODE){
+		alias DEVMODEW DEVMODE;
+		alias PDEVMODEW PDEVMODE;
+		alias NPDEVMODEW NPDEVMODE;
+		alias LPDEVMODEW LPDEVMODE;
+	}else{
+		alias DEVMODEA DEVMODE;
+		alias PDEVMODEA PDEVMODE;
+		alias NPDEVMODEA NPDEVMODE;
+		alias LPDEVMODEA LPDEVMODE;
+	}
+}*/
+
+enum DM_SPECVERSION = 0x0401;
+
+enum {
+	DM_ORIENTATION             = 0x00000001,
+	DM_PAPERSIZE               = 0x00000002,
+	DM_PAPERLENGTH             = 0x00000004,
+	DM_PAPERWIDTH              = 0x00000008,
+	DM_SCALE                   = 0x00000010,
+	DM_POSITION                = 0x00000020,
+	DM_NUP                     = 0x00000040,
+	//(WINVER >= _WIN32_WINNT_WINXP)
+		DM_DISPLAYORIENTATION = 0x00000080,
+	DM_COPIES                  = 0x00000100,
+	DM_DEFAULTSOURCE           = 0x00000200,
+	DM_PRINTQUALITY            = 0x00000400,
+	DM_COLOR                   = 0x00000800,
+	DM_DUPLEX                  = 0x00001000,
+	DM_YRESOLUTION             = 0x00002000,
+	DM_TTOPTION                = 0x00004000,
+	DM_COLLATE                 = 0x00008000,
+	DM_FORMNAME                = 0x00010000,
+	DM_LOGPIXELS               = 0x00020000,
+	DM_BITSPERPEL              = 0x00040000,
+	DM_PELSWIDTH               = 0x00080000,
+	DM_PELSHEIGHT              = 0x00100000,
+	DM_DISPLAYFLAGS            = 0x00200000,
+	DM_DISPLAYFREQUENCY        = 0x00400000,
+	DM_ICMMETHOD               = 0x00800000,
+	DM_ICMINTENT               = 0x01000000,
+	DM_MEDIATYPE               = 0x02000000,
+	DM_DITHERTYPE              = 0x04000000,
+	DM_PANNINGWIDTH            = 0x08000000,
+	DM_PANNINGHEIGHT           = 0x10000000,
+	//(WINVER >= _WIN32_WINNT_WINXP)
+		DM_DISPLAYFIXEDOUTPUT = 0x20000000,
+}
+
+enum {
+	DMORIENT_PORTRAIT  = 1,
+	DMORIENT_LANDSCAPE = 2,
+}
+
+enum {
+	DMPAPER_LETTER                        = 1,
+	DMPAPER_LETTERSMALL                   = 2,
+	DMPAPER_TABLOID                       = 3,
+	DMPAPER_LEDGER                        = 4,
+	DMPAPER_LEGAL                         = 5,
+	DMPAPER_STATEMENT                     = 6,
+	DMPAPER_EXECUTIVE                     = 7,
+	DMPAPER_A3                            = 8,
+	DMPAPER_A4                            = 9,
+	DMPAPER_A4SMALL                       = 10,
+	DMPAPER_A5                            = 11,
+	DMPAPER_B4                            = 12,
+	DMPAPER_B5                            = 13,
+	DMPAPER_FOLIO                         = 14,
+	DMPAPER_QUARTO                        = 15,
+	DMPAPER_10X14                         = 16,
+	DMPAPER_11X17                         = 17,
+	DMPAPER_NOTE                          = 18,
+	DMPAPER_ENV_9                         = 19,
+	DMPAPER_ENV_10                        = 20,
+	DMPAPER_ENV_11                        = 21,
+	DMPAPER_ENV_12                        = 22,
+	DMPAPER_ENV_14                        = 23,
+	DMPAPER_CSHEET                        = 24,
+	DMPAPER_DSHEET                        = 25,
+	DMPAPER_ESHEET                        = 26,
+	DMPAPER_ENV_DL                        = 27,
+	DMPAPER_ENV_C5                        = 28,
+	DMPAPER_ENV_C3                        = 29,
+	DMPAPER_ENV_C4                        = 30,
+	DMPAPER_ENV_C6                        = 31,
+	DMPAPER_ENV_C65                       = 32,
+	DMPAPER_ENV_B4                        = 33,
+	DMPAPER_ENV_B5                        = 34,
+	DMPAPER_ENV_B6                        = 35,
+	DMPAPER_ENV_ITALY                     = 36,
+	DMPAPER_ENV_MONARCH                   = 37,
+	DMPAPER_ENV_PERSONAL                  = 38,
+	DMPAPER_FANFOLD_US                    = 39,
+	DMPAPER_FANFOLD_STD_GERMAN            = 40,
+	DMPAPER_FANFOLD_LGL_GERMAN            = 41,
+	DMPAPER_FIRST                         = DMPAPER_LETTER,
+	DMPAPER_ISO_B4                        = 42,
+	DMPAPER_JAPANESE_POSTCARD             = 43,
+	DMPAPER_9X11                          = 44,
+	DMPAPER_10X11                         = 45,
+	DMPAPER_15X11                         = 46,
+	DMPAPER_ENV_INVITE                    = 47,
+	DMPAPER_RESERVED_48                   = 48,
+	DMPAPER_RESERVED_49                   = 49,
+	DMPAPER_LETTER_EXTRA                  = 50,
+	DMPAPER_LEGAL_EXTRA                   = 51,
+	DMPAPER_TABLOID_EXTRA                 = 52,
+	DMPAPER_A4_EXTRA                      = 53,
+	DMPAPER_LETTER_TRANSVERSE             = 54,
+	DMPAPER_A4_TRANSVERSE                 = 55,
+	DMPAPER_LETTER_EXTRA_TRANSVERSE       = 56,
+	DMPAPER_A_PLUS                        = 57,
+	DMPAPER_B_PLUS                        = 58,
+	DMPAPER_LETTER_PLUS                   = 59,
+	DMPAPER_A4_PLUS                       = 60,
+	DMPAPER_A5_TRANSVERSE                 = 61,
+	DMPAPER_B5_TRANSVERSE                 = 62,
+	DMPAPER_A3_EXTRA                      = 63,
+	DMPAPER_A5_EXTRA                      = 64,
+	DMPAPER_B5_EXTRA                      = 65,
+	DMPAPER_A2                            = 66,
+	DMPAPER_A3_TRANSVERSE                 = 67,
+	DMPAPER_A3_EXTRA_TRANSVERSE           = 68,
+	DMPAPER_DBL_JAPANESE_POSTCARD         = 69,
+	DMPAPER_A6                            = 70,
+	DMPAPER_JENV_KAKU2                    = 71,
+	DMPAPER_JENV_KAKU3                    = 72,
+	DMPAPER_JENV_CHOU3                    = 73,
+	DMPAPER_JENV_CHOU4                    = 74,
+	DMPAPER_LETTER_ROTATED                = 75,
+	DMPAPER_A3_ROTATED                    = 76,
+	DMPAPER_A4_ROTATED                    = 77,
+	DMPAPER_A5_ROTATED                    = 78,
+	DMPAPER_B4_JIS_ROTATED                = 79,
+	DMPAPER_B5_JIS_ROTATED                = 80,
+	DMPAPER_JAPANESE_POSTCARD_ROTATED     = 81,
+	DMPAPER_DBL_JAPANESE_POSTCARD_ROTATED = 82,
+	DMPAPER_A6_ROTATED                    = 83,
+	DMPAPER_JENV_KAKU2_ROTATED            = 84,
+	DMPAPER_JENV_KAKU3_ROTATED            = 85,
+	DMPAPER_JENV_CHOU3_ROTATED            = 86,
+	DMPAPER_JENV_CHOU4_ROTATED            = 87,
+	DMPAPER_B6_JIS                        = 88,
+	DMPAPER_B6_JIS_ROTATED                = 89,
+	DMPAPER_12X11                         = 90,
+	DMPAPER_JENV_YOU4                     = 91,
+	DMPAPER_JENV_YOU4_ROTATED             = 92,
+	DMPAPER_P16K                          = 93,
+	DMPAPER_P32K                          = 94,
+	DMPAPER_P32KBIG                       = 95,
+	DMPAPER_PENV_1                        = 96,
+	DMPAPER_PENV_2                        = 97,
+	DMPAPER_PENV_3                        = 98,
+	DMPAPER_PENV_4                        = 99,
+	DMPAPER_PENV_5                        = 100,
+	DMPAPER_PENV_6                        = 101,
+	DMPAPER_PENV_7                        = 102,
+	DMPAPER_PENV_8                        = 103,
+	DMPAPER_PENV_9                        = 104,
+	DMPAPER_PENV_10                       = 105,
+	DMPAPER_P16K_ROTATED                  = 106,
+	DMPAPER_P32K_ROTATED                  = 107,
+	DMPAPER_P32KBIG_ROTATED               = 108,
+	DMPAPER_PENV_1_ROTATED                = 109,
+	DMPAPER_PENV_2_ROTATED                = 110,
+	DMPAPER_PENV_3_ROTATED                = 111,
+	DMPAPER_PENV_4_ROTATED                = 112,
+	DMPAPER_PENV_5_ROTATED                = 113,
+	DMPAPER_PENV_6_ROTATED                = 114,
+	DMPAPER_PENV_7_ROTATED                = 115,
+	DMPAPER_PENV_8_ROTATED                = 116,
+	DMPAPER_PENV_9_ROTATED                = 117,
+	DMPAPER_PENV_10_ROTATED               = 118,
+}
+enum DMPAPER_LAST = DMPAPER_PENV_10_ROTATED;
+enum DMPAPER_USER = 256;
+
+enum {
+	DMBIN_UPPER         = 1,
+	DMBIN_ONLYONE       = 1,
+	DMBIN_LOWER         = 2,
+	DMBIN_MIDDLE        = 3,
+	DMBIN_MANUAL        = 4,
+	DMBIN_ENVELOPE      = 5,
+	DMBIN_ENVMANUAL     = 6,
+	DMBIN_AUTO          = 7,
+	DMBIN_TRACTOR       = 8,
+	DMBIN_SMALLFMT      = 9,
+	DMBIN_LARGEFMT      = 10,
+	DMBIN_LARGECAPACITY = 11,
+	DMBIN_CASSETTE      = 14,
+	DMBIN_FORMSOURCE    = 15,
+	DMBIN_FIRST         = DMBIN_UPPER,
+	DMBIN_LAST          = DMBIN_FORMSOURCE,
+	DMBIN_USER          = 256,
+}
+
+enum {
+	DMRES_DRAFT  = -1,
+	DMRES_LOW    = -2,
+	DMRES_MEDIUM = -3,
+	DMRES_HIGH   = -4,
+}
+
+enum {
+	DMCOLOR_MONOCHROME = 1,
+	DMCOLOR_COLOR      = 2,
+}
+
+enum {
+	DMDUP_SIMPLEX    = 1,
+	DMDUP_VERTICAL   = 2,
+	DMDUP_HORIZONTAL = 3,
+}
+
+enum {
+	DMTT_BITMAP           = 1,
+	DMTT_DOWNLOAD         = 2,
+	DMTT_SUBDEV           = 3,
+	DMTT_DOWNLOAD_OUTLINE = 4,
+}
+
+enum {
+	DMCOLLATE_FALSE = 0,
+	DMCOLLATE_TRUE  = 1,
+}
+
+//(WINVER >= _WIN32_WINNT_WINXP)
+	enum {
+		DMDO_DEFAULT  =  0,
+		DMDO_90       =  1,
+		DMDO_180      =  2,
+		DMDO_270      =  3,
+
+		DMDFO_DEFAULT = 0,
+		DMDFO_STRETCH = 1,
+		DMDFO_CENTER  = 2,
+	}
+
+	enum {
+		DM_INTERLACED           = 0x00000002,
+		DMDISPLAYFLAGS_TEXTMODE = 0x00000004,
+	}
+
+	enum {
+		DMNUP_SYSTEM = 1,
+		DMNUP_ONEUP  = 2,
+	}
+
+	enum {
+		DMICMMETHOD_NONE   = 1,
+		DMICMMETHOD_SYSTEM = 2,
+		DMICMMETHOD_DRIVER = 3,
+		DMICMMETHOD_DEVICE = 4,
+		DMICMMETHOD_USER   = 256,
+	}
+
+	enum {
+		DMICM_SATURATE         = 1,
+		DMICM_CONTRAST         = 2,
+		DMICM_COLORIMETRIC     = 3,
+		DMICM_ABS_COLORIMETRIC = 4,
+		DMICM_USER             = 256,
+	}
+
+	enum {
+		DMMEDIA_STANDARD     = 1,
+		DMMEDIA_TRANSPARENCY = 2,
+		DMMEDIA_GLOSSY       = 3,
+		DMMEDIA_USER         = 256,
+	}
+
+	enum {
+		DMDITHER_NONE           = 1,
+		DMDITHER_COARSE         = 2,
+		DMDITHER_FINE           = 3,
+		DMDITHER_LINEART        = 4,
+		DMDITHER_ERRORDIFFUSION = 5,
+		DMDITHER_RESERVED6      = 6,
+		DMDITHER_RESERVED7      = 7,
+		DMDITHER_RESERVED8      = 8,
+		DMDITHER_RESERVED9      = 9,
+		DMDITHER_GRAYSCALE      = 10,
+		DMDITHER_USER           = 256,
+	}
+
+struct DISPLAY_DEVICEA {
+	DWORD cb;
+	CHAR[32] DeviceName;
+	CHAR[128] DeviceString;
+	DWORD StateFlags;
+	CHAR[128] DeviceID;
+	CHAR[128] DeviceKey;
+}
+alias DISPLAY_DEVICEA* PDISPLAY_DEVICEA;
+alias DISPLAY_DEVICEA* LPDISPLAY_DEVICEA;
+
+struct DISPLAY_DEVICEW {
+	DWORD cb;
+	WCHAR[32] DeviceName;
+	WCHAR[128] DeviceString;
+	DWORD StateFlags;
+	WCHAR[128] DeviceID;
+	WCHAR[128] DeviceKey;
+}
+alias DISPLAY_DEVICEW* PDISPLAY_DEVICEW;
+alias DISPLAY_DEVICEW* LPDISPLAY_DEVICEW;
+version(UNICODE){
+	alias DISPLAY_DEVICEW DISPLAY_DEVICE;
+	alias PDISPLAY_DEVICEW PDISPLAY_DEVICE;
+	alias LPDISPLAY_DEVICEW LPDISPLAY_DEVICE;
+}else{
+	alias DISPLAY_DEVICEA DISPLAY_DEVICE;
+	alias PDISPLAY_DEVICEA PDISPLAY_DEVICE;
+	alias LPDISPLAY_DEVICEA LPDISPLAY_DEVICE;
+}
+enum {
+	DISPLAY_DEVICE_ATTACHED_TO_DESKTOP = 0x00000001,
+	DISPLAY_DEVICE_MULTI_DRIVER        = 0x00000002,
+	DISPLAY_DEVICE_PRIMARY_DEVICE      = 0x00000004,
+	DISPLAY_DEVICE_MIRRORING_DRIVER    = 0x00000008,
+	DISPLAY_DEVICE_VGA_COMPATIBLE      = 0x00000010,
+	DISPLAY_DEVICE_REMOVABLE           = 0x00000020,
+	DISPLAY_DEVICE_MODESPRUNED         = 0x08000000,
+	DISPLAY_DEVICE_REMOTE              = 0x04000000,
+	DISPLAY_DEVICE_DISCONNECT          = 0x02000000,
+	DISPLAY_DEVICE_TS_COMPATIBLE       = 0x00200000,
+	//(_WIN32_WINNT >= _WIN32_WINNT_LONGHORN){
+		DISPLAY_DEVICE_UNSAFE_MODES_ON = 0x00080000,
+	DISPLAY_DEVICE_ACTIVE              = 0x00000001,
+	DISPLAY_DEVICE_ATTACHED            = 0x00000002,
+}
+
+//(WINVER >= _WIN32_WINNT_WIN7)
+	enum DISPLAYCONFIG_MAXPATH = 1024;
+
+	struct  DISPLAYCONFIG_RATIONAL {
+		UINT32 Numerator;
+		UINT32 Denominator;
+	}
+
+	enum {
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_OTHER                = -1,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_HD15                 =  0,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_SVIDEO               =  1,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_COMPOSITE_VIDEO      =  2,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_COMPONENT_VIDEO      =  3,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DVI                  =  4,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_HDMI                 =  5,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_LVDS                 =  6,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_D_JPN                =  8,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_SDI                  =  9,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EXTERNAL = 10,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EMBEDDED = 11,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EXTERNAL         = 12,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED         = 13,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_SDTVDONGLE           = 14,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL             = 0x80000000,
+		DISPLAYCONFIG_OUTPUT_TECHNOLOGY_FORCE_UINT32         = 0xFFFFFFFF
+	}
+	alias uint DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY;
+
+	enum {
+		DISPLAYCONFIG_SCANLINE_ORDERING_UNSPECIFIED                = 0,
+		DISPLAYCONFIG_SCANLINE_ORDERING_PROGRESSIVE                = 1,
+		DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED                 = 2,
+		DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED_UPPERFIELDFIRST = DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED,
+		DISPLAYCONFIG_SCANLINE_ORDERING_INTERLACED_LOWERFIELDFIRST = 3,
+		DISPLAYCONFIG_SCANLINE_ORDERING_FORCE_UINT32               = 0xFFFFFFFF
+	}
+	alias uint DISPLAYCONFIG_SCANLINE_ORDERING;
+
+	struct DISPLAYCONFIG_2DREGION {
+		UINT32 cx;
+		UINT32 cy;
+	}
+
+	struct DISPLAYCONFIG_VIDEO_SIGNAL_INFO {
+		UINT64 pixelRate;
+		DISPLAYCONFIG_RATIONAL hSyncFreq;
+		DISPLAYCONFIG_RATIONAL vSyncFreq;
+		DISPLAYCONFIG_2DREGION activeSize;
+		DISPLAYCONFIG_2DREGION totalSize;
+		UINT32 videoStandard;
+		DISPLAYCONFIG_SCANLINE_ORDERING scanLineOrdering;
+	}
+
+	enum {
+		DISPLAYCONFIG_SCALING_IDENTITY               = 1,
+		DISPLAYCONFIG_SCALING_CENTERED               = 2,
+		DISPLAYCONFIG_SCALING_STRETCHED              = 3,
+		DISPLAYCONFIG_SCALING_ASPECTRATIOCENTEREDMAX = 4,
+		DISPLAYCONFIG_SCALING_CUSTOM                 = 5,
+		DISPLAYCONFIG_SCALING_PREFERRED              = 128,
+		DISPLAYCONFIG_SCALING_FORCE_UINT32           = 0xFFFFFFFF
+	}
+	alias int  DISPLAYCONFIG_SCALING;
+
+	enum {
+		DISPLAYCONFIG_ROTATION_IDENTITY     = 1,
+		DISPLAYCONFIG_ROTATION_ROTATE90     = 2,
+		DISPLAYCONFIG_ROTATION_ROTATE180    = 3,
+		DISPLAYCONFIG_ROTATION_ROTATE270    = 4,
+		DISPLAYCONFIG_ROTATION_FORCE_UINT32 = 0xFFFFFFFF
+	}
+	alias int DISPLAYCONFIG_ROTATION;
+
+	enum {
+		DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE       = 1,
+		DISPLAYCONFIG_MODE_INFO_TYPE_TARGET       = 2,
+		DISPLAYCONFIG_MODE_INFO_TYPE_FORCE_UINT32 = 0xFFFFFFFF
+	}
+	alias int DISPLAYCONFIG_MODE_INFO_TYPE;
+
+	enum {
+		DISPLAYCONFIG_PIXELFORMAT_8BPP         = 1,
+		DISPLAYCONFIG_PIXELFORMAT_16BPP        = 2,
+		DISPLAYCONFIG_PIXELFORMAT_24BPP        = 3,
+		DISPLAYCONFIG_PIXELFORMAT_32BPP        = 4,
+		DISPLAYCONFIG_PIXELFORMAT_NONGDI       = 5,
+		DISPLAYCONFIG_PIXELFORMAT_FORCE_UINT32 = 0xffffffff
+	}
+	alias int DISPLAYCONFIG_PIXELFORMAT;
+
+	struct DISPLAYCONFIG_SOURCE_MODE {
+		UINT32 width;
+		UINT32 height;
+		DISPLAYCONFIG_PIXELFORMAT pixelFormat;
+		POINTL position;
+	}
+
+	struct DISPLAYCONFIG_TARGET_MODE {
+		DISPLAYCONFIG_VIDEO_SIGNAL_INFO targetVideoSignalInfo;
+	}
+
+	struct DISPLAYCONFIG_MODE_INFO {
+		DISPLAYCONFIG_MODE_INFO_TYPE infoType;
+		UINT32 id;
+		LUID adapterId;
+		union {
+			DISPLAYCONFIG_TARGET_MODE targetMode;
+			DISPLAYCONFIG_SOURCE_MODE sourceMode;
+		}
+	}
+
+	enum DISPLAYCONFIG_PATH_MODE_IDX_INVALID = 0xffffffff;
+
+	struct DISPLAYCONFIG_PATH_SOURCE_INFO {
+		LUID adapterId;
+		UINT32 d;
+		UINT32 modeInfoIdx;
+		UINT32 statusFlags;
+	}
+
+	enum DISPLAYCONFIG_SOURCE_IN_USE = 0x00000001;
+
+	struct DISPLAYCONFIG_PATH_TARGET_INFO {
+		LUID adapterId;
+		UINT32 id;
+		UINT32 modeInfoIdx;
+		DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY outputTechnology;
+		DISPLAYCONFIG_ROTATION rotation;
+		DISPLAYCONFIG_SCALING scaling;
+		DISPLAYCONFIG_RATIONAL refreshRate;
+		DISPLAYCONFIG_SCANLINE_ORDERING scanLineOrdering;
+		BOOL targetAvailable;
+		UINT32 statusFlags;
+	}
+
+	enum {
+		DISPLAYCONFIG_TARGET_IN_USE                     = 0x00000001,
+		DISPLAYCONFIG_TARGET_FORCIBLE                   = 0x00000002,
+		DISPLAYCONFIG_TARGET_FORCED_AVAILABILITY_BOOT   = 0x00000004,
+		DISPLAYCONFIG_TARGET_FORCED_AVAILABILITY_PATH   = 0x00000008,
+		DISPLAYCONFIG_TARGET_FORCED_AVAILABILITY_SYSTEM = 0x00000010,
+	}
+
+	struct DISPLAYCONFIG_PATH_INFO {
+		DISPLAYCONFIG_PATH_SOURCE_INFO sourceInfo;
+		DISPLAYCONFIG_PATH_TARGET_INFO targetInfo;
+		UINT32 flags;
+	}
+
+	enum DISPLAYCONFIG_PATH_ACTIVE = 0x00000001;
+
+	enum {
+		DISPLAYCONFIG_TOPOLOGY_INTERNAL     = 0x00000001,
+		DISPLAYCONFIG_TOPOLOGY_CLONE        = 0x00000002,
+		DISPLAYCONFIG_TOPOLOGY_EXTEND       = 0x00000004,
+		DISPLAYCONFIG_TOPOLOGY_EXTERNAL     = 0x00000008,
+		DISPLAYCONFIG_TOPOLOGY_FORCE_UINT32 = 0xFFFFFFFF,
+	}
+	alias int DISPLAYCONFIG_TOPOLOGY_ID;
+
+	enum {
+		DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME           = 1,
+		DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME           = 2,
+		DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_PREFERRED_MODE = 3,
+		DISPLAYCONFIG_DEVICE_INFO_GET_ADAPTER_NAME          = 4,
+		DISPLAYCONFIG_DEVICE_INFO_SET_TARGET_PERSISTENCE    = 5,
+		DISPLAYCONFIG_DEVICE_INFO_FORCE_UINT32              = 0xFFFFFFFF,
+	}
+	alias int DISPLAYCONFIG_DEVICE_INFO_TYPE;
+
+	struct DISPLAYCONFIG_DEVICE_INFO_HEADER {
+		DISPLAYCONFIG_DEVICE_INFO_TYPE type;
+		UINT32 size;
+		LUID adapterId;
+		UINT32 id;
+	}
+
+	struct DISPLAYCONFIG_SOURCE_DEVICE_NAME {
+		DISPLAYCONFIG_DEVICE_INFO_HEADER header;
+		WCHAR[CCHDEVICENAME] viewGdiDeviceName;
+	}
+
+	struct DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS {
+		union {
+			struct {
+				UINT32 friendlyNameFromEdid1friendlyNameForced1edidIdsValid1reserved29;
+			}
+			UINT32 value;
+		}
+	}
+
+	struct DISPLAYCONFIG_TARGET_DEVICE_NAME {
+		DISPLAYCONFIG_DEVICE_INFO_HEADER header;
+		DISPLAYCONFIG_TARGET_DEVICE_NAME_FLAGS flags;
+		DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY outputTechnology;
+		UINT16 edidManufactureId;
+		UINT16 edidProductCodeId;
+		UINT32 connectorInstance;
+		WCHAR[64] monitorFriendlyDeviceName;
+		WCHAR[128] monitorDevicePath;
+	}
+
+	struct DISPLAYCONFIG_TARGET_PREFERRED_MODE {
+		DISPLAYCONFIG_DEVICE_INFO_HEADER header;
+		UINT32 width;
+		UINT32 height;
+		DISPLAYCONFIG_TARGET_MODE targetMode;
+	}
+
+	struct DISPLAYCONFIG_ADAPTER_NAME {
+		DISPLAYCONFIG_DEVICE_INFO_HEADER header;
+		WCHAR[128] adapterDevicePath;
+	}
+
+	struct DISPLAYCONFIG_SET_TARGET_PERSISTENCE {
+		DISPLAYCONFIG_DEVICE_INFO_HEADER header;
+		union {
+			struct {
+				UINT32 bootPersistenceOn1reserved31;
+			}
+			UINT32 value;
+		}
+	}
+
+	enum {
+		QDC_ALL_PATHS         = 0x00000001,
+		QDC_ONLY_ACTIVE_PATHS = 0x00000002,
+		QDC_DATABASE_CURRENT  = 0x00000004,
+	}
+
+	enum {
+		SDC_TOPOLOGY_INTERNAL           = 0x00000001,
+		SDC_TOPOLOGY_CLONE              = 0x00000002,
+		SDC_TOPOLOGY_EXTEND             = 0x00000004,
+		SDC_TOPOLOGY_EXTERNAL           = 0x00000008,
+		SDC_TOPOLOGY_SUPPLIED           = 0x00000010,
+		SDC_USE_DATABASE_CURRENT        = SDC_TOPOLOGY_INTERNAL | SDC_TOPOLOGY_CLONE | SDC_TOPOLOGY_EXTEND | SDC_TOPOLOGY_EXTERNAL,
+		SDC_USE_SUPPLIED_DISPLAY_CONFIG = 0x00000020,
+		SDC_VALIDATE                    = 0x00000040,
+		SDC_APPLY                       = 0x00000080,
+		SDC_NO_OPTIMIZATION             = 0x00000100,
+		SDC_SAVE_TO_DATABASE            = 0x00000200,
+		SDC_ALLOW_CHANGES               = 0x00000400,
+		SDC_PATH_PERSIST_IF_REQUIRED    = 0x00000800,
+		SDC_FORCE_MODE_ENUMERATION      = 0x00001000,
+		SDC_ALLOW_PATH_ORDER_CHANGES    = 0x00002000,
+	}
+
+enum RDH_RECTANGLES = 1;
+
+struct RGNDATAHEADER {
+	DWORD dwSize;
+	DWORD iType;
+	DWORD nCount;
+	DWORD nRgnSize;
+	RECT rcBound;
+}
+alias RGNDATAHEADER* PRGNDATAHEADER;
+
+struct RGNDATA {
+	RGNDATAHEADER rdh;
+	char[1] Buffer;
+}
+alias RGNDATA* PRGNDATA;
+alias RGNDATA* NPRGNDATA;
+alias RGNDATA* LPRGNDATA;
+
+enum SYSRGN = 4;
+
+struct ABC {
+	int abcA;
+	UINT abcB;
+	int abcC;
+}
+alias ABC* PABC;
+alias ABC* NPABC;
+alias ABC* LPABC;
+
+struct ABCFLOAT {
+	FLOAT abcfA;
+	FLOAT abcfB;
+	FLOAT abcfC;
+}
+alias ABCFLOAT* PABCFLOAT;
+alias ABCFLOAT* NPABCFLOAT;
+alias ABCFLOAT* LPABCFLOAT;
+
+struct OUTLINETEXTMETRICA {
+	UINT otmSize;
+	TEXTMETRICA otmTextMetrics;
+	BYTE otmFiller;
+	PANOSE otmPanoseNumber;
+	UINT otmfsSelection;
+	UINT otmfsType;
+	int otmsCharSlopeRise;
+	int otmsCharSlopeRun;
+	int otmItalicAngle;
+	UINT otmEMSquare;
+	int otmAscent;
+	int otmDescent;
+	UINT otmLineGap;
+	UINT otmsCapEmHeight;
+	UINT otmsXHeight;
+	RECT otmrcFontBox;
+	int otmMacAscent;
+	int otmMacDescent;
+	UINT otmMacLineGap;
+	UINT otmusMinimumPPEM;
+	POINT otmptSubscriptSize;
+	POINT otmptSubscriptOffset;
+	POINT otmptSuperscriptSize;
+	POINT otmptSuperscriptOffset;
+	UINT otmsStrikeoutSize;
+	int otmsStrikeoutPosition;
+	int otmsUnderscoreSize;
+	int otmsUnderscorePosition;
+	PSTR otmpFamilyName;
+	PSTR otmpFaceName;
+	PSTR otmpStyleName;
+	PSTR otmpFullName;
+}
+alias OUTLINETEXTMETRICA* POUTLINETEXTMETRICA;
+alias OUTLINETEXTMETRICA* NPOUTLINETEXTMETRICA;
+alias OUTLINETEXTMETRICA* LPOUTLINETEXTMETRICA;
+struct OUTLINETEXTMETRICW {
+	UINT otmSize;
+	TEXTMETRICW otmTextMetrics;
+	BYTE otmFiller;
+	PANOSE otmPanoseNumber;
+	UINT otmfsSelection;
+	UINT otmfsType;
+	int otmsCharSlopeRise;
+	int otmsCharSlopeRun;
+	int otmItalicAngle;
+	UINT otmEMSquare;
+	int otmAscent;
+	int otmDescent;
+	UINT otmLineGap;
+	UINT otmsCapEmHeight;
+	UINT otmsXHeight;
+	RECT otmrcFontBox;
+	int otmMacAscent;
+	int otmMacDescent;
+	UINT otmMacLineGap;
+	UINT otmusMinimumPPEM;
+	POINT otmptSubscriptSize;
+	POINT otmptSubscriptOffset;
+	POINT otmptSuperscriptSize;
+	POINT otmptSuperscriptOffset;
+	UINT otmsStrikeoutSize;
+	int otmsStrikeoutPosition;
+	int otmsUnderscoreSize;
+	int otmsUnderscorePosition;
+	PSTR otmpFamilyName;
+	PSTR otmpFaceName;
+	PSTR otmpStyleName;
+	PSTR otmpFullName;
+}
+alias OUTLINETEXTMETRICW* POUTLINETEXTMETRICW;
+alias OUTLINETEXTMETRICW* NPOUTLINETEXTMETRICW;
+alias OUTLINETEXTMETRICW* LPOUTLINETEXTMETRICW;
+
+version(UNICODE){
+	alias OUTLINETEXTMETRICW OUTLINETEXTMETRIC;
+	alias POUTLINETEXTMETRICW POUTLINETEXTMETRIC;
+	alias NPOUTLINETEXTMETRICW NPOUTLINETEXTMETRIC;
+	alias LPOUTLINETEXTMETRICW LPOUTLINETEXTMETRIC;
+}else{
+	alias OUTLINETEXTMETRICA OUTLINETEXTMETRIC;
+	alias POUTLINETEXTMETRICA POUTLINETEXTMETRIC;
+	alias NPOUTLINETEXTMETRICA NPOUTLINETEXTMETRIC;
+	alias LPOUTLINETEXTMETRICA LPOUTLINETEXTMETRIC;
+}
+
+struct POLYTEXTA {
+	int x;
+	int y;
+	UINT n;
+	LPCSTR lpstr;
+	UINT uiFlags;
+	RECT rcl;
+	int* pdx;
+}
+alias POLYTEXTA* PPOLYTEXTA;
+alias POLYTEXTA* NPPOLYTEXTA;
+alias POLYTEXTA* LPPOLYTEXTA;
+struct POLYTEXTW {
+	int x;
+	int y;
+	UINT n;
+	LPCWSTR lpstr;
+	UINT uiFlags;
+	RECT rcl;
+	int* pdx;
+}
+alias POLYTEXTW* PPOLYTEXTW;
+alias POLYTEXTW* NPPOLYTEXTW;
+alias POLYTEXTW* LPPOLYTEXTW;
+version(UNICODE){
+	alias POLYTEXTW POLYTEXT;
+	alias PPOLYTEXTW PPOLYTEXT;
+	alias NPPOLYTEXTW NPPOLYTEXT;
+	alias LPPOLYTEXTW LPPOLYTEXT;
+}else{
+	alias POLYTEXTA POLYTEXT;
+	alias PPOLYTEXTA PPOLYTEXT;
+	alias NPPOLYTEXTA NPPOLYTEXT;
+	alias LPPOLYTEXTA LPPOLYTEXT;
+}
+
+struct FIXED {
+	WORD fract;
+	short value;
+}
+
+struct MAT2 {
+	FIXED eM11;
+	FIXED eM12;
+	FIXED eM21;
+	FIXED eM22;
+}
+alias MAT2* LPMAT2;
+
+struct GLYPHMETRICS {
+	UINT gmBlackBoxX;
+	UINT gmBlackBoxY;
+	POINT gmptGlyphOrigin;
+	short gmCellIncX;
+	short gmCellIncY;
+}
+alias GLYPHMETRICS* LPGLYPHMETRICS;
+
+enum {
+	GGO_METRICS      = 0,
+	GGO_BITMAP       = 1,
+	GGO_NATIVE       = 2,
+	GGO_BEZIER       = 3,
+	GGO_GRAY2_BITMAP = 4,
+	GGO_GRAY4_BITMAP = 5,
+	GGO_GRAY8_BITMAP = 6,
+	GGO_GLYPH_INDEX  = 0x0080,
+	GGO_UNHINTED     = 0x0100,
+}
+
+enum {
+	TT_POLYGON_TYPE = 24,
+	TT_PRIM_LINE    = 1,
+	TT_PRIM_QSPLINE = 2,
+	TT_PRIM_CSPLINE = 3,
+}
+
+struct POINTFX {
+	FIXED x;
+	FIXED y;
+}
+alias POINTFX* LPPOINTFX;
+
+struct TTPOLYCURVE {
+	WORD wType;
+	WORD cpfx;
+	POINTFX[1] apfx;
+}
+alias TTPOLYCURVE* LPTTPOLYCURVE;
+
+struct TTPOLYGONHEADER {
+	DWORD cb;
+	DWORD dwType;
+	POINTFX pfxStart;
+}
+alias TTPOLYGONHEADER* LPTTPOLYGONHEADER;
+
+enum {
+	GCP_DBCS          = 0x0001,
+	GCP_REORDER       = 0x0002,
+	GCP_USEKERNING    = 0x0008,
+	GCP_GLYPHSHAPE    = 0x0010,
+	GCP_LIGATE        = 0x0020,
+//  GCP_GLYPHINDEXING = 0x0080,
+	GCP_DIACRITIC     = 0x0100,
+	GCP_KASHIDA       = 0x0400,
+	GCP_ERROR         = 0x8000,
+	FLI_MASK          = 0x103B,
+}
+
+enum {
+	GCP_JUSTIFY         = 0x00010000,
+//  GCP_NODIACRITICS    = 0x00020000,
+	FLI_GLYPHS          = 0x00040000,
+	GCP_CLASSIN         = 0x00080000,
+	GCP_MAXEXTENT       = 0x00100000,
+	GCP_JUSTIFYIN       = 0x00200000,
+	GCP_DISPLAYZWG      = 0x00400000,
+	GCP_SYMSWAPOFF      = 0x00800000,
+	GCP_NUMERICOVERRIDE = 0x01000000,
+	GCP_NEUTRALOVERRIDE = 0x02000000,
+	GCP_NUMERICSLATIN   = 0x04000000,
+	GCP_NUMERICSLOCAL   = 0x08000000,
+}
+
+enum {
+	GCPCLASS_LATIN                  = 1,
+	GCPCLASS_HEBREW                 = 2,
+	GCPCLASS_ARABIC                 = 2,
+	GCPCLASS_NEUTRAL                = 3,
+	GCPCLASS_LOCALNUMBER            = 4,
+	GCPCLASS_LATINNUMBER            = 5,
+	GCPCLASS_LATINNUMERICTERMINATOR = 6,
+	GCPCLASS_LATINNUMERICSEPARATOR  = 7,
+	GCPCLASS_NUMERICSEPARATOR       = 8,
+	GCPCLASS_PREBOUNDLTR            = 0x80,
+	GCPCLASS_PREBOUNDRTL            = 0x40,
+	GCPCLASS_POSTBOUNDLTR           = 0x20,
+	GCPCLASS_POSTBOUNDRTL           = 0x10,
+}
+
+enum {
+	GCPGLYPH_LINKBEFORE = 0x8000,
+	GCPGLYPH_LINKAFTER  = 0x4000,
+}
+
+struct GCP_RESULTSA {
+	DWORD lStructSize;
+	LPSTR lpOutString;
+	UINT* lpOrder;
+	int* lpDx;
+	int* lpCaretPos;
+	LPSTR lpClass;
+	LPWSTR lpGlyphs;
+	UINT nGlyphs;
+	int nMaxFit;
+}
+alias GCP_RESULTSA* LPGCP_RESULTSA;
+struct GCP_RESULTSW {
+	DWORD lStructSize;
+	LPWSTR lpOutString;
+	UINT* lpOrder;
+	int* lpDx;
+	int* lpCaretPos;
+	LPSTR lpClass;
+	LPWSTR lpGlyphs;
+	UINT nGlyphs;
+	int nMaxFit;
+}
+alias GCP_RESULTSW* LPGCP_RESULTSW;
+version(UNICODE){
+	alias GCP_RESULTSW GCP_RESULTS;
+	alias LPGCP_RESULTSW LPGCP_RESULTS;
+}else{
+	alias GCP_RESULTSA GCP_RESULTS;
+	alias LPGCP_RESULTSA LPGCP_RESULTS;
+}
+
+struct RASTERIZER_STATUS {
+	short nSize;
+	short wFlags;
+	short nLanguageID;
+}
+alias RASTERIZER_STATUS* LPRASTERIZER_STATUS;
+
+enum {
+	TT_AVAILABLE = 0x0001,
+	TT_ENABLED   = 0x0002,
+}
+
+struct PIXELFORMATDESCRIPTOR {
+	WORD nSize;
+	WORD nVersion;
+	DWORD dwFlags;
+	BYTE iPixelType;
+	BYTE cColorBits;
+	BYTE cRedBits;
+	BYTE cRedShift;
+	BYTE cGreenBits;
+	BYTE cGreenShift;
+	BYTE cBlueBits;
+	BYTE cBlueShift;
+	BYTE cAlphaBits;
+	BYTE cAlphaShift;
+	BYTE cAccumBits;
+	BYTE cAccumRedBits;
+	BYTE cAccumGreenBits;
+	BYTE cAccumBlueBits;
+	BYTE cAccumAlphaBits;
+	BYTE cDepthBits;
+	BYTE cStencilBits;
+	BYTE cAuxBuffers;
+	BYTE iLayerType;
+	BYTE bReserved;
+	DWORD dwLayerMask;
+	DWORD dwVisibleMask;
+	DWORD dwDamageMask;
+}
+alias PIXELFORMATDESCRIPTOR* PPIXELFORMATDESCRIPTOR;
+alias PIXELFORMATDESCRIPTOR* LPPIXELFORMATDESCRIPTOR;
+
+enum {
+	PFD_TYPE_RGBA       = 0,
+	PFD_TYPE_COLORINDEX = 1,
+}
+
+enum {
+	PFD_MAIN_PLANE     = 0,
+	PFD_OVERLAY_PLANE  = 1,
+	PFD_UNDERLAY_PLANE = -1,
+}
+
+enum {
+	PFD_DOUBLEBUFFER          = 0x00000001,
+	PFD_STEREO                = 0x00000002,
+	PFD_DRAW_TO_WINDOW        = 0x00000004,
+	PFD_DRAW_TO_BITMAP        = 0x00000008,
+	PFD_SUPPORT_GDI           = 0x00000010,
+	PFD_SUPPORT_OPENGL        = 0x00000020,
+	PFD_GENERIC_FORMAT        = 0x00000040,
+	PFD_NEED_PALETTE          = 0x00000080,
+	PFD_NEED_SYSTEM_PALETTE   = 0x00000100,
+	PFD_SWAP_EXCHANGE         = 0x00000200,
+	PFD_SWAP_COPY             = 0x00000400,
+	PFD_SWAP_LAYER_BUFFERS    = 0x00000800,
+	PFD_GENERIC_ACCELERATED   = 0x00001000,
+	PFD_SUPPORT_DIRECTDRAW    = 0x00002000,
+	PFD_DIRECT3D_ACCELERATED  = 0x00004000,
+	PFD_SUPPORT_COMPOSITION   = 0x00008000,
+	PFD_DEPTH_DONTCARE        = 0x20000000,
+	PFD_DOUBLEBUFFER_DONTCARE = 0x40000000,
+	PFD_STEREO_DONTCARE       = 0x80000000,
+}
+
+alias extern(Windows) int function(const(LOGFONTA)*, const(TEXTMETRICA)*, DWORD, LPARAM) OLDFONTENUMPROCA;
+alias extern(Windows) int function(const(LOGFONTW)*, const(TEXTMETRICW)*, DWORD, LPARAM) OLDFONTENUMPROCW;
+version(UNICODE)
+	alias OLDFONTENUMPROCW OLDFONTENUMPROC;
+else
+	alias OLDFONTENUMPROCA OLDFONTENUMPROC;
+
+alias OLDFONTENUMPROCA FONTENUMPROCA;
+alias OLDFONTENUMPROCW FONTENUMPROCW;
+version(UNICODE)
+	alias FONTENUMPROCW FONTENUMPROC;
+else
+	alias FONTENUMPROCA FONTENUMPROC;
+
+alias extern(Windows) int function(LPVOID, LPARAM) GOBJENUMPROC;
+alias extern(Windows) VOID function(int, int, LPARAM) LINEDDAPROC;
+
+export extern(Windows) int AddFontResourceA(LPCSTR);
+export extern(Windows) int AddFontResourceW(LPCWSTR);
+version(UNICODE)
+	alias AddFontResourceW AddFontResource;
+else
+	alias AddFontResourceA AddFontResource;
+
+export extern(Windows) BOOL AnimatePalette(HPALETTE hPal, UINT iStartIndex,  UINT cEntries, const(PALETTEENTRY)* ppe);
+export extern(Windows) BOOL Arc(HDC hdc, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+export extern(Windows) BOOL BitBlt(HDC hdc, int x, int y, int cx, int cy, HDC hdcSrc, int x1, int y1, DWORD rop);
+export extern(Windows) BOOL CancelDC(HDC hdc);
+export extern(Windows) BOOL Chord(HDC hdc, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+export extern(Windows) int ChoosePixelFormat(HDC hdc, const(PIXELFORMATDESCRIPTOR)* ppfd);
+export extern(Windows) HMETAFILE CloseMetaFile( HDC hdc);
+export extern(Windows) int CombineRgn(HRGN hrgnDst, HRGN hrgnSrc1, HRGN hrgnSrc2, int iMode);
+export extern(Windows) HMETAFILE CopyMetaFileA(HMETAFILE, LPCSTR);
+export extern(Windows) HMETAFILE CopyMetaFileW(HMETAFILE, LPCWSTR);
+version(UNICODE)
+	alias CopyMetaFileW CopyMetaFile;
+else
+	alias CopyMetaFileA CopyMetaFile;
+
+export extern(Windows) HBITMAP CreateBitmap(int nWidth, int nHeight, UINT nPlanes, UINT nBitCount, const(VOID)* lpBits);
+export extern(Windows) HBITMAP CreateBitmapIndirect(const(BITMAP)* pbm);
+export extern(Windows) HBRUSH  CreateBrushIndirect(const(LOGBRUSH)* plbrush);
+export extern(Windows) HBITMAP CreateCompatibleBitmap(HDC hdc, int cx, int cy);
+export extern(Windows) HBITMAP CreateDiscardableBitmap(HDC hdc, int cx, int cy);
+export extern(Windows) HDC CreateCompatibleDC(HDC hdc);
+export extern(Windows) HDC CreateDCA(LPCSTR pwszDriver, LPCSTR pwszDevice, LPCSTR pszPort, const(DEVMODEA)* pdm);
+export extern(Windows) HDC CreateDCW(LPCWSTR pwszDriver, LPCWSTR pwszDevice, LPCWSTR pszPort, const(DEVMODEW)* pdm);
+version(UNICODE)
+	alias CreateDCW CreateDC;
+else
+	alias CreateDCA CreateDC;
+
+export extern(Windows) HBITMAP CreateDIBitmap(HDC hdc, const(BITMAPINFOHEADER)* pbmih, DWORD flInit, const(VOID)* pjBits, const(BITMAPINFO)* pbmi, UINT iUsage);
+export extern(Windows) HBRUSH CreateDIBPatternBrush(HGLOBAL h, UINT iUsage);
+export extern(Windows) HBRUSH CreateDIBPatternBrushPt(const(VOID)* lpPackedDIB, UINT iUsage);
+export extern(Windows) HRGN CreateEllipticRgn(int x1, int y1, int x2, int y2);
+export extern(Windows) HRGN CreateEllipticRgnIndirect(const(RECT)* lprect);
+export extern(Windows) HFONT CreateFontIndirectA(const(LOGFONTA)* lplf);
+export extern(Windows) HFONT CreateFontIndirectW(const(LOGFONTW)* lplf);
+version(UNICODE)
+	alias CreateFontIndirectW CreateFontIndirect;
+else
+	alias CreateFontIndirectA CreateFontIndirect;
+
+export extern(Windows) HFONT CreateFontA(int cHeight, int cWidth, int cEscapement, int cOrientation, int cWeight, DWORD bItalic, DWORD bUnderline, DWORD bStrikeOut, DWORD iCharSet, DWORD iOutPrecision, DWORD iClipPrecision, DWORD iQuality, DWORD iPitchAndFamily, LPCSTR pszFaceName);
+export extern(Windows) HFONT CreateFontW(int cHeight, int cWidth, int cEscapement, int cOrientation, int cWeight, DWORD bItalic, DWORD bUnderline, DWORD bStrikeOut, DWORD iCharSet, DWORD iOutPrecision, DWORD iClipPrecision, DWORD iQuality, DWORD iPitchAndFamily, LPCWSTR pszFaceName);
+version(UNICODE)
+	alias CreateFontW CreateFont;
+else
+	alias CreateFontA CreateFont;
+
+export extern(Windows) HBRUSH CreateHatchBrush(int iHatch, COLORREF color);
+export extern(Windows) HDC CreateICA(LPCSTR pszDriver, LPCSTR pszDevice, LPCSTR pszPort, const(DEVMODEA)* pdm);
+export extern(Windows) HDC CreateICW(LPCWSTR pszDriver, LPCWSTR pszDevice, LPCWSTR pszPort, const(DEVMODEW)* pdm);
+version(UNICODE)
+	alias CreateICW CreateIC;
+else
+	alias CreateICA CreateIC;
+
+export extern(Windows) HDC CreateMetaFileA(LPCSTR pszFile);
+export extern(Windows) HDC CreateMetaFileW(LPCWSTR pszFile);
+version(UNICODE)
+	alias CreateMetaFileW CreateMetaFile;
+else
+	alias CreateMetaFileA CreateMetaFile;
+
+export extern(Windows) HPALETTE CreatePalette(const(LOGPALETTE)* plpal);
+export extern(Windows) HPEN CreatePen(int iStyle, int cWidth, COLORREF color);
+export extern(Windows) HPEN CreatePenIndirect(const(LOGPEN)* plpen);
+export extern(Windows) HRGN CreatePolyPolygonRgn(const(POINT)* pptl, const(INT)* pc, int cPoly, int iMode);
+export extern(Windows) HBRUSH CreatePatternBrush(HBITMAP hbm);
+export extern(Windows) HRGN CreateRectRgn(int x1, int y1, int x2, int y2);
+export extern(Windows) HRGN CreateRectRgnIndirect(const(RECT)* lprect);
+export extern(Windows) HRGN CreateRoundRectRgn(int x1, int y1, int x2, int y2, int w, int h);
+export extern(Windows) BOOL CreateScalableFontResourceA(DWORD fdwHidden, LPCSTR lpszFont, LPCSTR lpszFile, LPCSTR lpszPath);
+export extern(Windows) BOOL CreateScalableFontResourceW(DWORD fdwHidden, LPCWSTR lpszFont, LPCWSTR lpszFile, LPCWSTR lpszPath);
+version(UNICODE)
+	alias CreateScalableFontResourceW CreateScalableFontResource;
+else
+	alias CreateScalableFontResourceA CreateScalableFontResource;
+
+export extern(Windows) HBRUSH CreateSolidBrush(COLORREF color);
+
+export extern(Windows) BOOL DeleteDC(HDC hdc);
+export extern(Windows) BOOL DeleteMetaFile(HMETAFILE hmf);
+export extern(Windows) BOOL DeleteObject(HGDIOBJ ho);
+export extern(Windows) int DescribePixelFormat(HDC hdc, int iPixelFormat, UINT nBytes, LPPIXELFORMATDESCRIPTOR ppfd);
+
+alias extern(Windows) UINT function(HWND, HMODULE, LPDEVMODE, LPSTR, LPSTR, LPDEVMODE, LPSTR, UINT) LPFNDEVMODE;
+
+alias extern(Windows) DWORD function(LPSTR, LPSTR, UINT, LPSTR, LPDEVMODE) LPFNDEVCAPS;
+
+enum {
+	DM_UPDATE      = 1,
+	DM_COPY        = 2,
+	DM_PROMPT      = 4,
+	DM_MODIFY      = 8,
+	DM_IN_BUFFER   = DM_MODIFY,
+	DM_IN_PROMPT   = DM_PROMPT,
+	DM_OUT_BUFFER  = DM_COPY,
+	DM_OUT_DEFAULT = DM_UPDATE,
+}
+
+enum {
+	DC_FIELDS            = 1,
+	DC_PAPERS            = 2,
+	DC_PAPERSIZE         = 3,
+	DC_MINEXTENT         = 4,
+	DC_MAXEXTENT         = 5,
+	DC_BINS              = 6,
+	DC_DUPLEX            = 7,
+	DC_SIZE              = 8,
+	DC_EXTRA             = 9,
+	DC_VERSION           = 10,
+	DC_DRIVER            = 11,
+	DC_BINNAMES          = 12,
+	DC_ENUMRESOLUTIONS   = 13,
+	DC_FILEDEPENDENCIES  = 14,
+	DC_TRUETYPE          = 15,
+	DC_PAPERNAMES        = 16,
+	DC_ORIENTATION       = 17,
+	DC_COPIES            = 18,
+	DC_BINADJUST         = 19,
+	DC_EMF_COMPLIANT     = 20,
+	DC_DATATYPE_PRODUCED = 21,
+	DC_COLLATE           = 22,
+	DC_MANUFACTURER      = 23,
+	DC_MODEL             = 24,
+	DC_PERSONALITY       = 25,
+	DC_PRINTRATE         = 26,
+	DC_PRINTRATEUNIT     = 27,
+	PRINTRATEUNIT_PPM    = 1,
+	PRINTRATEUNIT_CPS    = 2,
+	PRINTRATEUNIT_LPM    = 3,
+	PRINTRATEUNIT_IPM    = 4,
+	DC_PRINTERMEM        = 28,
+	DC_MEDIAREADY        = 29,
+	DC_STAPLE            = 30,
+	DC_PRINTRATEPPM      = 31,
+	DC_COLORDEVICE       = 32,
+	DC_NUP               = 33,
+	DC_MEDIATYPENAMES    = 34,
+	DC_MEDIATYPES        = 35,
+}
+
+enum {
+	DCTT_BITMAP           = 0x0000001,
+	DCTT_DOWNLOAD         = 0x0000002,
+	DCTT_SUBDEV           = 0x0000004,
+	DCTT_DOWNLOAD_OUTLINE = 0x0000008,
+}
+
+enum {
+	DCBA_FACEUPNONE     = 0x0000,
+	DCBA_FACEUPCENTER   = 0x0001,
+	DCBA_FACEUPLEFT     = 0x0002,
+	DCBA_FACEUPRIGHT    = 0x0003,
+	DCBA_FACEDOWNNONE   = 0x0100,
+	DCBA_FACEDOWNCENTER = 0x0101,
+	DCBA_FACEDOWNLEFT   = 0x0102,
+	DCBA_FACEDOWNRIGHT  = 0x0103,
+}
+
+export extern(Windows) int DeviceCapabilitiesA(LPCSTR pDevice, LPCSTR pPort, WORD fwCapability, LPSTR pOutput, const(DEVMODEA)* pDevMode);
+export extern(Windows) int DeviceCapabilitiesW(LPCWSTR pDevice, LPCWSTR pPort, WORD fwCapability, LPWSTR pOutput, const(DEVMODEW)* pDevMode);
+version(UNICODE)
+	alias DeviceCapabilitiesW DeviceCapabilities;
+else
+	alias DeviceCapabilitiesA DeviceCapabilities;
+
+export extern(Windows) int DrawEscape(HDC hdc, int iEscape, int cjIn, LPCSTR lpIn);
+
+export extern(Windows) BOOL Ellipse(HDC hdc, int left, int top, int right, int bottom);
+
+export extern(Windows) int EnumFontFamiliesExA(HDC hdc, LPLOGFONTA lpLogfont, FONTENUMPROCA lpProc, LPARAM lParam, DWORD dwFlags);
+export extern(Windows) int EnumFontFamiliesExW(HDC hdc, LPLOGFONTW lpLogfont, FONTENUMPROCW lpProc, LPARAM lParam, DWORD dwFlags);
+version(UNICODE)
+	alias EnumFontFamiliesExW EnumFontFamiliesEx;
+else
+	alias EnumFontFamiliesExA EnumFontFamiliesEx;
+
+export extern(Windows) int EnumFontFamiliesA(HDC hdc, LPCSTR lpLogfont, FONTENUMPROCA lpProc, LPARAM lParam);
+export extern(Windows) int EnumFontFamiliesW(HDC hdc, LPCWSTR lpLogfont, FONTENUMPROCW lpProc, LPARAM lParam);
+version(UNICODE)
+	alias EnumFontFamiliesW EnumFontFamilies;
+else
+	alias EnumFontFamiliesA EnumFontFamilies;
+
+export extern(Windows) int EnumFontsA(HDC hdc, LPCSTR lpLogfont, FONTENUMPROCA lpProc, LPARAM lParam);
+export extern(Windows) int EnumFontsW(HDC hdc, LPCWSTR lpLogfont, FONTENUMPROCW lpProc, LPARAM lParam);
+version(UNICODE)
+	alias EnumFontsW EnumFonts;
+else
+	alias EnumFontsA EnumFonts;
+
+export extern(Windows) int EnumObjects(HDC hdc, int nType, GOBJENUMPROC lpFunc, LPARAM lParam);
+
+export extern(Windows) BOOL EqualRgn(HRGN hrgn1, HRGN hrgn2);
+export extern(Windows) int Escape(HDC hdc, int iEscape, int cjIn, LPCSTR pvIn, LPVOID pvOut);
+export extern(Windows) int ExtEscape(HDC hdc, int iEscape, int cjInput, LPCSTR lpInData, int cjOutput, LPSTR lpOutData);
+export extern(Windows) int ExcludeClipRect(HDC hdc, int left, int top, int right, int bottom);
+export extern(Windows) HRGN ExtCreateRegion(const(XFORM)* lpx, DWORD nCount, const(RGNDATA)* lpData);
+export extern(Windows) BOOL ExtFloodFill(HDC hdc, int x, int y, COLORREF color, UINT type);
+export extern(Windows) BOOL FillRgn(HDC hdc, HRGN hrgn, HBRUSH hbr);
+export extern(Windows) BOOL FloodFill(HDC hdc, int x, int y, COLORREF color);
+export extern(Windows) BOOL FrameRgn(HDC hdc, HRGN hrgn, HBRUSH hbr, int w, int h);
+export extern(Windows) int GetROP2(HDC hdc);
+export extern(Windows) BOOL GetAspectRatioFilterEx(HDC hdc, LPSIZE lpsize);
+export extern(Windows) COLORREF GetBkColor(HDC hdc);
+
+export extern(Windows) COLORREF GetDCBrushColor(HDC hdc);
+export extern(Windows) COLORREF GetDCPenColor(HDC hdc);
+
+export extern(Windows) int GetBkMode(HDC hdc);
+
+export extern(Windows) LONG GetBitmapBits(HBITMAP hbit, LONG cb, LPVOID lpvBits);
+
+export extern(Windows) BOOL GetBitmapDimensionEx(HBITMAP hbit, LPSIZE lpsize);
+export extern(Windows) UINT GetBoundsRect(HDC hdc, LPRECT lprect, UINT flags);
+
+export extern(Windows) BOOL GetBrushOrgEx(HDC hdc, LPPOINT lppt);
+
+export extern(Windows) BOOL GetCharWidthA(HDC hdc, UINT iFirst, UINT iLast, LPINT lpBuffer);
+export extern(Windows) BOOL GetCharWidthW(HDC hdc, UINT iFirst, UINT iLast, LPINT lpBuffer);
+version(UNICODE)
+	alias GetCharWidthW GetCharWidth;
+else
+	alias GetCharWidthA GetCharWidth;
+
+export extern(Windows) BOOL GetCharWidth32A(HDC hdc, UINT iFirst, UINT iLast, LPINT lpBuffer);
+export extern(Windows) BOOL GetCharWidth32W(HDC hdc, UINT iFirst, UINT iLast, LPINT lpBuffer);
+version(UNICODE)
+	alias GetCharWidth32W GetCharWidth32;
+else
+	alias GetCharWidth32A GetCharWidth32;
+
+export extern(Windows) BOOL GetCharWidthFloatA(HDC hdc, UINT iFirst, UINT iLast, PFLOAT lpBuffer);
+export extern(Windows) BOOL GetCharWidthFloatW(HDC hdc, UINT iFirst, UINT iLast, PFLOAT lpBuffer);
+version(UNICODE)
+	alias GetCharWidthFloatW GetCharWidthFloat;
+else
+	alias GetCharWidthFloatA GetCharWidthFloat;
+
+export extern(Windows) BOOL GetCharABCWidthsA(HDC hdc, UINT wFirst, UINT wLast, LPABC lpABC);
+export extern(Windows) BOOL GetCharABCWidthsW(HDC hdc, UINT wFirst, UINT wLast, LPABC lpABC);
+version(UNICODE)
+	alias GetCharABCWidthsW GetCharABCWidths;
+else
+	alias GetCharABCWidthsA GetCharABCWidths;
+
+export extern(Windows) BOOL GetCharABCWidthsFloatA(HDC hdc, UINT iFirst, UINT iLast, LPABCFLOAT lpABC);
+export extern(Windows) BOOL GetCharABCWidthsFloatW(HDC hdc, UINT iFirst, UINT iLast, LPABCFLOAT lpABC);
+version(UNICODE)
+	alias GetCharABCWidthsFloatW GetCharABCWidthsFloat;
+else
+	alias GetCharABCWidthsFloatA GetCharABCWidthsFloat;
+
+export extern(Windows) int GetClipBox(HDC hdc, LPRECT lprect);
+export extern(Windows) int GetClipRgn(HDC hdc, HRGN hrgn);
+export extern(Windows) int GetMetaRgn(HDC hdc, HRGN hrgn);
+export extern(Windows) HGDIOBJ GetCurrentObject(HDC hdc, UINT type);
+export extern(Windows) BOOL GetCurrentPositionEx(HDC hdc, LPPOINT lppt);
+export extern(Windows) int GetDeviceCaps(HDC hdc, int index);
+export extern(Windows) int GetDIBits(HDC hdc, HBITMAP hbm, UINT start, UINT cLines, LPVOID lpvBits, LPBITMAPINFO lpbmi, UINT usage);
+
+export extern(Windows) DWORD GetFontData (HDC hdc, DWORD dwTable, DWORD dwOffset, PVOID pvBuffer, DWORD cjBuffer);
+
+export extern(Windows) DWORD GetGlyphOutlineA(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, const(MAT2)* lpmat2);
+export extern(Windows) DWORD GetGlyphOutlineW(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, const(MAT2)* lpmat2);
+version(UNICODE)
+	alias GetGlyphOutlineW GetGlyphOutline;
+else
+	alias GetGlyphOutlineA GetGlyphOutline;
+
+export extern(Windows) int GetGraphicsMode(HDC hdc);
+export extern(Windows) int GetMapMode(HDC hdc);
+export extern(Windows) UINT GetMetaFileBitsEx(HMETAFILE hMF, UINT cbBuffer, LPVOID lpData);
+export extern(Windows) HMETAFILE GetMetaFileA(LPCSTR lpName);
+export extern(Windows) HMETAFILE GetMetaFileW(LPCWSTR lpName);
+version(UNICODE)
+	alias GetMetaFileW GetMetaFile;
+else
+	alias GetMetaFileA GetMetaFile;
+
+export extern(Windows) COLORREF GetNearestColor(HDC hdc, COLORREF color);
+export extern(Windows) UINT GetNearestPaletteIndex(HPALETTE h, COLORREF color);
+export extern(Windows) DWORD GetObjectType(HGDIOBJ h);
+
+export extern(Windows) UINT GetOutlineTextMetricsA(HDC hdc, UINT cjCopy, LPOUTLINETEXTMETRICA potm);
+export extern(Windows) UINT GetOutlineTextMetricsW(HDC hdc, UINT cjCopy, LPOUTLINETEXTMETRICW potm);
+version(UNICODE)
+	alias GetOutlineTextMetricsW GetOutlineTextMetrics;
+else
+	alias GetOutlineTextMetricsA GetOutlineTextMetrics;
+
+export extern(Windows) UINT GetPaletteEntries(HPALETTE hpal, UINT iStart, UINT cEntries, LPPALETTEENTRY pPalEntries);
+export extern(Windows) COLORREF GetPixel(HDC hdc, int x, int y);
+export extern(Windows) int GetPixelFormat(HDC hdc);
+export extern(Windows) int GetPolyFillMode(HDC hdc);
+export extern(Windows) BOOL GetRasterizerCaps(LPRASTERIZER_STATUS lpraststat, UINT cjBytes);
+
+export extern(Windows) int GetRandomRgn(HDC hdc, HRGN hrgn, INT i);
+export extern(Windows) DWORD GetRegionData(HRGN hrgn, DWORD nCount, LPRGNDATA lpRgnData);
+export extern(Windows) int GetRgnBox(HRGN hrgn, LPRECT lprc);
+export extern(Windows) HGDIOBJ GetStockObject(int i);
+export extern(Windows) int GetStretchBltMode(HDC hdc);
+export extern(Windows) UINT GetSystemPaletteEntries(HDC hdc, UINT iStart, UINT cEntries, LPPALETTEENTRY pPalEntries);
+
+export extern(Windows) UINT GetSystemPaletteUse(HDC hdc);
+export extern(Windows) int GetTextCharacterExtra(HDC hdc);
+export extern(Windows) UINT GetTextAlign(HDC hdc);
+export extern(Windows) COLORREF GetTextColor(HDC hdc);
+
+export extern(Windows) BOOL GetTextExtentPointA(HDC hdc, LPCSTR lpString, int c, LPSIZE lpsz);
+export extern(Windows) BOOL GetTextExtentPointW(HDC hdc, LPCWSTR lpString, int c, LPSIZE lpsz);
+version(UNICODE)
+	alias GetTextExtentPointW GetTextExtentPoint;
+else
+	alias GetTextExtentPointA GetTextExtentPoint;
+
+export extern(Windows) BOOL GetTextExtentPoint32A(HDC hdc, LPCSTR lpString, int c, LPSIZE psizl);
+export extern(Windows) BOOL GetTextExtentPoint32W(HDC hdc, LPCWSTR lpString, int c, LPSIZE psizl);
+version(UNICODE)
+	alias GetTextExtentPoint32W GetTextExtentPoint32;
+else
+	alias GetTextExtentPoint32A GetTextExtentPoint32;
+
+export extern(Windows) BOOL GetTextExtentExPointA(HDC hdc, LPCSTR lpszString, int cchString, int nMaxExtent, LPINT lpnFit, LPINT lpnDx, LPSIZE lpSize);
+export extern(Windows) BOOL GetTextExtentExPointW(HDC hdc, LPCWSTR lpszString, int cchString, int nMaxExtent, LPINT lpnFit, LPINT lpnDx, LPSIZE lpSize);
+version(UNICODE)
+	alias GetTextExtentExPointW GetTextExtentExPoint;
+else
+	alias GetTextExtentExPointA GetTextExtentExPoint;
+
+export extern(Windows) int GetTextCharset(HDC hdc);
+export extern(Windows) int GetTextCharsetInfo(HDC hdc, LPFONTSIGNATURE lpSig, DWORD dwFlags);
+export extern(Windows) BOOL TranslateCharsetInfo(DWORD* lpSrc, LPCHARSETINFO lpCs, DWORD dwFlags);
+export extern(Windows) DWORD GetFontLanguageInfo(HDC hdc);
+export extern(Windows) DWORD GetCharacterPlacementA(HDC hdc, LPCSTR lpString, int nCount, int nMexExtent,LPGCP_RESULTSA lpResults, DWORD dwFlags);
+export extern(Windows) DWORD GetCharacterPlacementW(HDC hdc, LPCWSTR lpString, int nCount, int nMexExtent,LPGCP_RESULTSW lpResults, DWORD dwFlags);
+version(UNICODE)
+	alias GetCharacterPlacementW GetCharacterPlacement;
+else
+	alias GetCharacterPlacementA GetCharacterPlacement;
+
+struct WCRANGE {
+	WCHAR wcLow;
+	USHORT cGlyphs;
+}
+alias WCRANGE* PWCRANGE;
+alias WCRANGE* LPWCRANGE;
+
+struct GLYPHSET {
+	DWORD cbThis;
+	DWORD flAccel;
+	DWORD cGlyphsSupported;
+	DWORD cRanges;
+	WCRANGE[1] ranges;
+}
+alias GLYPHSET* PGLYPHSET;
+alias GLYPHSET* LPGLYPHSET;
+
+enum GS_8BIT_INDICES = 0x00000001;
+
+enum GGI_MARK_NONEXISTING_GLYPHS = 0x0001;
+
+export extern(Windows) DWORD GetFontUnicodeRanges(HDC hdc, LPGLYPHSET lpgs);
+export extern(Windows) DWORD GetGlyphIndicesA(HDC hdc, LPCSTR lpstr, int c, LPWORD pgi, DWORD fl);
+export extern(Windows) DWORD GetGlyphIndicesW(HDC hdc, LPCWSTR lpstr, int c, LPWORD pgi, DWORD fl);
+version(UNICODE)
+	alias GetGlyphIndicesW GetGlyphIndices;
+else
+	alias GetGlyphIndicesA GetGlyphIndices;
+export extern(Windows) BOOL GetTextExtentPointI(HDC hdc, LPWORD pgiIn, int cgi, LPSIZE psize);
+export extern(Windows) BOOL GetTextExtentExPointI(HDC hdc, LPWORD lpwszString, int cwchString, int nMaxExtent, LPINT lpnFit, LPINT lpnDx, LPSIZE lpSize);
+export extern(Windows) BOOL GetCharWidthI(HDC hdc, UINT giFirst, UINT cgi, LPWORD pgi, LPINT piWidths);
+export extern(Windows) BOOL GetCharABCWidthsI(HDC hdc, UINT giFirst, UINT cgi, LPWORD pgi, LPABC  pabc);
+
+enum {
+	STAMP_DESIGNVECTOR = 0x8000000 + 'd' + ('v' << 8),
+	STAMP_AXESLIST     = 0x8000000 + 'a' + ('l' << 8),
+	MM_MAX_NUMAXES     = 16,
+}
+
+struct DESIGNVECTOR {
+	DWORD dvReserved;
+	DWORD dvNumAxes;
+	LONG[MM_MAX_NUMAXES] dvValues;
+}
+alias DESIGNVECTOR* PDESIGNVECTOR;
+alias DESIGNVECTOR* LPDESIGNVECTOR;
+
+export extern(Windows) int AddFontResourceExA(LPCSTR name, DWORD fl, PVOID res);
+export extern(Windows) int AddFontResourceExW(LPCWSTR name, DWORD fl, PVOID res);
+version(UNICODE)
+	alias AddFontResourceExW AddFontResourceEx;
+else
+	alias AddFontResourceExA AddFontResourceEx;
+export extern(Windows) BOOL RemoveFontResourceExA(LPCSTR name, DWORD fl, PVOID pdv);
+export extern(Windows) BOOL RemoveFontResourceExW(LPCWSTR name, DWORD fl, PVOID pdv);
+version(UNICODE)
+	alias RemoveFontResourceExW RemoveFontResourceEx;
+else
+	alias RemoveFontResourceExA RemoveFontResourceEx;
+export extern(Windows) HANDLE AddFontMemResourceEx(PVOID pFileView, DWORD cjSize, PVOID pvResrved, DWORD* pNumFonts);
+
+export extern(Windows) BOOL RemoveFontMemResourceEx(HANDLE h);
+enum {
+	FR_PRIVATE  = 0x10,
+	FR_NOT_ENUM = 0x20,
+}
+
+enum MM_MAX_AXES_NAMELEN = 16;
+
+struct AXISINFOA {
+	LONG axMinValue;
+	LONG axMaxValue;
+	BYTE[MM_MAX_AXES_NAMELEN] axAxisName;
+}
+alias AXISINFOA* PAXISINFOA;
+alias AXISINFOA* LPAXISINFOA;
+struct AXISINFOW {
+	LONG axMinValue;
+	LONG axMaxValue;
+	WCHAR[MM_MAX_AXES_NAMELEN] axAxisName;
+}
+alias AXISINFOW* PAXISINFOW;
+alias AXISINFOW* LPAXISINFOW;
+version(UNICODE){
+	alias AXISINFOW AXISINFO;
+	alias PAXISINFOW PAXISINFO;
+	alias LPAXISINFOW LPAXISINFO;
+}else{
+	alias AXISINFOA AXISINFO;
+	alias PAXISINFOA PAXISINFO;
+	alias LPAXISINFOA LPAXISINFO;
+}
+
+struct AXESLISTA {
+	DWORD axlReserved;
+	DWORD axlNumAxes;
+	AXISINFOA[MM_MAX_NUMAXES] axlAxisInfo;
+}
+alias AXESLISTA* PAXESLISTA;
+alias AXESLISTA* LPAXESLISTA;
+struct AXESLISTW {
+	DWORD axlReserved;
+	DWORD axlNumAxes;
+	AXISINFOW[MM_MAX_NUMAXES] axlAxisInfo;
+}
+alias AXESLISTW* PAXESLISTW;
+alias AXESLISTW* LPAXESLISTW;
+version(UNICODE){
+	alias AXESLISTW AXESLIST;
+	alias PAXESLISTW PAXESLIST;
+	alias LPAXESLISTW LPAXESLIST;
+}else{
+	alias AXESLISTA AXESLIST;
+	alias PAXESLISTA PAXESLIST;
+	alias LPAXESLISTA LPAXESLIST;
+}
+
+struct ENUMLOGFONTEXDVA {
+	ENUMLOGFONTEXA elfEnumLogfontEx;
+	DESIGNVECTOR elfDesignVector;
+}
+alias ENUMLOGFONTEXDVA* PENUMLOGFONTEXDVA;
+alias ENUMLOGFONTEXDVA* LPENUMLOGFONTEXDVA;
+struct ENUMLOGFONTEXDVW {
+	ENUMLOGFONTEXW elfEnumLogfontEx;
+	DESIGNVECTOR elfDesignVector;
+}
+alias ENUMLOGFONTEXDVW* PENUMLOGFONTEXDVW;
+alias ENUMLOGFONTEXDVW* LPENUMLOGFONTEXDVW;
+version(UNICODE){
+	alias ENUMLOGFONTEXDVW ENUMLOGFONTEXDV;
+	alias PENUMLOGFONTEXDVW PENUMLOGFONTEXDV;
+	alias LPENUMLOGFONTEXDVW LPENUMLOGFONTEXDV;
+}else{
+	alias ENUMLOGFONTEXDVA ENUMLOGFONTEXDV;
+	alias PENUMLOGFONTEXDVA PENUMLOGFONTEXDV;
+	alias LPENUMLOGFONTEXDVA LPENUMLOGFONTEXDV;
+}
+
+export extern(Windows) HFONT CreateFontIndirectExA(const(ENUMLOGFONTEXDVA)*);
+export extern(Windows) HFONT CreateFontIndirectExW(const(ENUMLOGFONTEXDVW)*);
+version(UNICODE)
+	alias CreateFontIndirectExW CreateFontIndirectEx;
+else
+	alias CreateFontIndirectExA CreateFontIndirectEx;
+
+struct ENUMTEXTMETRICA {
+	NEWTEXTMETRICEXA etmNewTextMetricEx;
+	AXESLISTA etmAxesList;
+}
+alias ENUMTEXTMETRICA* PENUMTEXTMETRICA;
+alias ENUMTEXTMETRICA* LPENUMTEXTMETRICA;
+struct ENUMTEXTMETRICW {
+	NEWTEXTMETRICEXW etmNewTextMetricEx;
+	AXESLISTW etmAxesList;
+}
+alias ENUMTEXTMETRICW* PENUMTEXTMETRICW;
+alias ENUMTEXTMETRICW* LPENUMTEXTMETRICW;
+version(UNICODE){
+	alias ENUMTEXTMETRICW ENUMTEXTMETRIC;
+	alias PENUMTEXTMETRICW PENUMTEXTMETRIC;
+	alias LPENUMTEXTMETRICW LPENUMTEXTMETRIC;
+}else{
+	alias ENUMTEXTMETRICA ENUMTEXTMETRIC;
+	alias PENUMTEXTMETRICA PENUMTEXTMETRIC;
+	alias LPENUMTEXTMETRICA LPENUMTEXTMETRIC;
+}
+
+export extern(Windows) BOOL GetViewportExtEx(HDC hdc, LPSIZE lpsize);
+export extern(Windows) BOOL GetViewportOrgEx(HDC hdc, LPPOINT lppoint);
+export extern(Windows) BOOL GetWindowExtEx(HDC hdc, LPSIZE lpsize);
+export extern(Windows) BOOL GetWindowOrgEx(HDC hdc, LPPOINT lppoint);
+
+export extern(Windows) int IntersectClipRect(HDC hdc, int left, int top, int right, int bottom);
+export extern(Windows) BOOL InvertRgn(HDC hdc, HRGN hrgn);
+export extern(Windows) BOOL LineDDA(int xStart, int yStart, int xEnd, int yEnd, LINEDDAPROC lpProc, LPARAM data);
+export extern(Windows) BOOL LineTo(HDC hdc, int x, int y);
+export extern(Windows) BOOL MaskBlt(HDC hdcDest, int xDest, int yDest, int width, int height, HDC hdcSrc, int xSrc, int ySrc, HBITMAP hbmMask, int xMask, int yMask, DWORD rop);
+export extern(Windows) BOOL PlgBlt(HDC hdcDest, const(POINT)* lpPoint, HDC hdcSrc, int xSrc, int ySrc, int width, int height, HBITMAP hbmMask, int xMask, int yMask);
+
+export extern(Windows) int OffsetClipRgn(HDC hdc, int x, int y);
+export extern(Windows) int OffsetRgn(HRGN hrgn, int x, int y);
+export extern(Windows) BOOL PatBlt(HDC hdc, int x, int y, int w, int h, DWORD rop);
+export extern(Windows) BOOL Pie(HDC hdc, int left, int top, int right, int bottom, int xr1, int yr1, int xr2, int yr2);
+export extern(Windows) BOOL PlayMetaFile(HDC hdc, HMETAFILE hmf);
+export extern(Windows) BOOL PaintRgn(HDC hdc, HRGN hrgn);
+export extern(Windows) BOOL PolyPolygon(HDC hdc,  const(POINT)* apt, const(INT)* asz, int csz);
+export extern(Windows) BOOL PtInRegion(HRGN hrgn, int x, int y);
+export extern(Windows) BOOL PtVisible(HDC hdc, int x, int y);
+export extern(Windows) BOOL RectInRegion(HRGN hrgn, const(RECT)* lprect);
+export extern(Windows) BOOL RectVisible(HDC hdc, const(RECT)* lprect);
+export extern(Windows) BOOL Rectangle(HDC hdc, int left, int top, int right, int bottom);
+export extern(Windows) BOOL RestoreDC(HDC hdc, int nSavedDC);
+export extern(Windows) HDC  ResetDCA(HDC hdc, const(DEVMODEA)* lpdm);
+export extern(Windows) HDC  ResetDCW(HDC hdc, const(DEVMODEW)* lpdm);
+version(UNICODE)
+	alias ResetDCW ResetDC;
+else
+	alias ResetDCA ResetDC;
+
+export extern(Windows) UINT RealizePalette(HDC hdc);
+export extern(Windows) BOOL RemoveFontResourceA(LPCSTR lpFileName);
+export extern(Windows) BOOL RemoveFontResourceW(LPCWSTR lpFileName);
+version(UNICODE)
+	alias RemoveFontResourceW RemoveFontResource;
+else
+	alias RemoveFontResourceA RemoveFontResource;
+
+export extern(Windows) BOOL RoundRect(HDC hdc, int left, int top, int right, int bottom, int width, int height);
+export extern(Windows) BOOL ResizePalette(HPALETTE hpal, UINT n);
+
+export extern(Windows) int SaveDC(HDC hdc);
+export extern(Windows) int SelectClipRgn(HDC hdc, HRGN hrgn);
+export extern(Windows) int ExtSelectClipRgn(HDC hdc, HRGN hrgn, int mode);
+export extern(Windows) int SetMetaRgn(HDC hdc);
+export extern(Windows) HGDIOBJ SelectObject(HDC hdc, HGDIOBJ h);
+export extern(Windows) HPALETTE SelectPalette(HDC hdc, HPALETTE hPal, BOOL bForceBkgd);
+export extern(Windows) COLORREF SetBkColor(HDC hdc, COLORREF color);
+
+export extern(Windows) COLORREF SetDCBrushColor(HDC hdc, COLORREF color);
+export extern(Windows) COLORREF SetDCPenColor(HDC hdc, COLORREF color);
+
+export extern(Windows) int SetBkMode(HDC hdc, int mode);
+export extern(Windows) LONG SetBitmapBits(HBITMAP hbm, DWORD cb, const(VOID)* pvBits);
+export extern(Windows) UINT SetBoundsRect(HDC hdc, const(RECT)* lprect, UINT flags);
+export extern(Windows) int SetDIBits(HDC hdc, HBITMAP hbm, UINT start, UINT cLines, const(VOID)* lpBits, const(BITMAPINFO)* lpbmi, UINT ColorUse);
+export extern(Windows) int SetDIBitsToDevice(HDC hdc, int xDest, int yDest, DWORD w, DWORD h, int xSrc, int ySrc, UINT StartScan, UINT cLines, const(VOID)* lpvBits, const(BITMAPINFO)* lpbmi, UINT ColorUse);
+export extern(Windows) DWORD SetMapperFlags(HDC hdc, DWORD flags);
+export extern(Windows) int SetGraphicsMode(HDC hdc, int iMode);
+export extern(Windows) int SetMapMode(HDC hdc, int iMode);
+
+export extern(Windows) DWORD SetLayout(HDC hdc, DWORD l);
+export extern(Windows) DWORD GetLayout(HDC hdc);
+
+export extern(Windows) HMETAFILE SetMetaFileBitsEx(UINT cbBuffer, const(BYTE)* lpData);
+export extern(Windows) UINT SetPaletteEntries(HPALETTE hpal, UINT iStart, UINT cEntries, const(PALETTEENTRY)* pPalEntries);
+export extern(Windows) COLORREF SetPixel(HDC hdc, int x, int y, COLORREF color);
+export extern(Windows) BOOL SetPixelV(HDC hdc, int x, int y, COLORREF color);
+export extern(Windows) BOOL SetPixelFormat(HDC hdc, int format, const(PIXELFORMATDESCRIPTOR)* ppfd);
+export extern(Windows) int SetPolyFillMode(HDC hdc, int mode);
+export extern(Windows) BOOL StretchBlt(HDC hdcDest, int xDest, int yDest, int wDest, int hDest, HDC hdcSrc, int xSrc, int ySrc, int wSrc, int hSrc, DWORD rop);
+export extern(Windows) BOOL SetRectRgn(HRGN hrgn, int left, int top, int right, int bottom);
+export extern(Windows) int StretchDIBits(HDC hdc, int xDest, int yDest, int DestWidth, int DestHeight, int xSrc, int ySrc, int SrcWidth, int SrcHeight, const(VOID)* lpBits, const(BITMAPINFO)* lpbmi, UINT iUsage, DWORD rop);
+export extern(Windows) int SetROP2(HDC hdc, int rop2);
+export extern(Windows) int SetStretchBltMode(HDC hdc, int mode);
+export extern(Windows) UINT SetSystemPaletteUse(HDC hdc, UINT use);
+export extern(Windows) int SetTextCharacterExtra(HDC hdc, int extra);
+export extern(Windows) COLORREF SetTextColor(HDC hdc, COLORREF color);
+export extern(Windows) UINT SetTextAlign(HDC hdc, UINT align_);
+export extern(Windows) BOOL SetTextJustification(HDC hdc, int extra, int count);
+export extern(Windows) BOOL UpdateColors(HDC hdc);
+
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	alias extern(Windows) PVOID function(DWORD dwSize, LPVOID pGdiRef) GDIMARSHALLOC;
+	alias extern(Windows) HRESULT function(HGDIOBJ hGdiObj, LPVOID pGdiRef, LPVOID* ppDDrawRef) DDRAWMARSHCALLBACKMARSHAL;
+	alias extern(Windows) HRESULT function(LPVOID pData, HDC* phdc, LPVOID* ppDDrawRef) DDRAWMARSHCALLBACKUNMARSHAL;
+	alias extern(Windows) HRESULT function(LPVOID pDDrawRef) DDRAWMARSHCALLBACKRELEASE;
+
+	enum GDIREGISTERDDRAWPACKETVERSION = 0x1;
+
+	struct GDIREGISTERDDRAWPACKET {
+		DWORD dwSize;
+		DWORD dwVersion;
+		DDRAWMARSHCALLBACKMARSHAL pfnDdMarshal;
+		DDRAWMARSHCALLBACKUNMARSHAL pfnDdUnmarshal;
+		DDRAWMARSHCALLBACKRELEASE pfnDdRelease;
+	}
+	alias GDIREGISTERDDRAWPACKET* PGDIREGISTERDDRAWPACKET;
+
+static if(_WIN32_WINNT >= _WIN32_WINNT_VISTA){
+	export extern(Windows) BOOL GdiRegisterDdraw(PGDIREGISTERDDRAWPACKET pPacket, GDIMARSHALLOC* ppfnGdiAlloc);
+	export extern(Windows) ULONG GdiMarshalSize();
+	export extern(Windows) VOID GdiMarshal(DWORD dwProcessIdTo, HGDIOBJ hGdiObj,PVOID pData, ULONG ulFlags);
+	export extern(Windows) HGDIOBJ GdiUnmarshal(PVOID pData, ULONG ulFlags);
+}
+
+alias USHORT COLOR16;
+
+struct TRIVERTEX {
+	LONG x;
+	LONG y;
+	COLOR16 Red;
+	COLOR16 Green;
+	COLOR16 Blue;
+	COLOR16 Alpha;
+}
+alias TRIVERTEX* PTRIVERTEX;
+alias TRIVERTEX* LPTRIVERTEX;
+
+struct GRADIENT_TRIANGLE {
+	ULONG Vertex1;
+	ULONG Vertex2;
+	ULONG Vertex3;
+}
+alias GRADIENT_TRIANGLE* PGRADIENT_TRIANGLE;
+alias GRADIENT_TRIANGLE* LPGRADIENT_TRIANGLE;
+
+struct GRADIENT_RECT {
+	ULONG UpperLeft;
+	ULONG LowerRight;
+}
+alias GRADIENT_RECT* PGRADIENT_RECT;
+alias GRADIENT_RECT* LPGRADIENT_RECT;
+
+struct BLENDFUNCTION {
+	BYTE BlendOp;
+	BYTE BlendFlags;
+	BYTE SourceConstantAlpha;
+	BYTE AlphaFormat;
+}
+alias BLENDFUNCTION* PBLENDFUNCTION;
+
+enum {
+	AC_SRC_OVER  = 0x00,
+	AC_SRC_ALPHA = 0x01,
+}
+
+export extern(Windows) BOOL AlphaBlend(HDC hdcDest, int xoriginDest, int yoriginDest, int wDest, int hDest, HDC hdcSrc, int xoriginSrc, int yoriginSrc, int wSrc, int hSrc, BLENDFUNCTION ftn);
+export extern(Windows) BOOL TransparentBlt(HDC hdcDest, int xoriginDest, int yoriginDest, int wDest, int hDest, HDC hdcSrc, int xoriginSrc, int yoriginSrc, int wSrc, int hSrc, UINT crTransparent);
+
+enum {
+	GRADIENT_FILL_RECT_H   = 0x00000000,
+	GRADIENT_FILL_RECT_V   = 0x00000001,
+	GRADIENT_FILL_TRIANGLE = 0x00000002,
+	GRADIENT_FILL_OP_FLAG  = 0x000000ff,
+}
+
+export extern(Windows) BOOL GradientFill(HDC hdc, PTRIVERTEX pVertex, ULONG nVertex, PVOID pMesh, ULONG nMesh, ULONG ulMode);
+
+export extern(Windows) BOOL GdiAlphaBlend(HDC hdcDest, int xoriginDest, int yoriginDest, int wDest, int hDest, HDC hdcSrc, int xoriginSrc, int yoriginSrc, int wSrc, int hSrc, BLENDFUNCTION ftn);
+export extern(Windows) BOOL GdiTransparentBlt(HDC hdcDest, int xoriginDest, int yoriginDest, int wDest, int hDest, HDC hdcSrc, int xoriginSrc, int yoriginSrc, int wSrc, int hSrc, UINT crTransparent);
+export extern(Windows) BOOL GdiGradientFill(HDC hdc, PTRIVERTEX pVertex, ULONG nVertex, PVOID pMesh, ULONG nCount, ULONG ulMode);
+
+export extern(Windows) BOOL PlayMetaFileRecord(HDC hdc, LPHANDLETABLE lpHandleTable, LPMETARECORD lpMR, UINT noObjs);
+
+alias extern(Windows) int function(HDC hdc, HANDLETABLE* lpht, METARECORD* lpMR, int nObj, LPARAM param) MFENUMPROC;
+export extern(Windows) BOOL EnumMetaFile(HDC hdc, HMETAFILE hmf, MFENUMPROC proc, LPARAM param);
+
+alias extern(Windows) int function(HDC hdc, HANDLETABLE* lpht, const(ENHMETARECORD)* lpmr, int nHandles, LPARAM data) ENHMFENUMPROC;
+
+export extern(Windows) HENHMETAFILE CloseEnhMetaFile(HDC hdc);
+export extern(Windows) HENHMETAFILE CopyEnhMetaFileA(HENHMETAFILE hEnh, LPCSTR lpFileName);
+export extern(Windows) HENHMETAFILE CopyEnhMetaFileW(HENHMETAFILE hEnh, LPCWSTR lpFileName);
+version(UNICODE)
+	alias CopyEnhMetaFileW CopyEnhMetaFile;
+else
+	alias CopyEnhMetaFileA CopyEnhMetaFile;
+
+export extern(Windows) HDC CreateEnhMetaFileA(HDC hdc, LPCSTR lpFilename, const(RECT)* lprc, LPCSTR lpDesc);
+export extern(Windows) HDC CreateEnhMetaFileW(HDC hdc, LPCWSTR lpFilename, const(RECT)* lprc, LPCWSTR lpDesc);
+version(UNICODE)
+	alias CreateEnhMetaFileW CreateEnhMetaFile;
+else
+	alias CreateEnhMetaFileA CreateEnhMetaFile;
+
+export extern(Windows) BOOL DeleteEnhMetaFile(HENHMETAFILE hmf);
+export extern(Windows) BOOL EnumEnhMetaFile(HDC hdc, HENHMETAFILE hmf, ENHMFENUMPROC proc, LPVOID param, const(RECT)* lpRect);
+export extern(Windows) HENHMETAFILE GetEnhMetaFileA(LPCSTR lpName);
+export extern(Windows) HENHMETAFILE GetEnhMetaFileW(LPCWSTR lpName);
+version(UNICODE)
+	alias GetEnhMetaFileW GetEnhMetaFile;
+else
+	alias GetEnhMetaFileA GetEnhMetaFile;
+
+export extern(Windows) UINT GetEnhMetaFileBits( HENHMETAFILE hEMF, UINT nSize, LPBYTE lpData);
+export extern(Windows) UINT GetEnhMetaFileDescriptionA(HENHMETAFILE hemf, UINT cchBuffer, LPSTR lpDescription);
+export extern(Windows) UINT GetEnhMetaFileDescriptionW(HENHMETAFILE hemf, UINT cchBuffer, LPWSTR lpDescription);
+version(UNICODE)
+	alias GetEnhMetaFileDescriptionW GetEnhMetaFileDescription;
+else
+	alias GetEnhMetaFileDescriptionA GetEnhMetaFileDescription;
+
+export extern(Windows) UINT GetEnhMetaFileHeader(HENHMETAFILE hemf, UINT nSize, LPENHMETAHEADER lpEnhMetaHeader);
+export extern(Windows) UINT GetEnhMetaFilePaletteEntries(HENHMETAFILE hemf, UINT nNumEntries, LPPALETTEENTRY lpPaletteEntries);
+export extern(Windows) UINT GetEnhMetaFilePixelFormat(HENHMETAFILE hemf, UINT cbBuffer, PIXELFORMATDESCRIPTOR* ppfd);
+export extern(Windows) UINT GetWinMetaFileBits(HENHMETAFILE hemf, UINT cbData16, LPBYTE pData16, INT iMapMode, HDC hdcRef);
+export extern(Windows) BOOL PlayEnhMetaFile(HDC hdc, HENHMETAFILE hmf, const(RECT)* lprect);
+export extern(Windows) BOOL PlayEnhMetaFileRecord(HDC hdc, LPHANDLETABLE pht, const(ENHMETARECORD)* pmr, UINT cht);
+export extern(Windows) HENHMETAFILE  SetEnhMetaFileBits(UINT nSize, const(BYTE)* pb);
+export extern(Windows) HENHMETAFILE SetWinMetaFileBits(UINT nSize, const(BYTE)* lpMeta16Data, HDC hdcRef, const(METAFILEPICT)* lpMFP);
+export extern(Windows) BOOL GdiComment(HDC hdc, UINT nSize, const(BYTE)* lpData);
+
+
+export extern(Windows) BOOL GetTextMetricsA(HDC hdc, LPTEXTMETRICA lptm);
+export extern(Windows) BOOL GetTextMetricsW(HDC hdc, LPTEXTMETRICW lptm);
+version(UNICODE)
+	alias GetTextMetricsW GetTextMetrics;
+else
+	alias GetTextMetricsA GetTextMetrics;
+
+struct DIBSECTION {
+	BITMAP dsBm;
+	BITMAPINFOHEADER dsBmih;
+	DWORD[3] dsBitfields;
+	HANDLE dshSection;
+	DWORD dsOffset;
+}
+alias DIBSECTION* LPDIBSECTION;
+alias DIBSECTION* PDIBSECTION;
+
+export extern(Windows) BOOL AngleArc(HDC hdc, int x, int y, DWORD r, FLOAT StartAngle, FLOAT SweepAngle);
+export extern(Windows) BOOL PolyPolyline(HDC hdc, const(POINT)* apt, const(DWORD)* asz, DWORD csz);
+export extern(Windows) BOOL GetWorldTransform(HDC hdc, LPXFORM lpxf);
+export extern(Windows) BOOL SetWorldTransform(HDC hdc, const(XFORM)* lpxf);
+export extern(Windows) BOOL ModifyWorldTransform(HDC hdc, const(XFORM)* lpxf, DWORD mode);
+export extern(Windows) BOOL CombineTransform(LPXFORM lpxfOut, const(XFORM)* lpxf1, const(XFORM)* lpxf2);
+export extern(Windows) HBITMAP CreateDIBSection(HDC hdc, const(BITMAPINFO)* lpbmi, UINT usage, VOID** ppvBits, HANDLE hSection, DWORD offset);
+export extern(Windows) UINT GetDIBColorTable(HDC  hdc, UINT iStart, UINT cEntries, RGBQUAD* prgbq);
+export extern(Windows) UINT SetDIBColorTable(HDC hdc, UINT iStart, UINT cEntries, const(RGBQUAD)* prgbq);
+
+enum {
+	CA_NEGATIVE   = 0x0001,
+	CA_LOG_FILTER = 0x0002,
+}
+
+enum {
+	ILLUMINANT_DEVICE_DEFAULT = 0,
+	ILLUMINANT_A              = 1,
+	ILLUMINANT_B              = 2,
+	ILLUMINANT_C              = 3,
+	ILLUMINANT_D50            = 4,
+	ILLUMINANT_D55            = 5,
+	ILLUMINANT_D65            = 6,
+	ILLUMINANT_D75            = 7,
+	ILLUMINANT_F2             = 8,
+	ILLUMINANT_MAX_INDEX      = ILLUMINANT_F2,
+	ILLUMINANT_TUNGSTEN       = ILLUMINANT_A,
+	ILLUMINANT_DAYLIGHT       = ILLUMINANT_C,
+	ILLUMINANT_FLUORESCENT    = ILLUMINANT_F2,
+	ILLUMINANT_NTSC           = ILLUMINANT_C,
+	RGB_GAMMA_MIN             = cast(WORD)2500,
+	RGB_GAMMA_MAX             = cast(WORD)65000,
+	REFERENCE_WHITE_MIN       = cast(WORD)6000,
+	REFERENCE_WHITE_MAX       = cast(WORD)10000,
+	REFERENCE_BLACK_MIN       = cast(WORD)0,
+	REFERENCE_BLACK_MAX       = cast(WORD)4000,
+	COLOR_ADJ_MIN             = cast(SHORT)-100,
+	COLOR_ADJ_MAX             = cast(SHORT)100,
+}
+
+struct COLORADJUSTMENT {
+	WORD caSize;
+	WORD caFlags;
+	WORD caIlluminantIndex;
+	WORD caRedGamma;
+	WORD caGreenGamma;
+	WORD caBlueGamma;
+	WORD caReferenceBlack;
+	WORD caReferenceWhite;
+	SHORT caContrast;
+	SHORT caBrightness;
+	SHORT caColorfulness;
+	SHORT caRedGreenTint;
+}
+alias COLORADJUSTMENT* PCOLORADJUSTMENT;
+alias COLORADJUSTMENT* LPCOLORADJUSTMENT;
+
+export extern(Windows) BOOL SetColorAdjustment(HDC hdc, const(COLORADJUSTMENT)* lpca);
+export extern(Windows) BOOL GetColorAdjustment(HDC hdc, LPCOLORADJUSTMENT lpca);
+export extern(Windows) HPALETTE CreateHalftonePalette(HDC hdc);
+
+alias extern(Windows) BOOL function(HDC, int) ABORTPROC;
+
+struct DOCINFOA {
+	int cbSize;
+	LPCSTR lpszDocName;
+	LPCSTR lpszOutput;
+	LPCSTR lpszDatatype;
+	DWORD fwType;
+}
+alias DOCINFOA* LPDOCINFOA;
+struct DOCINFOW {
+	int cbSize;
+	LPCWSTR lpszDocName;
+	LPCWSTR lpszOutput;
+	LPCWSTR lpszDatatype;
+	DWORD fwType;
+}
+alias DOCINFOW* LPDOCINFOW;
+version(UNICODE){
+	alias DOCINFOW DOCINFO;
+	alias LPDOCINFOW LPDOCINFO;
+}else{
+	alias DOCINFOA DOCINFO;
+	alias LPDOCINFOA LPDOCINFO;
+}
+
+enum {
+	DI_APPBANDING            = 0x00000001,
+	DI_ROPS_READ_DESTINATION = 0x00000002,
+}
+
+export extern(Windows) int StartDocA(HDC hdc, const(DOCINFOA)* lpdi);
+export extern(Windows) int StartDocW(HDC hdc, const(DOCINFOW)* lpdi);
+version(UNICODE)
+	alias StartDocW StartDoc;
+else
+	alias StartDocA StartDoc;
+
+export extern(Windows) int EndDoc(HDC hdc);
+export extern(Windows) int StartPage(HDC hdc);
+export extern(Windows) int EndPage(HDC hdc);
+export extern(Windows) int AbortDoc(HDC hdc);
+export extern(Windows) int SetAbortProc(HDC hdc, ABORTPROC proc);
+
+export extern(Windows) BOOL AbortPath(HDC hdc);
+export extern(Windows) BOOL ArcTo(HDC hdc, int left, int top, int right, int bottom, int xr1, int yr1, int xr2, int yr2);
+export extern(Windows) BOOL BeginPath(HDC hdc);
+export extern(Windows) BOOL CloseFigure(HDC hdc);
+export extern(Windows) BOOL EndPath(HDC hdc);
+export extern(Windows) BOOL FillPath(HDC hdc);
+export extern(Windows) BOOL FlattenPath(HDC hdc);
+export extern(Windows) int GetPath(HDC hdc, LPPOINT apt, LPBYTE aj, int cpt);
+export extern(Windows) HRGN PathToRegion(HDC hdc);
+export extern(Windows) BOOL PolyDraw(HDC hdc, const(POINT)* apt, const(BYTE)* aj, int cpt);
+export extern(Windows) BOOL SelectClipPath(HDC hdc, int mode);
+export extern(Windows) int SetArcDirection(HDC hdc, int dir);
+export extern(Windows) BOOL SetMiterLimit(HDC hdc, FLOAT limit, PFLOAT old);
+export extern(Windows) BOOL StrokeAndFillPath(HDC hdc);
+export extern(Windows) BOOL StrokePath(HDC hdc);
+export extern(Windows) BOOL WidenPath(HDC hdc);
+export extern(Windows) HPEN ExtCreatePen(DWORD iPenStyle, DWORD cWidth, const(LOGBRUSH)* plbrush, DWORD cStyle, const(DWORD)* pstyle);
+export extern(Windows) BOOL GetMiterLimit(HDC hdc, PFLOAT plimit);
+export extern(Windows) int GetArcDirection(HDC hdc);
+
+export extern(Windows) int GetObjectA(HANDLE h, int c, LPVOID pv);
+export extern(Windows) int GetObjectW(HANDLE h, int c, LPVOID pv);
+version(UNICODE)
+	alias GetObjectW GetObject;
+else
+	alias GetObjectA GetObject;
+
+export extern(Windows) BOOL  MoveToEx(HDC hdc, int x, int y, LPPOINT lppt);
+export extern(Windows) BOOL  TextOutA(HDC hdc, int x, int y, LPCSTR lpString, int c);
+export extern(Windows) BOOL  TextOutW(HDC hdc, int x, int y, LPCWSTR lpString, int c);
+version(UNICODE)
+	alias TextOutW TextOut;
+else
+	alias TextOutA TextOut;
+
+export extern(Windows) BOOL ExtTextOutA(HDC hdc, int x, int y, UINT options, const(RECT)* lprect, LPCSTR lpString, UINT c, const(INT)* lpDx);
+export extern(Windows) BOOL ExtTextOutW(HDC hdc, int x, int y, UINT options, const(RECT)* lprect, LPCWSTR lpString, UINT c, const(INT)* lpDx);
+version(UNICODE)
+	alias ExtTextOutW ExtTextOut;
+else
+	alias ExtTextOutA ExtTextOut;
+
+export extern(Windows) BOOL PolyTextOutA(HDC hdc, const(POLYTEXTA)* ppt, int nstrings);
+export extern(Windows) BOOL PolyTextOutW(HDC hdc, const(POLYTEXTW)* ppt, int nstrings);
+version(UNICODE)
+	alias PolyTextOutW PolyTextOut;
+else
+	alias PolyTextOutA PolyTextOut;
+
+export extern(Windows) HRGN CreatePolygonRgn(const(POINT)* pptl, int cPoint, int iMode);
+export extern(Windows) BOOL DPtoLP(HDC hdc, LPPOINT lppt, int c);
+export extern(Windows) BOOL LPtoDP(HDC hdc, LPPOINT lppt, int c);
+export extern(Windows) BOOL Polygon(HDC hdc, const(POINT)* apt, int cpt);
+export extern(Windows) BOOL Polyline(HDC hdc, const(POINT)* apt, int cpt);
+
+export extern(Windows) BOOL PolyBezier(HDC hdc, const(POINT)* apt, DWORD cpt);
+export extern(Windows) BOOL PolyBezierTo(HDC hdc, const(POINT)* apt, DWORD cpt);
+export extern(Windows) BOOL PolylineTo(HDC hdc, const(POINT)* apt, DWORD cpt);
+
+export extern(Windows) BOOL SetViewportExtEx(HDC hdc, int x, int y, LPSIZE lpsz);
+export extern(Windows) BOOL SetViewportOrgEx(HDC hdc, int x, int y, LPPOINT lppt);
+export extern(Windows) BOOL SetWindowExtEx(HDC hdc, int x, int y, LPSIZE lpsz);
+export extern(Windows) BOOL SetWindowOrgEx(HDC hdc, int x, int y, LPPOINT lppt);
+
+export extern(Windows) BOOL OffsetViewportOrgEx(HDC hdc, int x, int y, LPPOINT lppt);
+export extern(Windows) BOOL OffsetWindowOrgEx(HDC hdc, int x, int y, LPPOINT lppt);
+export extern(Windows) BOOL ScaleViewportExtEx(HDC hdc, int xn, int dx, int yn, int yd, LPSIZE lpsz);
+export extern(Windows) BOOL ScaleWindowExtEx(HDC hdc, int xn, int xd, int yn, int yd, LPSIZE lpsz);
+export extern(Windows) BOOL SetBitmapDimensionEx(HBITMAP hbm, int w, int h, LPSIZE lpsz);
+export extern(Windows) BOOL SetBrushOrgEx(HDC hdc, int x, int y, LPPOINT lppt);
+
+export extern(Windows) int GetTextFaceA(HDC hdc, int c, LPSTR lpName);
+export extern(Windows) int GetTextFaceW(HDC hdc, int c, LPWSTR lpName);
+version(UNICODE)
+	alias GetTextFaceW GetTextFace;
+else
+	alias GetTextFaceA GetTextFace;
+
+enum FONTMAPPER_MAX = 10;
+
+struct KERNINGPAIR {
+	WORD wFirst;
+	WORD wSecond;
+	int iKernAmount;
+}
+alias KERNINGPAIR* LPKERNINGPAIR;
+
+export extern(Windows) DWORD GetKerningPairsA(HDC hdc, DWORD nPairs, LPKERNINGPAIR lpKernPair);
+export extern(Windows) DWORD GetKerningPairsW(HDC hdc, DWORD nPairs, LPKERNINGPAIR lpKernPair);
+version(UNICODE)
+	alias GetKerningPairsW GetKerningPairs;
+else
+	alias GetKerningPairsA GetKerningPairs;
+
+export extern(Windows) BOOL GetDCOrgEx(HDC hdc, LPPOINT lppt);
+export extern(Windows) BOOL FixBrushOrgEx(HDC hdc, int x, int y, LPPOINT ptl);
+export extern(Windows) BOOL UnrealizeObject(HGDIOBJ h);
+
+export extern(Windows) BOOL GdiFlush();
+export extern(Windows) DWORD GdiSetBatchLimit(DWORD dw);
+export extern(Windows) DWORD GdiGetBatchLimit();
+
+enum {
+	ICM_OFF            = 1,
+	ICM_ON             = 2,
+	ICM_QUERY          = 3,
+	ICM_DONE_OUTSIDEDC = 4,
+}
+
+alias extern(Windows) int function(LPSTR, LPARAM) ICMENUMPROCA;
+alias extern(Windows) int function(LPWSTR, LPARAM) ICMENUMPROCW;
+version(UNICODE)
+	alias ICMENUMPROCW ICMENUMPROC;
+else
+	alias ICMENUMPROCA ICMENUMPROC;
+export extern(Windows) int SetICMMode(HDC hdc, int mode);
+export extern(Windows) BOOL CheckColorsInGamut(HDC hdc, LPRGBTRIPLE lpRGBTriple, LPVOID dlpBuffer, DWORD nCount);
+export extern(Windows) HCOLORSPACE GetColorSpace(HDC hdc);
+export extern(Windows) BOOL GetLogColorSpaceA(HCOLORSPACE hColorSpace, LPLOGCOLORSPACEA lpBuffer, DWORD nSize);
+export extern(Windows) BOOL GetLogColorSpaceW(HCOLORSPACE hColorSpace, LPLOGCOLORSPACEW lpBuffer, DWORD nSize);
+version(UNICODE)
+	alias GetLogColorSpaceW GetLogColorSpace;
+else
+	alias GetLogColorSpaceA GetLogColorSpace;
+export extern(Windows) HCOLORSPACE CreateColorSpaceA(LPLOGCOLORSPACEA lplcs);
+export extern(Windows) HCOLORSPACE CreateColorSpaceW(LPLOGCOLORSPACEW lplcs);
+version(UNICODE)
+	alias CreateColorSpaceW CreateColorSpace;
+else
+	alias CreateColorSpaceA CreateColorSpace;
+export extern(Windows) HCOLORSPACE SetColorSpace(HDC hdc, HCOLORSPACE hcs);
+export extern(Windows) BOOL DeleteColorSpace(HCOLORSPACE hcs);
+export extern(Windows) BOOL GetICMProfileA(HDC hdc, LPDWORD pBufSize, LPSTR pszFilename);
+export extern(Windows) BOOL GetICMProfileW(HDC hdc, LPDWORD pBufSize, LPWSTR pszFilename);
+version(UNICODE)
+	alias GetICMProfileW GetICMProfile;
+else
+	alias GetICMProfileA GetICMProfile;
+export extern(Windows) BOOL SetICMProfileA(HDC hdc, LPSTR lpFileName);
+export extern(Windows) BOOL SetICMProfileW(HDC hdc, LPWSTR lpFileName);
+version(UNICODE)
+	alias SetICMProfileW SetICMProfile;
+else
+	alias SetICMProfileA SetICMProfile;
+export extern(Windows) BOOL GetDeviceGammaRamp(HDC hdc, LPVOID lpRamp);
+export extern(Windows) BOOL SetDeviceGammaRamp(HDC hdc, LPVOID lpRamp);
+export extern(Windows) BOOL ColorMatchToTarget(HDC hdc, HDC hdcTarget, DWORD action);
+export extern(Windows) int EnumICMProfilesA(HDC hdc, ICMENUMPROCA proc, LPARAM param);
+export extern(Windows) int EnumICMProfilesW(HDC hdc, ICMENUMPROCW proc, LPARAM param);
+version(UNICODE)
+	alias EnumICMProfilesW EnumICMProfiles;
+else
+	alias EnumICMProfilesA EnumICMProfiles;
+export extern(Windows) BOOL UpdateICMRegKeyA(DWORD reserved, LPSTR lpszCMID, LPSTR lpszFileName, UINT command);
+export extern(Windows) BOOL UpdateICMRegKeyW(DWORD reserved, LPWSTR lpszCMID, LPWSTR lpszFileName, UINT command);
+version(UNICODE)
+	deprecated alias UpdateICMRegKeyW UpdateICMRegKey;
+else
+	deprecated alias UpdateICMRegKeyA UpdateICMRegKey;
+
+export extern(Windows) BOOL ColorCorrectPalette(HDC hdc, HPALETTE hPal, DWORD deFirst, DWORD num);
+
+enum ENHMETA_SIGNATURE = 0x464D4520;
+
+enum ENHMETA_STOCK_OBJECT = 0x80000000;
+
+enum {
+	EMR_HEADER                  = 1,
+	EMR_POLYBEZIER              = 2,
+	EMR_POLYGON                 = 3,
+	EMR_POLYLINE                = 4,
+	EMR_POLYBEZIERTO            = 5,
+	EMR_POLYLINETO              = 6,
+	EMR_POLYPOLYLINE            = 7,
+	EMR_POLYPOLYGON             = 8,
+	EMR_SETWINDOWEXTEX          = 9,
+	EMR_SETWINDOWORGEX          = 10,
+	EMR_SETVIEWPORTEXTEX        = 11,
+	EMR_SETVIEWPORTORGEX        = 12,
+	EMR_SETBRUSHORGEX           = 13,
+	EMR_EOF                     = 14,
+	EMR_SETPIXELV               = 15,
+	EMR_SETMAPPERFLAGS          = 16,
+	EMR_SETMAPMODE              = 17,
+	EMR_SETBKMODE               = 18,
+	EMR_SETPOLYFILLMODE         = 19,
+	EMR_SETROP2                 = 20,
+	EMR_SETSTRETCHBLTMODE       = 21,
+	EMR_SETTEXTALIGN            = 22,
+	EMR_SETCOLORADJUSTMENT      = 23,
+	EMR_SETTEXTCOLOR            = 24,
+	EMR_SETBKCOLOR              = 25,
+	EMR_OFFSETCLIPRGN           = 26,
+	EMR_MOVETOEX                = 27,
+	EMR_SETMETARGN              = 28,
+	EMR_EXCLUDECLIPRECT         = 29,
+	EMR_INTERSECTCLIPRECT       = 30,
+	EMR_SCALEVIEWPORTEXTEX      = 31,
+	EMR_SCALEWINDOWEXTEX        = 32,
+	EMR_SAVEDC                  = 33,
+	EMR_RESTOREDC               = 34,
+	EMR_SETWORLDTRANSFORM       = 35,
+	EMR_MODIFYWORLDTRANSFORM    = 36,
+	EMR_SELECTOBJECT            = 37,
+	EMR_CREATEPEN               = 38,
+	EMR_CREATEBRUSHINDIRECT     = 39,
+	EMR_DELETEOBJECT            = 40,
+	EMR_ANGLEARC                = 41,
+	EMR_ELLIPSE                 = 42,
+	EMR_RECTANGLE               = 43,
+	EMR_ROUNDRECT               = 44,
+	EMR_ARC                     = 45,
+	EMR_CHORD                   = 46,
+	EMR_PIE                     = 47,
+	EMR_SELECTPALETTE           = 48,
+	EMR_CREATEPALETTE           = 49,
+	EMR_SETPALETTEENTRIES       = 50,
+	EMR_RESIZEPALETTE           = 51,
+	EMR_REALIZEPALETTE          = 52,
+	EMR_EXTFLOODFILL            = 53,
+	EMR_LINETO                  = 54,
+	EMR_ARCTO                   = 55,
+	EMR_POLYDRAW                = 56,
+	EMR_SETARCDIRECTION         = 57,
+	EMR_SETMITERLIMIT           = 58,
+	EMR_BEGINPATH               = 59,
+	EMR_ENDPATH                 = 60,
+	EMR_CLOSEFIGURE             = 61,
+	EMR_FILLPATH                = 62,
+	EMR_STROKEANDFILLPATH       = 63,
+	EMR_STROKEPATH              = 64,
+	EMR_FLATTENPATH             = 65,
+	EMR_WIDENPATH               = 66,
+	EMR_SELECTCLIPPATH          = 67,
+	EMR_ABORTPATH               = 68,
+	EMR_GDICOMMENT              = 70,
+	EMR_FILLRGN                 = 71,
+	EMR_FRAMERGN                = 72,
+	EMR_INVERTRGN               = 73,
+	EMR_PAINTRGN                = 74,
+	EMR_EXTSELECTCLIPRGN        = 75,
+	EMR_BITBLT                  = 76,
+	EMR_STRETCHBLT              = 77,
+	EMR_MASKBLT                 = 78,
+	EMR_PLGBLT                  = 79,
+	EMR_SETDIBITSTODEVICE       = 80,
+	EMR_STRETCHDIBITS           = 81,
+	EMR_EXTCREATEFONTINDIRECTW  = 82,
+	EMR_EXTTEXTOUTA             = 83,
+	EMR_EXTTEXTOUTW             = 84,
+	EMR_POLYBEZIER16            = 85,
+	EMR_POLYGON16               = 86,
+	EMR_POLYLINE16              = 87,
+	EMR_POLYBEZIERTO16          = 88,
+	EMR_POLYLINETO16            = 89,
+	EMR_POLYPOLYLINE16          = 90,
+	EMR_POLYPOLYGON16           = 91,
+	EMR_POLYDRAW16              = 92,
+	EMR_CREATEMONOBRUSH         = 93,
+	EMR_CREATEDIBPATTERNBRUSHPT = 94,
+	EMR_EXTCREATEPEN            = 95,
+	EMR_POLYTEXTOUTA            = 96,
+	EMR_POLYTEXTOUTW            = 97,
+	EMR_SETICMMODE              = 98,
+	EMR_CREATECOLORSPACE        = 99,
+	EMR_SETCOLORSPACE           =100,
+	EMR_DELETECOLORSPACE        =101,
+	EMR_GLSRECORD               =102,
+	EMR_GLSBOUNDEDRECORD        =103,
+	EMR_PIXELFORMAT             =104,
+	EMR_RESERVED_105            = 105,
+	EMR_RESERVED_106            = 106,
+	EMR_RESERVED_107            = 107,
+	EMR_RESERVED_108            = 108,
+	EMR_RESERVED_109            = 109,
+	EMR_RESERVED_110            = 110,
+	EMR_COLORCORRECTPALETTE     = 111,
+	EMR_SETICMPROFILEA          = 112,
+	EMR_SETICMPROFILEW          = 113,
+	EMR_ALPHABLEND              = 114,
+	EMR_SETLAYOUT               = 115,
+	EMR_TRANSPARENTBLT          = 116,
+	EMR_RESERVED_117            = 117,
+	EMR_GRADIENTFILL            = 118,
+	EMR_RESERVED_119            = 119,
+	EMR_RESERVED_120            = 120,
+	EMR_COLORMATCHTOTARGETW     = 121,
+	EMR_CREATECOLORSPACEW       = 122,
+}
+enum EMR_MIN = 1;
+enum EMR_MAX = 122;
+
+struct EMR {
+	DWORD iType;
+	DWORD nSize;
+}
+alias EMR* PEMR;
+
+struct EMRTEXT {
+	POINTL ptlReference;
+	DWORD nChars;
+	DWORD offString;
+	DWORD fOptions;
+	RECTL rcl;
+	DWORD offDx;
+}
+alias EMRTEXT* PEMRTEXT;
+
+struct EMRABORTPATH {
+	EMR emr;
+}
+alias EMRABORTPATH* PEMRABORTPATH;
+alias EMRABORTPATH EMRBEGINPATH;
+alias EMRBEGINPATH* PEMRBEGINPATH;
+alias EMRABORTPATH EMRENDPATH;
+alias EMRENDPATH* PEMRENDPATH;
+alias EMRABORTPATH EMRCLOSEFIGURE;
+alias EMRCLOSEFIGURE* PEMRCLOSEFIGURE;
+alias EMRABORTPATH EMRFLATTENPATH;
+alias EMRFLATTENPATH* PEMRFLATTENPATH;
+alias EMRABORTPATH EMRWIDENPATH;
+alias EMRWIDENPATH* PEMRWIDENPATH;
+alias EMRABORTPATH EMRSETMETARGN;
+alias EMRSETMETARGN* PEMRSETMETARGN;
+alias EMRABORTPATH EMRSAVEDC;
+alias EMRSAVEDC* PEMRSAVEDC;
+alias EMRABORTPATH EMRREALIZEPALETTE;
+alias EMRREALIZEPALETTE* PEMRREALIZEPALETTE;
+
+struct EMRSELECTCLIPPATH {
+	EMR emr;
+	DWORD iMode;
+}
+alias EMRSELECTCLIPPATH* PEMRSELECTCLIPPATH;
+alias EMRSELECTCLIPPATH EMRSETBKMODE;
+alias EMRSETBKMODE* PEMRSETBKMODE;
+alias EMRSELECTCLIPPATH EMRSETMAPMODE;
+alias EMRSETMAPMODE* PEMRSETMAPMODE;
+alias EMRSELECTCLIPPATH  EMRSETLAYOUT;
+alias EMRSETLAYOUT* PEMRSETLAYOUT;
+alias EMRSELECTCLIPPATH EMRSETPOLYFILLMODE;
+alias EMRSETPOLYFILLMODE* PEMRSETPOLYFILLMODE;
+alias EMRSELECTCLIPPATH EMRSETROP2;
+alias EMRSETROP2* PEMRSETROP2;
+alias EMRSELECTCLIPPATH EMRSETSTRETCHBLTMODE;
+alias EMRSETSTRETCHBLTMODE* PEMRSETSTRETCHBLTMODE;
+alias EMRSELECTCLIPPATH EMRSETICMMODE;
+alias EMRSETICMMODE* PEMRSETICMMODE;
+alias EMRSELECTCLIPPATH EMRSETTEXTALIGN;
+alias EMRSETTEXTALIGN* PEMRSETTEXTALIGN;
+
+struct EMRSETMITERLIMIT {
+	EMR emr;
+	FLOAT eMiterLimit;
+}
+alias EMRSETMITERLIMIT* PEMRSETMITERLIMIT;
+
+struct EMRRESTOREDC {
+	EMR emr;
+	LONG iRelative;
+}
+alias EMRRESTOREDC* PEMRRESTOREDC;
+
+struct EMRSETARCDIRECTION {
+	EMR emr;
+	DWORD iArcDirection;
+}
+alias EMRSETARCDIRECTION* PEMRSETARCDIRECTION;
+
+struct EMRSETMAPPERFLAGS {
+	EMR emr;
+	DWORD dwFlags;
+}
+alias EMRSETMAPPERFLAGS* PEMRSETMAPPERFLAGS;
+
+struct EMRSETBKCOLOR {
+	EMR emr;
+	COLORREF crColor;
+}
+alias EMRSETBKCOLOR* PEMRSETBKCOLOR;
+alias EMRSETBKCOLOR EMRSETTEXTCOLOR;
+alias EMRSETTEXTCOLOR* PEMRSETTEXTCOLOR;
+
+struct EMRSELECTOBJECT {
+	EMR emr;
+	DWORD ihObject;
+}
+alias EMRSELECTOBJECT* PEMRSELECTOBJECT;
+alias EMRSELECTOBJECT EMRDELETEOBJECT;
+alias EMRDELETEOBJECT* PEMRDELETEOBJECT;
+
+struct EMRSELECTPALETTE {
+	EMR emr;
+	DWORD ihPal;
+}
+alias EMRSELECTPALETTE* PEMRSELECTPALETTE;
+
+struct EMRRESIZEPALETTE {
+	EMR emr;
+	DWORD ihPal;
+	DWORD cEntries;
+}
+alias EMRRESIZEPALETTE* PEMRRESIZEPALETTE;
+
+struct EMRSETPALETTEENTRIES {
+	EMR emr;
+	DWORD ihPal;
+	DWORD iStart;
+	DWORD cEntries;
+	PALETTEENTRY[1] aPalEntries;
+}
+alias EMRSETPALETTEENTRIES* PEMRSETPALETTEENTRIES;
+
+struct EMRSETCOLORADJUSTMENT {
+	EMR emr;
+	COLORADJUSTMENT ColorAdjustment;
+}
+alias EMRSETCOLORADJUSTMENT* PEMRSETCOLORADJUSTMENT;
+
+struct EMRGDICOMMENT {
+	EMR emr;
+	DWORD cbData;
+	BYTE[1] Data;
+}
+alias EMRGDICOMMENT* PEMRGDICOMMENT;
+
+struct EMREOF {
+	EMR emr;
+	DWORD nPalEntries;
+	DWORD offPalEntries;
+	DWORD nSizeLast;
+}
+alias EMREOF* PEMREOF;
+
+struct EMRLINETO {
+	EMR     emr;
+	POINTL  ptl;
+}
+alias EMRLINETO* PEMRLINETO;
+alias EMRLINETO EMRMOVETOEX;
+alias EMRMOVETOEX* PEMRMOVETOEX;
+
+struct EMROFFSETCLIPRGN {
+	EMR emr;
+	POINTL ptlOffset;
+}
+alias EMROFFSETCLIPRGN* PEMROFFSETCLIPRGN;
+
+struct EMRFILLPATH {
+	EMR emr;
+	RECTL rclBounds;
+}
+alias EMRFILLPATH* PEMRFILLPATH;
+alias EMRFILLPATH EMRSTROKEANDFILLPATH;
+alias EMRSTROKEANDFILLPATH* PEMRSTROKEANDFILLPATH;
+alias EMRFILLPATH EMRSTROKEPATH;
+alias EMRSTROKEPATH* PEMRSTROKEPATH;
+
+struct EMREXCLUDECLIPRECT {
+	EMR emr;
+	RECTL rclClip;
+}
+alias EMREXCLUDECLIPRECT* PEMREXCLUDECLIPRECT;
+alias EMREXCLUDECLIPRECT EMRINTERSECTCLIPRECT;
+alias EMRINTERSECTCLIPRECT* PEMRINTERSECTCLIPRECT;
+
+struct EMRSETVIEWPORTORGEX {
+	EMR emr;
+	POINTL ptlOrigin;
+}
+alias EMRSETVIEWPORTORGEX* PEMRSETVIEWPORTORGEX;
+alias EMRSETVIEWPORTORGEX EMRSETWINDOWORGEX;
+alias EMRSETWINDOWORGEX* PEMRSETWINDOWORGEX;
+alias EMRSETVIEWPORTORGEX EMRSETBRUSHORGEX;
+alias EMRSETBRUSHORGEX* PEMRSETBRUSHORGEX;
+
+struct EMRSETVIEWPORTEXTEX {
+	EMR emr;
+	SIZEL szlExtent;
+}
+alias EMRSETVIEWPORTEXTEX* PEMRSETVIEWPORTEXTEX;
+alias EMRSETVIEWPORTEXTEX EMRSETWINDOWEXTEX;
+alias EMRSETWINDOWEXTEX* PEMRSETWINDOWEXTEX;
+
+struct EMRSCALEVIEWPORTEXTEX {
+	EMR emr;
+	LONG xNum;
+	LONG xDenom;
+	LONG yNum;
+	LONG yDenom;
+}
+alias EMRSCALEVIEWPORTEXTEX* PEMRSCALEVIEWPORTEXTEX;
+alias EMRSCALEVIEWPORTEXTEX EMRSCALEWINDOWEXTEX;
+alias EMRSCALEWINDOWEXTEX* PEMRSCALEWINDOWEXTEX;
+
+struct EMRSETWORLDTRANSFORM {
+	EMR emr;
+	XFORM xform;
+}
+alias EMRSETWORLDTRANSFORM* PEMRSETWORLDTRANSFORM;
+
+struct EMRMODIFYWORLDTRANSFORM {
+	EMR emr;
+	XFORM xform;
+	DWORD iMode;
+}
+alias EMRMODIFYWORLDTRANSFORM* PEMRMODIFYWORLDTRANSFORM;
+
+struct EMRSETPIXELV {
+	EMR emr;
+	POINTL ptlPixel;
+	COLORREF crColor;
+}
+alias EMRSETPIXELV* PEMRSETPIXELV;
+
+struct EMREXTFLOODFILL {
+	EMR emr;
+	POINTL ptlStart;
+	COLORREF crColor;
+	DWORD iMode;
+}
+alias EMREXTFLOODFILL* PEMREXTFLOODFILL;
+
+struct EMRELLIPSE {
+	EMR emr;
+	RECTL rclBox;
+}
+alias EMRELLIPSE* PEMRELLIPSE;
+alias EMRELLIPSE EMRRECTANGLE;
+alias EMRRECTANGLE* PEMRRECTANGLE;
+
+struct EMRROUNDRECT {
+	EMR emr;
+	RECTL rclBox;
+	SIZEL szlCorner;
+}
+alias EMRROUNDRECT* PEMRROUNDRECT;
+
+struct EMRARC {
+	EMR emr;
+	RECTL rclBox;
+	POINTL ptlStart;
+	POINTL ptlEnd;
+}
+alias EMRARC* PEMRARC;
+alias EMRARC EMRARCTO;
+alias EMRARCTO* PEMRARCTO;
+alias EMRARC EMRCHORD;
+alias EMRCHORD* PEMRCHORD;
+alias EMRARC EMRPIE;
+alias EMRPIE* PEMRPIE;
+
+struct EMRANGLEARC {
+	EMR emr;
+	POINTL ptlCenter;
+	DWORD nRadius;
+	FLOAT eStartAngle;
+	FLOAT eSweepAngle;
+}
+alias EMRANGLEARC* PEMRANGLEARC;
+
+struct EMRPOLYLINE {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD cptl;
+	POINTL[1] aptl;
+}
+alias EMRPOLYLINE* PEMRPOLYLINE;
+alias EMRPOLYLINE EMRPOLYBEZIER;
+alias EMRPOLYBEZIER* PEMRPOLYBEZIER;
+alias EMRPOLYLINE EMRPOLYGON;
+alias EMRPOLYGON* PEMRPOLYGON;
+alias EMRPOLYLINE EMRPOLYBEZIERTO;
+alias EMRPOLYBEZIERTO* PEMRPOLYBEZIERTO;
+alias EMRPOLYLINE EMRPOLYLINETO;
+alias EMRPOLYLINETO* PEMRPOLYLINETO;
+
+struct EMRPOLYLINE16 {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD cpts;
+	POINTS[1] apts;
+}
+alias EMRPOLYLINE16* PEMRPOLYLINE16;
+alias EMRPOLYLINE16 EMRPOLYBEZIER16;
+alias EMRPOLYBEZIER16* PEMRPOLYBEZIER16;
+alias EMRPOLYLINE16 EMRPOLYGON16;
+alias EMRPOLYGON16* PEMRPOLYGON16;
+alias EMRPOLYLINE16 EMRPOLYBEZIERTO16;
+alias EMRPOLYBEZIERTO16* PEMRPOLYBEZIERTO16;
+alias EMRPOLYLINE16 EMRPOLYLINETO16;
+alias EMRPOLYLINETO16* PEMRPOLYLINETO16;
+
+struct EMRPOLYDRAW {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD cptl;
+	POINTL[1] aptl;
+	BYTE[1] abTypes;
+}
+alias EMRPOLYDRAW* PEMRPOLYDRAW;
+
+struct EMRPOLYDRAW16 {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD cpts;
+	POINTS[1] apts;
+	BYTE[1] abTypes;
+}
+alias EMRPOLYDRAW16* PEMRPOLYDRAW16;
+
+struct EMRPOLYPOLYLINE {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD nPolys;
+	DWORD cptl;
+	DWORD[1] aPolyCounts;
+	POINTL[1] aptl;
+}
+alias EMRPOLYPOLYLINE* PEMRPOLYPOLYLINE;
+alias EMRPOLYPOLYLINE EMRPOLYPOLYGON;
+alias EMRPOLYPOLYGON* PEMRPOLYPOLYGON;
+
+struct EMRPOLYPOLYLINE16 {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD nPolys;
+	DWORD cpts;
+	DWORD[1] aPolyCounts;
+	POINTS[1] apts;
+}
+alias EMRPOLYPOLYLINE16* PEMRPOLYPOLYLINE16;
+alias EMRPOLYPOLYLINE16 EMRPOLYPOLYGON16;
+alias EMRPOLYPOLYGON16* PEMRPOLYPOLYGON16;
+
+struct EMRINVERTRGN {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD cbRgnData;
+	BYTE[1] RgnData;
+}
+alias EMRINVERTRGN* PEMRINVERTRGN;
+alias EMRINVERTRGN EMRPAINTRGN;
+alias EMRPAINTRGN* PEMRPAINTRGN;
+
+struct EMRFILLRGN {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD cbRgnData;
+	DWORD ihBrush;
+	BYTE[1] RgnData;
+}
+alias EMRFILLRGN* PEMRFILLRGN;
+
+struct EMRFRAMERGN {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD cbRgnData;
+	DWORD ihBrush;
+	SIZEL szlStroke;
+	BYTE[1] RgnData;
+}
+alias EMRFRAMERGN* PEMRFRAMERGN;
+
+struct EMREXTSELECTCLIPRGN {
+	EMR emr;
+	DWORD cbRgnData;
+	DWORD iMode;
+	BYTE[1] RgnData;
+}
+alias EMREXTSELECTCLIPRGN* PEMREXTSELECTCLIPRGN;
+
+struct EMREXTTEXTOUTA {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD iGraphicsMode;
+	FLOAT exScale;
+	FLOAT eyScale;
+	EMRTEXT emrtext;
+}
+alias EMREXTTEXTOUTA* PEMREXTTEXTOUTA;
+alias EMREXTTEXTOUTA EMREXTTEXTOUTW;
+alias EMREXTTEXTOUTW* PEMREXTTEXTOUTW;
+
+struct EMRPOLYTEXTOUTA {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD iGraphicsMode;
+	FLOAT exScale;
+	FLOAT eyScale;
+	LONG cStrings;
+	EMRTEXT[1] aemrtext;
+}
+alias EMRPOLYTEXTOUTA* PEMRPOLYTEXTOUTA;
+alias EMRPOLYTEXTOUTA EMRPOLYTEXTOUTW;
+alias EMRPOLYTEXTOUTW* PEMRPOLYTEXTOUTW;
+
+struct EMRBITBLT {
+	EMR emr;
+	RECTL rclBounds;
+	LONG xDest;
+	LONG yDest;
+	LONG cxDest;
+	LONG cyDest;
+	DWORD dwRop;
+	LONG xSrc;
+	LONG ySrc;
+	XFORM xformSrc;
+	COLORREF crBkColorSrc;
+	DWORD iUsageSrc;
+	DWORD offBmiSrc;
+	DWORD cbBmiSrc;
+	DWORD offBitsSrc;
+	DWORD cbBitsSrc;
+}
+alias EMRBITBLT* PEMRBITBLT;
+
+struct EMRSTRETCHBLT {
+	EMR emr;
+	RECTL rclBounds;
+	LONG xDest;
+	LONG yDest;
+	LONG cxDest;
+	LONG cyDest;
+	DWORD dwRop;
+	LONG xSrc;
+	LONG ySrc;
+	XFORM xformSrc;
+	COLORREF crBkColorSrc;
+	DWORD iUsageSrc;
+	DWORD offBmiSrc;
+	DWORD cbBmiSrc;
+	DWORD offBitsSrc;
+	DWORD cbBitsSrc;
+	LONG cxSrc;
+	LONG cySrc;
+}
+alias EMRSTRETCHBLT* PEMRSTRETCHBLT;
+
+struct EMRMASKBLT {
+	EMR emr;
+	RECTL rclBounds;
+	LONG xDest;
+	LONG yDest;
+	LONG cxDest;
+	LONG cyDest;
+	DWORD dwRop;
+	LONG xSrc;
+	LONG ySrc;
+	XFORM xformSrc;
+	COLORREF crBkColorSrc;
+	DWORD iUsageSrc;
+	DWORD offBmiSrc;
+	DWORD cbBmiSrc;
+	DWORD offBitsSrc;
+	DWORD cbBitsSrc;
+	LONG xMask;
+	LONG yMask;
+	DWORD iUsageMask;
+	DWORD offBmiMask;
+	DWORD cbBmiMask;
+	DWORD offBitsMask;
+	DWORD cbBitsMask;
+}
+alias EMRMASKBLT* PEMRMASKBLT;
+
+struct EMRPLGBLT {
+	EMR emr;
+	RECTL rclBounds;
+	POINTL[3] aptlDest;
+	LONG xSrc;
+	LONG ySrc;
+	LONG cxSrc;
+	LONG cySrc;
+	XFORM xformSrc;
+	COLORREF crBkColorSrc;
+	DWORD iUsageSrc;
+	DWORD offBmiSrc;
+	DWORD cbBmiSrc;
+	DWORD offBitsSrc;
+	DWORD cbBitsSrc;
+	LONG xMask;
+	LONG yMask;
+	DWORD iUsageMask;
+	DWORD offBmiMask;
+	DWORD cbBmiMask;
+	DWORD offBitsMask;
+	DWORD cbBitsMask;
+}
+alias EMRPLGBLT* PEMRPLGBLT;
+
+struct EMRSETDIBITSTODEVICE {
+	EMR emr;
+	RECTL rclBounds;
+	LONG xDest;
+	LONG yDest;
+	LONG xSrc;
+	LONG ySrc;
+	LONG cxSrc;
+	LONG cySrc;
+	DWORD offBmiSrc;
+	DWORD cbBmiSrc;
+	DWORD offBitsSrc;
+	DWORD cbBitsSrc;
+	DWORD iUsageSrc;
+	DWORD iStartScan;
+	DWORD cScans;
+}
+alias EMRSETDIBITSTODEVICE* PEMRSETDIBITSTODEVICE;
+
+struct EMRSTRETCHDIBITS {
+	EMR emr;
+	RECTL rclBounds;
+	LONG xDest;
+	LONG yDest;
+	LONG xSrc;
+	LONG ySrc;
+	LONG cxSrc;
+	LONG cySrc;
+	DWORD offBmiSrc;
+	DWORD cbBmiSrc;
+	DWORD offBitsSrc;
+	DWORD cbBitsSrc;
+	DWORD iUsageSrc;
+	DWORD dwRop;
+	LONG cxDest;
+	LONG cyDest;
+}
+alias EMRSTRETCHDIBITS* PEMRSTRETCHDIBITS;
+
+struct EMREXTCREATEFONTINDIRECTW {
+	EMR emr;
+	DWORD ihFont;
+	EXTLOGFONTW elfw;
+}
+alias EMREXTCREATEFONTINDIRECTW* PEMREXTCREATEFONTINDIRECTW;
+
+struct EMRCREATEPALETTE {
+	EMR emr;
+	DWORD ihPal;
+	LOGPALETTE lgpl;
+}
+alias EMRCREATEPALETTE* PEMRCREATEPALETTE;
+
+struct EMRCREATEPEN {
+	EMR emr;
+	DWORD ihPen;
+	LOGPEN lopn;
+}
+alias EMRCREATEPEN* PEMRCREATEPEN;
+
+struct EMREXTCREATEPEN {
+	EMR emr;
+	DWORD ihPen;
+	DWORD offBmi;
+	DWORD cbBmi;
+	DWORD offBits;
+	DWORD cbBits;
+	EXTLOGPEN32 elp;
+}
+alias EMREXTCREATEPEN* PEMREXTCREATEPEN;
+
+struct EMRCREATEBRUSHINDIRECT {
+	EMR emr;
+	DWORD ihBrush;
+	LOGBRUSH32 lb;
+}
+alias EMRCREATEBRUSHINDIRECT* PEMRCREATEBRUSHINDIRECT;
+
+struct EMRCREATEMONOBRUSH {
+	EMR emr;
+	DWORD ihBrush;
+	DWORD iUsage;
+	DWORD offBmi;
+	DWORD cbBmi;
+	DWORD offBits;
+	DWORD cbBits;
+}
+alias EMRCREATEMONOBRUSH* PEMRCREATEMONOBRUSH;
+
+struct EMRCREATEDIBPATTERNBRUSHPT {
+	EMR emr;
+	DWORD ihBrush;
+	DWORD iUsage;
+	DWORD offBmi;
+	DWORD cbBmi;
+	DWORD offBits;
+	DWORD cbBits;
+}
+alias EMRCREATEDIBPATTERNBRUSHPT* PEMRCREATEDIBPATTERNBRUSHPT;
+
+struct EMRFORMAT {
+	DWORD dSignature;
+	DWORD nVersion;
+	DWORD cbData;
+	DWORD offData;
+}
+alias EMRFORMAT* PEMRFORMAT;
+
+struct EMRGLSRECORD {
+	EMR emr;
+	DWORD cbData;
+	BYTE[1] Data;
+}
+alias EMRGLSRECORD* PEMRGLSRECORD;
+
+struct EMRGLSBOUNDEDRECORD {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD cbData;
+	BYTE[1] Data;
+}
+alias EMRGLSBOUNDEDRECORD* PEMRGLSBOUNDEDRECORD;
+
+struct EMRPIXELFORMAT {
+	EMR emr;
+	PIXELFORMATDESCRIPTOR pfd;
+}
+alias EMRPIXELFORMAT* PEMRPIXELFORMAT;
+
+struct EMRCREATECOLORSPACE {
+	EMR emr;
+	DWORD ihCS;
+	LOGCOLORSPACEA lcs;
+}
+alias EMRCREATECOLORSPACE* PEMRCREATECOLORSPACE;
+
+struct EMRSETCOLORSPACE {
+	EMR emr;
+	DWORD ihCS;
+}
+alias EMRSETCOLORSPACE* PEMRSETCOLORSPACE;
+alias EMRSETCOLORSPACE EMRSELECTCOLORSPACE;
+alias EMRSETCOLORSPACE* PEMRSELECTCOLORSPACE;
+alias EMRSETCOLORSPACE EMRDELETECOLORSPACE;
+alias EMRSETCOLORSPACE* PEMRDELETECOLORSPACE;
+
+struct EMREXTESCAPE {
+	EMR emr;
+	INT iEscape;
+	INT cbEscData;
+	BYTE[1] EscData;
+}
+alias EMREXTESCAPE* PEMREXTESCAPE;
+alias EMREXTESCAPE EMRDRAWESCAPE;
+alias EMREXTESCAPE* PEMRDRAWESCAPE;
+
+struct EMRNAMEDESCAPE {
+	EMR emr;
+	INT iEscape;
+	INT cbDriver;
+	INT cbEscData;
+	BYTE[1] EscData;
+}
+alias EMRNAMEDESCAPE* PEMRNAMEDESCAPE;
+
+enum SETICMPROFILE_EMBEDED = 0x00000001;
+
+struct EMRSETICMPROFILE {
+	EMR emr;
+	DWORD dwFlags;
+	DWORD cbName;
+	DWORD cbData;
+	BYTE[1] Data;
+}
+alias EMRSETICMPROFILE* PEMRSETICMPROFILE;
+alias EMRSETICMPROFILE EMRSETICMPROFILEA;
+alias EMRSETICMPROFILE* PEMRSETICMPROFILEA;
+alias EMRSETICMPROFILE EMRSETICMPROFILEW;
+alias EMRSETICMPROFILE* PEMRSETICMPROFILEW;
+
+enum CREATECOLORSPACE_EMBEDED = 0x00000001;
+
+struct EMRCREATECOLORSPACEW {
+	EMR emr;
+	DWORD ihCS;
+	LOGCOLORSPACEW lcs;
+	DWORD dwFlags;
+	DWORD cbData;
+	BYTE[1] Data;
+}
+alias EMRCREATECOLORSPACEW* PEMRCREATECOLORSPACEW;
+
+enum COLORMATCHTOTARGET_EMBEDED = 0x00000001;
+
+struct EMRCOLORMATCHTOTARGET {
+	EMR emr;
+	DWORD dwAction;
+	DWORD dwFlags;
+	DWORD cbName;
+	DWORD cbData;
+	BYTE[1] Data;
+}
+alias EMRCOLORMATCHTOTARGET* PEMRCOLORMATCHTOTARGET;
+
+struct EMRCOLORCORRECTPALETTE {
+	EMR emr;
+	DWORD ihPalette;
+	DWORD nFirstEntry;
+	DWORD nPalEntries;
+	DWORD nReserved;
+}
+alias EMRCOLORCORRECTPALETTE* PEMRCOLORCORRECTPALETTE;
+
+struct EMRALPHABLEND {
+	EMR emr;
+	RECTL rclBounds;
+	LONG xDest;
+	LONG yDest;
+	LONG cxDest;
+	LONG cyDest;
+	DWORD dwRop;
+	LONG xSrc;
+	LONG ySrc;
+	XFORM xformSrc;
+	COLORREF crBkColorSrc;
+	DWORD iUsageSrc;
+	DWORD offBmiSrc;
+	DWORD cbBmiSrc;
+	DWORD offBitsSrc;
+	DWORD cbBitsSrc;
+	LONG cxSrc;
+	LONG cySrc;
+}
+alias EMRALPHABLEND* PEMRALPHABLEND;
+
+struct EMRGRADIENTFILL {
+	EMR emr;
+	RECTL rclBounds;
+	DWORD nVer;
+	DWORD nTri;
+	ULONG ulMode;
+	TRIVERTEX[1] Ver;
+}
+alias EMRGRADIENTFILL* PEMRGRADIENTFILL;
+
+struct EMRTRANSPARENTBLT {
+	EMR emr;
+	RECTL rclBounds;
+	LONG xDest;
+	LONG yDest;
+	LONG cxDest;
+	LONG cyDest;
+	DWORD dwRop;
+	LONG xSrc;
+	LONG ySrc;
+	XFORM xformSrc;
+	COLORREF crBkColorSrc;
+	DWORD iUsageSrc;
+	DWORD offBmiSrc;
+	DWORD cbBmiSrc;
+	DWORD offBitsSrc;
+	DWORD cbBitsSrc;
+	LONG cxSrc;
+	LONG cySrc;
+}
+alias EMRTRANSPARENTBLT* PEMRTRANSPARENTBLT;
+
+enum {
+	GDICOMMENT_IDENTIFIER       = 0x43494447,
+	GDICOMMENT_WINDOWS_METAFILE = 0x80000001,
+	GDICOMMENT_BEGINGROUP       = 0x00000002,
+	GDICOMMENT_ENDGROUP         = 0x00000003,
+	GDICOMMENT_MULTIFORMATS     = 0x40000004,
+	EPS_SIGNATURE               = 0x46535045,
+	GDICOMMENT_UNICODE_STRING   = 0x00000040,
+	GDICOMMENT_UNICODE_END      = 0x00000080,
+}
+
+
+export extern(Windows){
+	BOOL wglCopyContext(HGLRC, HGLRC, UINT);
+	HGLRC wglCreateContext(HDC);
+	HGLRC wglCreateLayerContext(HDC, int);
+	BOOL wglDeleteContext(HGLRC);
+	HGLRC wglGetCurrentContext();
+	HDC wglGetCurrentDC();
+	PROC wglGetProcAddress(LPCSTR);
+	BOOL wglMakeCurrent(HDC, HGLRC);
+	BOOL wglShareLists(HGLRC, HGLRC);
+	BOOL wglUseFontBitmapsA(HDC, DWORD, DWORD, DWORD);
+	BOOL wglUseFontBitmapsW(HDC, DWORD, DWORD, DWORD);
+}
+version(UNICODE)
+	alias wglUseFontBitmapsW wglUseFontBitmaps;
+else
+	alias wglUseFontBitmapsA wglUseFontBitmaps;
+
+export extern(Windows) BOOL SwapBuffers(HDC);
+
+struct POINTFLOAT {
+	FLOAT x;
+	FLOAT y;
+}
+alias POINTFLOAT* PPOINTFLOAT;
+
+struct GLYPHMETRICSFLOAT {
+	FLOAT gmfBlackBoxX;
+	FLOAT gmfBlackBoxY;
+	POINTFLOAT gmfptGlyphOrigin;
+	FLOAT gmfCellIncX;
+	FLOAT gmfCellIncY;
+}
+alias GLYPHMETRICSFLOAT* PGLYPHMETRICSFLOAT;
+alias GLYPHMETRICSFLOAT* LPGLYPHMETRICSFLOAT;
+
+enum {
+	WGL_FONT_LINES    = 0,
+	WGL_FONT_POLYGONS = 1,
+}
+
+export extern(Windows){
+	BOOL wglUseFontOutlinesA(HDC, DWORD, DWORD, DWORD, FLOAT, FLOAT, int, LPGLYPHMETRICSFLOAT);
+	BOOL wglUseFontOutlinesW(HDC, DWORD, DWORD, DWORD, FLOAT, FLOAT, int, LPGLYPHMETRICSFLOAT);
+}
+version(UNICODE)
+	alias wglUseFontOutlinesW wglUseFontOutlines;
+else
+	alias wglUseFontOutlinesA wglUseFontOutlines;
+
+struct LAYERPLANEDESCRIPTOR {
+	WORD nSize;
+	WORD nVersion;
+	DWORD dwFlags;
+	BYTE iPixelType;
+	BYTE cColorBits;
+	BYTE cRedBits;
+	BYTE cRedShift;
+	BYTE cGreenBits;
+	BYTE cGreenShift;
+	BYTE cBlueBits;
+	BYTE cBlueShift;
+	BYTE cAlphaBits;
+	BYTE cAlphaShift;
+	BYTE cAccumBits;
+	BYTE cAccumRedBits;
+	BYTE cAccumGreenBits;
+	BYTE cAccumBlueBits;
+	BYTE cAccumAlphaBits;
+	BYTE cDepthBits;
+	BYTE cStencilBits;
+	BYTE cAuxBuffers;
+	BYTE iLayerPlane;
+	BYTE bReserved;
+	COLORREF crTransparent;
+}
+alias LAYERPLANEDESCRIPTOR* PLAYERPLANEDESCRIPTOR;
+alias LAYERPLANEDESCRIPTOR* LPLAYERPLANEDESCRIPTOR;
+
+enum {
+	LPD_DOUBLEBUFFER   = 0x00000001,
+	LPD_STEREO         = 0x00000002,
+	LPD_SUPPORT_GDI    = 0x00000010,
+	LPD_SUPPORT_OPENGL = 0x00000020,
+	LPD_SHARE_DEPTH    = 0x00000040,
+	LPD_SHARE_STENCIL  = 0x00000080,
+	LPD_SHARE_ACCUM    = 0x00000100,
+	LPD_SWAP_EXCHANGE  = 0x00000200,
+	LPD_SWAP_COPY      = 0x00000400,
+	LPD_TRANSPARENT    = 0x00001000,
+}
+
+enum {
+	LPD_TYPE_RGBA       = 0,
+	LPD_TYPE_COLORINDEX = 1,
+}
+
+enum {
+	WGL_SWAP_MAIN_PLANE = 0x00000001,
+	WGL_SWAP_OVERLAY1   = 0x00000002,
+	WGL_SWAP_OVERLAY2   = 0x00000004,
+	WGL_SWAP_OVERLAY3   = 0x00000008,
+	WGL_SWAP_OVERLAY4   = 0x00000010,
+	WGL_SWAP_OVERLAY5   = 0x00000020,
+	WGL_SWAP_OVERLAY6   = 0x00000040,
+	WGL_SWAP_OVERLAY7   = 0x00000080,
+	WGL_SWAP_OVERLAY8   = 0x00000100,
+	WGL_SWAP_OVERLAY9   = 0x00000200,
+	WGL_SWAP_OVERLAY10  = 0x00000400,
+	WGL_SWAP_OVERLAY11  = 0x00000800,
+	WGL_SWAP_OVERLAY12  = 0x00001000,
+	WGL_SWAP_OVERLAY13  = 0x00002000,
+	WGL_SWAP_OVERLAY14  = 0x00004000,
+	WGL_SWAP_OVERLAY15  = 0x00008000,
+	WGL_SWAP_UNDERLAY1  = 0x00010000,
+	WGL_SWAP_UNDERLAY2  = 0x00020000,
+	WGL_SWAP_UNDERLAY3  = 0x00040000,
+	WGL_SWAP_UNDERLAY4  = 0x00080000,
+	WGL_SWAP_UNDERLAY5  = 0x00100000,
+	WGL_SWAP_UNDERLAY6  = 0x00200000,
+	WGL_SWAP_UNDERLAY7  = 0x00400000,
+	WGL_SWAP_UNDERLAY8  = 0x00800000,
+	WGL_SWAP_UNDERLAY9  = 0x01000000,
+	WGL_SWAP_UNDERLAY10 = 0x02000000,
+	WGL_SWAP_UNDERLAY11 = 0x04000000,
+	WGL_SWAP_UNDERLAY12 = 0x08000000,
+	WGL_SWAP_UNDERLAY13 = 0x10000000,
+	WGL_SWAP_UNDERLAY14 = 0x20000000,
+	WGL_SWAP_UNDERLAY15 = 0x40000000,
+}
+
+export extern(Windows){
+	BOOL wglDescribeLayerPlane(HDC, int, int, UINT, LPLAYERPLANEDESCRIPTOR);
+	int wglSetLayerPaletteEntries(HDC, int, int, int, const(COLORREF)*);
+	int wglGetLayerPaletteEntries(HDC, int, int, int, COLORREF*);
+	BOOL wglRealizeLayerPalette(HDC, int, BOOL);
+	BOOL wglSwapLayerBuffers(HDC, UINT);
+}
+
+struct WGLSWAP {
+	HDC hdc;
+	UINT uiFlags;
+}
+alias WGLSWAP* PWGLSWAP;
+alias WGLSWAP* LPWGLSWAP;
+enum WGL_SWAPMULTIPLE_MAX = 16;
+export extern(Windows) DWORD wglSwapMultipleBuffers(UINT, const(WGLSWAP)*);
+
+} // extern(C)

@@ -1,0 +1,1007 @@
+/** prsht.d
+
+Converted from 'prsht.h'.
+
+Version: V7.0
+Authors: Koji Kishita
+Bugs: Because cannot resolve cross-reference, cannot make versioning.
+*/
+module c.windows.prsht;
+
+
+import c.windows.sdkddkver;
+import c.windows.windef;
+import c.windows.winuser;
+
+
+extern(C){
+
+enum MAXPROPPAGES = 100;
+
+enum HPROPSHEETPAGE : void* {init = (void*).init}
+
+alias extern(Windows) UINT function(HWND hwnd, UINT uMsg, PROPSHEETPAGEA* ppsp) LPFNPSPCALLBACKA;
+alias extern(Windows) UINT function(HWND hwnd, UINT uMsg, PROPSHEETPAGEW* ppsp) LPFNPSPCALLBACKW;
+version(UNICODE)
+	alias LPFNPSPCALLBACKW LPFNPSPCALLBACK;
+else
+	alias LPFNPSPCALLBACKA LPFNPSPCALLBACK;
+
+
+enum {
+	PSP_DEFAULT              = 0x00000000,
+	PSP_DLGINDIRECT          = 0x00000001,
+	PSP_USEHICON             = 0x00000002,
+	PSP_USEICONID            = 0x00000004,
+	PSP_USETITLE             = 0x00000008,
+	PSP_RTLREADING           = 0x00000010,
+	PSP_HASHELP              = 0x00000020,
+	PSP_USEREFPARENT         = 0x00000040,
+	PSP_USECALLBACK          = 0x00000080,
+	PSP_PREMATURE            = 0x00000400,
+	PSP_HIDEHEADER           = 0x00000800,
+	PSP_USEHEADERTITLE       = 0x00001000,
+	PSP_USEHEADERSUBTITLE    = 0x00002000,
+	//(_WIN32_WINNT >= _WIN32_WINNT_WINXP)
+		PSP_USEFUSIONCONTEXT = 0x00004000,
+}
+
+enum {
+	PSPCB_ADDREF  = 0,
+	PSPCB_RELEASE = 1,
+	PSPCB_CREATE  = 2,
+}
+
+alias LPCDLGTEMPLATE PROPSHEETPAGE_RESOURCE;
+
+version(Win32){
+align(4){
+struct PROPSHEETPAGEA_V1 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCSTR pszIcon;
+	}
+	LPCSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKA pfnCallback;
+	UINT* pcRefParent;
+}
+struct PROPSHEETPAGEW_V1 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCWSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCWSTR pszIcon;
+	}
+	LPCWSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKW pfnCallback;
+	UINT* pcRefParent;
+}
+struct PROPSHEETPAGEA_V2 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCSTR pszIcon;
+	}
+	LPCSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKA pfnCallback;
+	UINT* pcRefParent;
+	LPCSTR pszHeaderTitle;
+	LPCSTR pszHeaderSubTitle;
+}
+struct PROPSHEETPAGEW_V2 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCWSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCWSTR pszIcon;
+	}
+	LPCWSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKW pfnCallback;
+	UINT* pcRefParent;
+	LPCWSTR pszHeaderTitle;
+	LPCWSTR pszHeaderSubTitle;
+}
+struct PROPSHEETPAGEA_V3 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCSTR pszIcon;
+	}
+	LPCSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKA pfnCallback;
+	UINT* pcRefParent;
+	LPCSTR pszHeaderTitle;
+	LPCSTR pszHeaderSubTitle;
+	HANDLE hActCtx;
+}
+struct PROPSHEETPAGEW_V3 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCWSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCWSTR pszIcon;
+	}
+	LPCWSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKW pfnCallback;
+	UINT* pcRefParent;
+	LPCWSTR pszHeaderTitle;
+	LPCWSTR pszHeaderSubTitle;
+	HANDLE hActCtx;
+}
+
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	struct PROPSHEETPAGEA_V4 {
+		DWORD dwSize;
+		DWORD dwFlags;
+		HINSTANCE hInstance;
+		union {
+			LPCSTR pszTemplate;
+			PROPSHEETPAGE_RESOURCE pResource;
+		}
+		union {
+			HICON hIcon;
+			LPCSTR pszIcon;
+		}
+		LPCSTR pszTitle;
+		DLGPROC pfnDlgProc;
+		LPARAM lParam;
+		LPFNPSPCALLBACKA pfnCallback;
+		UINT* pcRefParent;
+		LPCSTR pszHeaderTitle;
+		LPCSTR pszHeaderSubTitle;
+		HANDLE hActCtx;
+		union {
+			HBITMAP hbmHeader;
+			LPCSTR pszbmHeader;
+		}
+	}
+	struct PROPSHEETPAGEW_V4 {
+		DWORD dwSize;
+		DWORD dwFlags;
+		HINSTANCE hInstance;
+		union {
+			LPCWSTR pszTemplate;
+			PROPSHEETPAGE_RESOURCE pResource;
+		}
+		union {
+			HICON hIcon;
+			LPCWSTR pszIcon;
+		}
+		LPCWSTR pszTitle;
+		DLGPROC pfnDlgProc;
+		LPARAM lParam;
+		LPFNPSPCALLBACKW pfnCallback;
+		UINT* pcRefParent;
+		LPCWSTR pszHeaderTitle;
+		LPCWSTR pszHeaderSubTitle;
+		HANDLE hActCtx;
+		union {
+			HBITMAP hbmHeader;
+			LPCWSTR pszbmHeader;
+		}
+	}
+}//align(4)
+
+}else version(Win64){
+align(8){
+struct PROPSHEETPAGEA_V1 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCSTR pszIcon;
+	}
+	LPCSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKA pfnCallback;
+	UINT* pcRefParent;
+}
+struct PROPSHEETPAGEW_V1 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCWSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCWSTR pszIcon;
+	}
+	LPCWSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKW pfnCallback;
+	UINT* pcRefParent;
+}
+struct PROPSHEETPAGEA_V2 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCSTR pszIcon;
+	}
+	LPCSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKA pfnCallback;
+	UINT* pcRefParent;
+	LPCSTR pszHeaderTitle;
+	LPCSTR pszHeaderSubTitle;
+}
+struct PROPSHEETPAGEW_V2 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCWSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCWSTR pszIcon;
+	}
+	LPCWSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKW pfnCallback;
+	UINT* pcRefParent;
+	LPCWSTR pszHeaderTitle;
+	LPCWSTR pszHeaderSubTitle;
+}
+struct PROPSHEETPAGEA_V3 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCSTR pszIcon;
+	}
+	LPCSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKA pfnCallback;
+	UINT* pcRefParent;
+	LPCSTR pszHeaderTitle;
+	LPCSTR pszHeaderSubTitle;
+	HANDLE hActCtx;
+}
+struct PROPSHEETPAGEW_V3 {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HINSTANCE hInstance;
+	union {
+		LPCWSTR pszTemplate;
+		PROPSHEETPAGE_RESOURCE pResource;
+	}
+	union {
+		HICON hIcon;
+		LPCWSTR pszIcon;
+	}
+	LPCWSTR pszTitle;
+	DLGPROC pfnDlgProc;
+	LPARAM lParam;
+	LPFNPSPCALLBACKW pfnCallback;
+	UINT* pcRefParent;
+	LPCWSTR pszHeaderTitle;
+	LPCWSTR pszHeaderSubTitle;
+	HANDLE hActCtx;
+}
+
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA){
+	struct PROPSHEETPAGEA_V4 {
+		DWORD dwSize;
+		DWORD dwFlags;
+		HINSTANCE hInstance;
+		union {
+			LPCSTR pszTemplate;
+			PROPSHEETPAGE_RESOURCE pResource;
+		}
+		union {
+			HICON hIcon;
+			LPCSTR pszIcon;
+		}
+		LPCSTR pszTitle;
+		DLGPROC pfnDlgProc;
+		LPARAM lParam;
+		LPFNPSPCALLBACKA pfnCallback;
+		UINT* pcRefParent;
+		LPCSTR pszHeaderTitle;
+		LPCSTR pszHeaderSubTitle;
+		HANDLE hActCtx;
+		union {
+			HBITMAP hbmHeader;
+			LPCSTR pszbmHeader;
+		}
+	}
+	struct PROPSHEETPAGEW_V4 {
+		DWORD dwSize;
+		DWORD dwFlags;
+		HINSTANCE hInstance;
+		union {
+			LPCWSTR pszTemplate;
+			PROPSHEETPAGE_RESOURCE pResource;
+		}
+		union {
+			HICON hIcon;
+			LPCWSTR pszIcon;
+		}
+		LPCWSTR pszTitle;
+		DLGPROC pfnDlgProc;
+		LPARAM lParam;
+		LPFNPSPCALLBACKW pfnCallback;
+		UINT* pcRefParent;
+		LPCWSTR pszHeaderTitle;
+		LPCWSTR pszHeaderSubTitle;
+		HANDLE hActCtx;
+		union {
+			HBITMAP hbmHeader;
+			LPCWSTR pszbmHeader;
+		}
+	}
+}// align(8)
+}// version
+
+alias PROPSHEETPAGEA_V1* LPPROPSHEETPAGEA_V1;
+alias const(PROPSHEETPAGEA_V1)* LPCPROPSHEETPAGEA_V1;
+alias PROPSHEETPAGEW_V1* LPPROPSHEETPAGEW_V1;
+alias const(PROPSHEETPAGEW_V1)* LPCPROPSHEETPAGEW_V1;
+alias PROPSHEETPAGEA_V2* LPPROPSHEETPAGEA_V2;
+alias const(PROPSHEETPAGEA_V2)* LPCPROPSHEETPAGEA_V2;
+alias PROPSHEETPAGEW_V2* LPPROPSHEETPAGEW_V2;
+alias const(PROPSHEETPAGEW_V2)* LPCPROPSHEETPAGEW_V2;
+alias PROPSHEETPAGEA_V3* LPPROPSHEETPAGEA_V3;
+alias const(PROPSHEETPAGEA_V3)* LPCPROPSHEETPAGEA_V3;
+alias PROPSHEETPAGEW_V3* LPPROPSHEETPAGEW_V3;
+alias const(PROPSHEETPAGEW_V3)* LPCPROPSHEETPAGEW_V3;
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	alias PROPSHEETPAGEA_V4* LPPROPSHEETPAGEA_V4;
+	alias const(PROPSHEETPAGEA_V4)* LPCPROPSHEETPAGEA_V4;
+	alias PROPSHEETPAGEW_V4* LPPROPSHEETPAGEW_V4;
+	alias const(PROPSHEETPAGEW_V4)* LPCPROPSHEETPAGEW_V4;
+
+enum {
+	PROPSHEETPAGEA_V1_SIZE = PROPSHEETPAGEA_V1.sizeof,
+	PROPSHEETPAGEW_V1_SIZE = PROPSHEETPAGEW_V1.sizeof,
+	PROPSHEETPAGEA_V2_SIZE = PROPSHEETPAGEA_V2.sizeof,
+	PROPSHEETPAGEW_V2_SIZE = PROPSHEETPAGEW_V2.sizeof,
+	PROPSHEETPAGEA_V3_SIZE = PROPSHEETPAGEA_V3.sizeof,
+	PROPSHEETPAGEW_V3_SIZE = PROPSHEETPAGEW_V3.sizeof,
+}
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	enum {
+		PROPSHEETPAGEA_V4_SIZE = PROPSHEETPAGEA_V4.sizeof,
+		PROPSHEETPAGEW_V4_SIZE = PROPSHEETPAGEW_V4.sizeof,
+	}
+
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	alias PROPSHEETPAGEA_V4 PROPSHEETPAGEA_LATEST;
+	alias PROPSHEETPAGEW_V4 PROPSHEETPAGEW_LATEST;
+	alias LPPROPSHEETPAGEA_V4 LPPROPSHEETPAGEA_LATEST;
+	alias LPPROPSHEETPAGEW_V4 LPPROPSHEETPAGEW_LATEST;
+	alias LPCPROPSHEETPAGEA_V4 LPCPROPSHEETPAGEA_LATEST;
+	alias LPCPROPSHEETPAGEW_V4 LPCPROPSHEETPAGEW_LATEST;
+/*}else{
+	alias PROPSHEETPAGEA_V3 PROPSHEETPAGEA_LATEST;
+	alias PROPSHEETPAGEW_V3 PROPSHEETPAGEW_LATEST;
+	alias LPPROPSHEETPAGEA_V3 LPPROPSHEETPAGEA_LATEST;
+	alias LPPROPSHEETPAGEW_V3 LPPROPSHEETPAGEW_LATEST;
+	alias LPCPROPSHEETPAGEA_V3 LPCPROPSHEETPAGEA_LATEST;
+	alias LPCPROPSHEETPAGEW_V3 LPCPROPSHEETPAGEW_LATEST;
+}*/
+
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA){
+	alias PROPSHEETPAGEA_V4 PROPSHEETPAGEA;
+	alias PROPSHEETPAGEW_V4 PROPSHEETPAGEW;
+	alias LPPROPSHEETPAGEA_V4 LPPROPSHEETPAGEA;
+	alias LPPROPSHEETPAGEW_V4 LPPROPSHEETPAGEW;
+	alias LPCPROPSHEETPAGEA_V4 LPCPROPSHEETPAGEA;
+	alias LPCPROPSHEETPAGEW_V4 LPCPROPSHEETPAGEW;
+/*}else(_WIN32_WINNT >= _WIN32_WINNT_WINXP){
+	alias PROPSHEETPAGEA_V3 PROPSHEETPAGEA;
+	alias PROPSHEETPAGEW_V3 PROPSHEETPAGEW;
+	alias LPPROPSHEETPAGEA_V3 LPPROPSHEETPAGEA;
+	alias LPPROPSHEETPAGEW_V3 LPPROPSHEETPAGEW;
+	alias LPCPROPSHEETPAGEA_V3 LPCPROPSHEETPAGEA;
+	alias LPCPROPSHEETPAGEW_V3 LPCPROPSHEETPAGEW;
+}else (_WIN32_IE >= 0x0400){
+	alias PROPSHEETPAGEA_V2 PROPSHEETPAGEA;
+	alias PROPSHEETPAGEW_V2 PROPSHEETPAGEW;
+	alias LPPROPSHEETPAGEA_V2 LPPROPSHEETPAGEA;
+	alias LPPROPSHEETPAGEW_V2 LPPROPSHEETPAGEW;
+	alias LPCPROPSHEETPAGEA_V2 LPCPROPSHEETPAGEA;
+	alias LPCPROPSHEETPAGEW_V2 LPCPROPSHEETPAGEW;
+}else{
+	alias PROPSHEETPAGEA_V1 PROPSHEETPAGEA;
+	alias PROPSHEETPAGEW_V1 PROPSHEETPAGEW;
+	alias LPPROPSHEETPAGEA_V1 LPPROPSHEETPAGEA;
+	alias LPPROPSHEETPAGEW_V1 LPPROPSHEETPAGEW;
+	alias LPCPROPSHEETPAGEA_V1 LPCPROPSHEETPAGEA;
+	alias LPCPROPSHEETPAGEW_V1 LPCPROPSHEETPAGEW;
+}*/
+
+version(UNICODE){
+	alias PROPSHEETPAGEW PROPSHEETPAGE;
+	alias LPPROPSHEETPAGEW LPPROPSHEETPAGE;
+	alias LPCPROPSHEETPAGEW LPCPROPSHEETPAGE;
+	enum PROPSHEETPAGE_V1_SIZE = PROPSHEETPAGEW_V1_SIZE;
+	enum PROPSHEETPAGE_V2_SIZE = PROPSHEETPAGEW_V2_SIZE;
+	alias PROPSHEETPAGEW_V1 PROPSHEETPAGE_V1;
+	alias LPPROPSHEETPAGEW_V1 LPPROPSHEETPAGE_V1;
+	alias LPCPROPSHEETPAGEW_V1 LPCPROPSHEETPAGE_V1;
+	alias PROPSHEETPAGEW_V2 PROPSHEETPAGE_V2;
+	alias LPPROPSHEETPAGEW_V2 LPPROPSHEETPAGE_V2;
+	alias LPCPROPSHEETPAGEW_V2 LPCPROPSHEETPAGE_V2;
+	alias PROPSHEETPAGEW_V3 PROPSHEETPAGE_V3;
+	alias LPPROPSHEETPAGEW_V3 LPPROPSHEETPAGE_V3;
+	alias LPCPROPSHEETPAGEW_V3 LPCPROPSHEETPAGE_V3;
+	//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		alias PROPSHEETPAGEW_V4 PROPSHEETPAGE_V4;
+		alias LPPROPSHEETPAGEW_V4 LPPROPSHEETPAGE_V4;
+		alias LPCPROPSHEETPAGEW_V4 LPCPROPSHEETPAGE_V4;
+	alias PROPSHEETPAGEW_LATEST PROPSHEETPAGE_LATEST;
+	alias LPPROPSHEETPAGEW_LATEST LPPROPSHEETPAGE_LATEST;
+	alias LPCPROPSHEETPAGEW_LATEST LPCPROPSHEETPAGE_LATEST;
+}else{
+	alias PROPSHEETPAGEA PROPSHEETPAGE;
+	alias LPPROPSHEETPAGEA LPPROPSHEETPAGE;
+	alias LPCPROPSHEETPAGEA LPCPROPSHEETPAGE;
+	enum PROPSHEETPAGE_V1_SIZE = PROPSHEETPAGEA_V1_SIZE;
+	enum PROPSHEETPAGE_V2_SIZE = PROPSHEETPAGEA_V2_SIZE;
+	alias PROPSHEETPAGEA_V1 PROPSHEETPAGE_V1;
+	alias LPPROPSHEETPAGEA_V1 LPPROPSHEETPAGE_V1;
+	alias LPCPROPSHEETPAGEA_V1 LPCPROPSHEETPAGE_V1;
+	alias PROPSHEETPAGEA_V2 PROPSHEETPAGE_V2;
+	alias LPPROPSHEETPAGEA_V2 LPPROPSHEETPAGE_V2;
+	alias LPCPROPSHEETPAGEA_V2 LPCPROPSHEETPAGE_V2;
+	alias PROPSHEETPAGEA_V3 PROPSHEETPAGE_V3;
+	alias LPPROPSHEETPAGEA_V3 LPPROPSHEETPAGE_V3;
+	alias LPCPROPSHEETPAGEA_V3 LPCPROPSHEETPAGE_V3;
+	//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		alias PROPSHEETPAGEA_V4 PROPSHEETPAGE_V4;
+		alias LPPROPSHEETPAGEA_V4 LPPROPSHEETPAGE_V4;
+		alias LPCPROPSHEETPAGEA_V4 LPCPROPSHEETPAGE_V4;
+	alias PROPSHEETPAGEA_LATEST PROPSHEETPAGE_LATEST;
+	alias LPPROPSHEETPAGEA_LATEST LPPROPSHEETPAGE_LATEST;
+	alias LPCPROPSHEETPAGEA_LATEST LPCPROPSHEETPAGE_LATEST;
+}
+
+enum {
+	PSH_DEFAULT           = 0x00000000,
+	PSH_PROPTITLE         = 0x00000001,
+	PSH_USEHICON          = 0x00000002,
+	PSH_USEICONID         = 0x00000004,
+	PSH_PROPSHEETPAGE     = 0x00000008,
+	PSH_WIZARDHASFINISH   = 0x00000010,
+	PSH_WIZARD            = 0x00000020,
+	PSH_USEPSTARTPAGE     = 0x00000040,
+	PSH_NOAPPLYNOW        = 0x00000080,
+	PSH_USECALLBACK       = 0x00000100,
+	PSH_HASHELP           = 0x00000200,
+	PSH_MODELESS          = 0x00000400,
+	PSH_RTLREADING        = 0x00000800,
+	PSH_WIZARDCONTEXTHELP = 0x00001000,
+	PSH_WIZARD97          = 0x01000000,
+	PSH_WATERMARK         = 0x00008000,
+	PSH_USEHBMWATERMARK   = 0x00010000,
+	PSH_USEHPLWATERMARK   = 0x00020000,
+	PSH_STRETCHWATERMARK  = 0x00040000,
+	PSH_HEADER            = 0x00080000,
+	PSH_USEHBMHEADER      = 0x00100000,
+	PSH_USEPAGELANG       = 0x00200000,
+	PSH_WIZARD_LITE       = 0x00400000,
+	PSH_NOCONTEXTHELP     = 0x02000000,
+	//(_WIN32_WINNT >= 0x0600)
+		PSH_AEROWIZARD   = 0x00004000,
+		PSH_RESIZABLE    = 0x04000000,
+		PSH_HEADERBITMAP = 0x08000000,
+		PSH_NOMARGIN     = 0x10000000,
+}
+
+alias extern(Windows) int function(HWND, UINT, LPARAM) PFNPROPSHEETCALLBACK;
+
+private
+template PROPSHEETHEADER_V1_FIELDS(T) {
+	DWORD dwSize;
+	DWORD dwFlags;
+	HWND hwndParent;
+	HINSTANCE hInstance;
+		union {
+		HICON hIcon;
+		T pszIcon;
+	}
+	T pszCaption;
+	UINT nPages;
+	union {
+		UINT nStartPage;
+		LPCSTR pStartPage;
+	}
+	union {
+		static if(is(T == LPCSTR))
+			LPCPROPSHEETPAGEA ppsp;
+		else
+			LPCPROPSHEETPAGEW ppsp;
+		HPROPSHEETPAGE* phpage;
+	}
+	PFNPROPSHEETCALLBACK pfnCallback;
+}
+
+private
+struct PROPSHEETHEADER_V1_T(T) {
+	mixin PROPSHEETHEADER_V1_FIELDS!(T);
+}
+
+private
+struct PROPSHEETHEADER_V2_T(T) {
+	mixin PROPSHEETHEADER_V1_FIELDS!(T);
+	union {
+		HBITMAP hbmWatermark;
+		T pszbmWatermark;
+	}
+	HPALETTE hplWatermark;
+	union {
+		HBITMAP hbmHeader;
+		T pszbmHeader;
+	}
+}
+
+version(Win32){
+	align(4){
+		alias PROPSHEETHEADER_V1_T!(LPCSTR) PROPSHEETHEADERA_V1;
+		alias PROPSHEETHEADER_V1_T!(LPCWSTR) PROPSHEETHEADERW_V1;
+		alias PROPSHEETHEADER_V2_T!(LPCSTR) PROPSHEETHEADERA_V2;
+		alias PROPSHEETHEADER_V2_T!(LPCWSTR) PROPSHEETHEADERW_V2;
+	}
+}else version(Win64){
+	align(8){
+		alias PROPSHEETHEADER_V1_T!(LPCSTR) PROPSHEETHEADERA_V1;
+		alias PROPSHEETHEADER_V1_T!(LPCWSTR) PROPSHEETHEADERW_V1;
+		alias PROPSHEETHEADER_V2_T!(LPCSTR) PROPSHEETHEADERA_V2;
+		alias PROPSHEETHEADER_V2_T!(LPCWSTR) PROPSHEETHEADERW_V2;
+	}
+}
+
+alias PROPSHEETHEADERA_V1* LPPROPSHEETHEADERA_V1;
+alias const(PROPSHEETHEADERA_V1)* LPCPROPSHEETHEADERA_V1;
+alias PROPSHEETHEADERW_V1* LPPROPSHEETHEADERW_V1;
+alias const(PROPSHEETHEADERW_V1)* LPCPROPSHEETHEADERW_V1;
+alias PROPSHEETHEADERA_V2* LPPROPSHEETHEADERA_V2;
+alias const(PROPSHEETHEADERA_V2)* LPCPROPSHEETHEADERA_V2;
+alias PROPSHEETHEADERW_V2* LPPROPSHEETHEADERW_V2;
+alias const(PROPSHEETHEADERW_V2)* LPCPROPSHEETHEADERW_V2;
+
+enum {
+	PROPSHEETHEADERA_V1_SIZE = PROPSHEETHEADERA_V1.sizeof,
+	PROPSHEETHEADERW_V1_SIZE = PROPSHEETHEADERW_V1.sizeof,
+}
+enum {
+	PROPSHEETHEADERA_V2_SIZE = PROPSHEETHEADERA_V2.sizeof,
+	PROPSHEETHEADERW_V2_SIZE = PROPSHEETHEADERW_V2.sizeof,
+}
+
+alias PROPSHEETHEADERA_V2 PROPSHEETHEADERA;
+alias PROPSHEETHEADERW_V2 PROPSHEETHEADERW;
+alias LPPROPSHEETHEADERA_V2 LPPROPSHEETHEADERA;
+alias LPPROPSHEETHEADERW_V2 LPPROPSHEETHEADERW;
+alias LPCPROPSHEETHEADERA_V2 LPCPROPSHEETHEADERA;
+alias LPCPROPSHEETHEADERW_V2 LPCPROPSHEETHEADERW;
+
+version(UNICODE){
+	alias PROPSHEETHEADERW PROPSHEETHEADER;
+	alias LPPROPSHEETHEADERW LPPROPSHEETHEADER;
+	alias LPCPROPSHEETHEADERW LPCPROPSHEETHEADER;
+	enum PROPSHEETHEADER_V1_SIZE = PROPSHEETHEADERW_V1_SIZE;
+	enum PROPSHEETHEADER_V2_SIZE = PROPSHEETHEADERW_V2_SIZE;
+}else{
+	alias PROPSHEETHEADERA PROPSHEETHEADER;
+	alias LPPROPSHEETHEADERA LPPROPSHEETHEADER;
+	alias LPCPROPSHEETHEADERA LPCPROPSHEETHEADER;
+	enum PROPSHEETHEADER_V1_SIZE = PROPSHEETHEADERA_V1_SIZE;
+	enum PROPSHEETHEADER_V2_SIZE = PROPSHEETHEADERA_V2_SIZE;
+}
+
+enum {
+	PSCB_INITIALIZED   = 1,
+	PSCB_PRECREATE     = 2,
+	PSCB_BUTTONPRESSED = 3,
+}
+
+export extern(Windows) HPROPSHEETPAGE CreatePropertySheetPageA(LPCPROPSHEETPAGEA constPropSheetPagePointer);
+export extern(Windows) HPROPSHEETPAGE CreatePropertySheetPageW(LPCPROPSHEETPAGEW constPropSheetPagePointer);
+export extern(Windows) BOOL DestroyPropertySheetPage(HPROPSHEETPAGE);
+export extern(Windows) INT_PTR PropertySheetA(LPCPROPSHEETHEADERA);
+export extern(Windows) INT_PTR PropertySheetW(LPCPROPSHEETHEADERW);
+version(UNICODE){
+	alias CreatePropertySheetPageW CreatePropertySheetPage;
+	alias PropertySheetW PropertySheet;
+}else{
+	alias CreatePropertySheetPageA CreatePropertySheetPage;
+	alias PropertySheetA PropertySheet;
+}
+alias extern(Windows) BOOL function(HPROPSHEETPAGE, LPARAM) LPFNADDPROPSHEETPAGE;
+alias extern(Windows) BOOL function(LPVOID, LPFNADDPROPSHEETPAGE, LPARAM) LPFNADDPROPSHEETPAGES;
+
+version(Win32){
+	align(4)
+	struct PSHNOTIFY {
+		NMHDR hdr;
+		LPARAM lParam;
+	}
+}else version(Win64){
+	align(8)
+	struct PSHNOTIFY {
+		NMHDR hdr;
+		LPARAM lParam;
+	}
+}
+alias PSHNOTIFY* LPPSHNOTIFY;
+
+enum {
+	PSN_FIRST                = 0U-200U,
+	PSN_LAST                 = 0U-299U,
+	PSN_SETACTIVE            = PSN_FIRST-0,
+	PSN_KILLACTIVE           = PSN_FIRST-1,
+	PSN_APPLY                = PSN_FIRST-2,
+	PSN_RESET                = PSN_FIRST-3,
+	PSN_HELP                 = PSN_FIRST-5,
+	PSN_WIZBACK              = PSN_FIRST-6,
+	PSN_WIZNEXT              = PSN_FIRST-7,
+	PSN_WIZFINISH            = PSN_FIRST-8,
+	PSN_QUERYCANCEL          = PSN_FIRST-9,
+	PSN_GETOBJECT            = PSN_FIRST-10,
+	PSN_TRANSLATEACCELERATOR = PSN_FIRST-12,
+	PSN_QUERYINITIALFOCUS    = PSN_FIRST-13,
+}
+
+enum {
+	PSNRET_NOERROR              = 0,
+	PSNRET_INVALID              = 1,
+	PSNRET_INVALID_NOCHANGEPAGE = 2,
+	PSNRET_MESSAGEHANDLED       = 3,
+}
+
+enum {
+	PSM_SETCURSEL          = WM_USER + 101,
+	PSM_REMOVEPAGE         = WM_USER + 102,
+	PSM_ADDPAGE            = WM_USER + 103,
+	PSM_CHANGED            = WM_USER + 104,
+	PSM_RESTARTWINDOWS     = WM_USER + 105,
+	PSM_REBOOTSYSTEM       = WM_USER + 106,
+	PSM_CANCELTOCLOSE      = WM_USER + 107,
+	PSM_QUERYSIBLINGS      = WM_USER + 108,
+	PSM_UNCHANGED          = WM_USER + 109,
+	PSM_APPLY              = WM_USER + 110,
+	PSM_SETTITLEA          = WM_USER + 111,
+	PSM_SETTITLEW          = WM_USER + 120,
+	PSM_SETWIZBUTTONS      = WM_USER + 112,
+	PSM_PRESSBUTTON        = WM_USER + 113,
+	PSM_SETCURSELID        = WM_USER + 114,
+	PSM_SETFINISHTEXTA     = WM_USER + 115,
+	PSM_SETFINISHTEXTW     = WM_USER + 121,
+	PSM_GETTABCONTROL      = WM_USER + 116,
+	PSM_ISDIALOGMESSAGE    = WM_USER + 117,
+	PSM_GETCURRENTPAGEHWND = WM_USER + 118,
+	PSM_INSERTPAGE         = WM_USER + 119,
+}
+version(UNICODE){
+	enum {
+		PSM_SETTITLE      = PSM_SETTITLEW,
+		PSM_SETFINISHTEXT = PSM_SETFINISHTEXTW,
+	}
+}else{
+	enum {
+		PSM_SETTITLE      = PSM_SETTITLEA,
+		PSM_SETFINISHTEXT = PSM_SETFINISHTEXTA,
+	}
+}
+
+enum {
+	PSWIZB_BACK               = 0x00000001,
+	PSWIZB_NEXT               = 0x00000002,
+	PSWIZB_FINISH             = 0x00000004,
+	PSWIZB_DISABLEDFINISH     = 0x00000008,
+	PSWIZBF_ELEVATIONREQUIRED = 0x00000001,
+	///(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		PSWIZB_CANCEL = 0x00000010,
+}
+
+
+enum {
+	PSBTN_BACK     = 0,
+	PSBTN_NEXT     = 1,
+	PSBTN_FINISH   = 2,
+	PSBTN_OK       = 3,
+	PSBTN_APPLYNOW = 4,
+	PSBTN_CANCEL   = 5,
+	PSBTN_HELP     = 6,
+	PSBTN_MAX      = 6,
+}
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	enum PSWIZF_SETCOLOR = cast(UINT)-1;
+
+enum {
+	PSM_SETHEADERTITLEA    = WM_USER + 125,
+	PSM_SETHEADERTITLEW    = WM_USER + 126,
+	PSM_SETHEADERSUBTITLEA = WM_USER + 127,
+	PSM_SETHEADERSUBTITLEW = WM_USER + 128,
+	PSM_HWNDTOINDEX        = WM_USER + 129,
+	PSM_INDEXTOHWND        = WM_USER + 130,
+	PSM_PAGETOINDEX        = WM_USER + 131,
+	PSM_INDEXTOPAGE        = WM_USER + 132,
+	PSM_IDTOINDEX          = WM_USER + 133,
+	PSM_INDEXTOID          = WM_USER + 134,
+	PSM_GETRESULT          = WM_USER + 135,
+	PSM_RECALCPAGESIZES    = WM_USER + 136,
+}
+version(UNICODE){
+	enum {
+		PSM_SETHEADERTITLE    = PSM_SETHEADERTITLEW,
+		PSM_SETHEADERSUBTITLE = PSM_SETHEADERSUBTITLEW,
+	}
+}else{
+	enum {
+		PSM_SETHEADERTITLE    = PSM_SETHEADERTITLEA,
+		PSM_SETHEADERSUBTITLE = PSM_SETHEADERSUBTITLEA,
+	}
+}
+
+//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	enum {
+		PSM_SETNEXTTEXTW     = WM_USER + 137,
+		PSM_SETNEXTTEXT      = PSM_SETNEXTTEXTW,
+		PSM_SHOWWIZBUTTONS   = WM_USER + 138,
+		PSM_ENABLEWIZBUTTONS = WM_USER + 139,
+		PSM_SETBUTTONTEXTW   = WM_USER + 140,
+		PSM_SETBUTTONTEXT    = PSM_SETBUTTONTEXTW,
+	}
+	enum {
+		PSWIZB_SHOW    = 0,
+		PSWIZB_RESTORE = 1,
+	}
+
+enum {
+	ID_PSRESTARTWINDOWS = 0x2,
+	ID_PSREBOOTSYSTEM   = ID_PSRESTARTWINDOWS | 0x1,
+	WIZ_CXDLG           = 276,
+	WIZ_CYDLG           = 140,
+	WIZ_CXBMP           = 80,
+	WIZ_BODYX           = 92,
+	WIZ_BODYCX          = 184,
+	PROP_SM_CXDLG       = 212,
+	PROP_SM_CYDLG       = 188,
+	PROP_MED_CXDLG      = 227,
+	PROP_MED_CYDLG      = 215,
+	PROP_LG_CXDLG       = 252,
+	PROP_LG_CYDLG       = 218,
+}
+
+version(HelperFunctions){
+	BOOL PropSheet_SetCurSel(HWND hDlg, HPROPSHEETPAGE hpage, HPROPSHEETPAGE index)
+	{
+		return cast(BOOL)SendMessage(hDlg, PSM_SETCURSEL, cast(WPARAM)index, cast(LPARAM)hpage);
+	}
+
+	void PropSheet_RemovePage(HWND hDlg, int index, HPROPSHEETPAGE hpage)
+	{
+		SendMessage(hDlg, PSM_REMOVEPAGE, index, cast(LPARAM)hpage);
+	}
+
+	BOOL PropSheet_AddPage(HWND hDlg, HPROPSHEETPAGE hpage)
+	{
+		return cast(BOOL)SendMessage(hDlg, PSM_ADDPAGE, 0, cast(LPARAM)hpage);
+	}
+
+	void PropSheet_Changed(HWND hDlg, HWND hwnd)
+	{
+		SendMessage(hDlg, PSM_CHANGED, cast(WPARAM)hwnd, 0);
+	}
+
+	void PropSheet_RestartWindows(HWND hDlg)
+	{
+		SendMessage(hDlg, PSM_RESTARTWINDOWS, 0, 0);
+	}
+
+	void PropSheet_RebootSystem(HWND hDlg)
+	{
+		SendMessage(hDlg, PSM_REBOOTSYSTEM, 0, 0);
+	}
+
+	void PropSheet_CancelToClose(HWND hDlg)
+	{
+		PostMessage(hDlg, PSM_CANCELTOCLOSE, 0, 0);
+	}
+
+	int PropSheet_QuerySiblings(HWND hDlg, WPARAM wParam, LPARAM lParam)
+	{
+		return cast(int)SendMessage(hDlg, PSM_QUERYSIBLINGS, wParam, lParam);
+	}
+
+	void PropSheet_UnChanged(HWND hDlg, HWND hwnd)
+	{
+		SendMessage(hDlg, PSM_UNCHANGED, cast(WPARAM)hwnd, 0);
+	}
+
+	BOOL PropSheet_Apply(HWND hDlg)
+	{
+		return cast(BOOL)SendMessage(hDlg, PSM_APPLY, 0, 0);
+	}
+
+	void PropSheet_SetTitle(HWND hDlg, DWORD wStyle, LPCTSTR lpszText)
+	{
+		SendMessage(hDlg, PSM_SETTITLE, wStyle, cast(LPARAM)lpszText);
+	}
+
+	void PropSheet_SetWizButtons(HWND hDlg, DWORD dwFlags)
+	{
+		PostMessage(hDlg, PSM_SETWIZBUTTONS, 0, cast(LPARAM)dwFlags);
+	}
+
+	void PropSheet_PressButton(HWND hDlg, int iButton)
+	{
+		PostMessage(hDlg, PSM_PRESSBUTTON, cast(WPARAM)iButton, 0);
+	}
+
+	BOOL PropSheet_SetCurSelByID(HWND hDlg, int id)
+	{
+		return cast(BOOL)SendMessage(hDlg, PSM_SETCURSELID, 0, cast(LPARAM)id);
+	}
+
+	void PropSheet_SetFinishText(HWND hDlg, LPCTSTR lpszText)
+	{
+		SendMessage(hDlg, PSM_SETFINISHTEXT, 0, cast(LPARAM)lpszText);
+	}
+
+	HWND PropSheet_GetTabControl(HWND hDlg)
+	{
+		return cast(HWND)SendMessage(hDlg, PSM_GETTABCONTROL, 0, 0);
+	}
+
+	BOOL PropSheet_IsDialogMessage(HWND hDlg, MSG* pMsg)
+	{
+		return cast(BOOL)SendMessage(hDlg, PSM_ISDIALOGMESSAGE, 0, cast(LPARAM)pMsg);
+	}
+
+	HWND PropSheet_GetCurrentPageHwnd(HWND hDlg)
+	{
+		return  cast(HWND)SendMessage(hDlg, PSM_GETCURRENTPAGEHWND, 0, 0);
+	}
+
+	BOOL PropSheet_InsertPage(HWND hDlg, WPARAM index, HPROPSHEETPAGE hpage)
+	{
+		return cast(BOOL)SendMessage(hDlg, PSM_INSERTPAGE, cast(WPARAM)index, cast(LPARAM)hpage);
+	}
+
+	int PropSheet_SetHeaderTitle(HWND hDlg, int index, LPCTSTR lpszText)
+	{
+		return cast(int)SendMessage(hDlg, PSM_SETHEADERTITLE, cast(WPARAM)index, cast(LPARAM)lpszText);
+	}
+
+	void PropSheet_SetHeaderSubTitle(HWND hDlg, int index, LPCTSTR lpszText)
+	{
+		SendMessage(hDlg, PSM_SETHEADERSUBTITLE, cast(WPARAM)index, cast(LPARAM)lpszText);
+	}
+
+	int PropSheet_HwndToIndex(HWND hDlg, HWND hwnd)
+	{
+		return cast(int)SendMessage(hDlg, PSM_HWNDTOINDEX, cast(WPARAM)hwnd, 0);
+	}
+
+	HWND PropSheet_IndexToHwnd(HWND hDlg, int i)
+	{
+		return cast(HWND)SendMessage(hDlg, PSM_INDEXTOHWND, cast(WPARAM)i, 0);
+	}
+
+	int PropSheet_PageToIndex(HWND hDlg, HPROPSHEETPAGE  hpage)
+	{
+		return cast(int)SendMessage(hDlg, PSM_PAGETOINDEX, 0, cast(LPARAM)hpage);
+	}
+
+	HPROPSHEETPAGE PropSheet_IndexToPage(HWND hDlg, int i)
+	{
+		return cast(HPROPSHEETPAGE)SendMessage(hDlg, PSM_INDEXTOPAGE, cast(WPARAM)i, 0);
+	}
+
+	int PropSheet_IdToIndex(HWND hDlg, int id)
+	{
+		return cast(int)SendMessage(hDlg, PSM_IDTOINDEX, 0, cast(LPARAM)id);
+	}
+
+	int PropSheet_IndexToId(HWND hDlg, int i)
+	{
+		return cast(int)SendMessage(hDlg, PSM_INDEXTOID, cast(WPARAM)i, 0);
+	}
+
+	int PropSheet_GetResult(HWND hDlg)
+	{
+		return cast(int)SendMessage(hDlg, PSM_GETRESULT, 0, 0);
+	}
+
+	BOOL PropSheet_RecalcPageSizes(HWND hDlg)
+	{
+		return cast(BOOL)SendMessage(hDlg, PSM_RECALCPAGESIZES, 0, 0);
+	}
+
+	//(_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		void PropSheet_SetNextText(HWND hDlg, LPCTSTR lpszText)
+		{
+			SendMessage(hDlg, PSM_SETNEXTTEXT, 0, cast(LPARAM)lpszText);
+		}
+
+		void PropSheet_ShowWizButtons(HWND hDlg, DWORD dwFlag, DWORD dwButton)
+		{
+			PostMessage(hDlg, PSM_SHOWWIZBUTTONS, cast(WPARAM)dwFlag, cast(LPARAM)dwButton);
+		}
+
+		void PropSheet_EnableWizButtons(HWND hDlg, DWORD dwState, DWORD dwMask)
+		{
+			PostMessage(hDlg, PSM_ENABLEWIZBUTTONS, cast(WPARAM)dwState, cast(LPARAM)dwMask);
+		}
+
+		void PropSheet_SetButtonText(HWND hDlg, DWORD dwButton, LPCTSTR lpszText)
+		{
+			SendMessage(hDlg, PSM_SETBUTTONTEXT, cast(WPARAM)dwButton, cast(LPARAM)lpszText);
+		}
+}
+
+}// extern(C)
